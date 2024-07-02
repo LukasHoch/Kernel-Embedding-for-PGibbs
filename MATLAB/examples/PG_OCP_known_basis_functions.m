@@ -14,13 +14,13 @@ rng(5);
 addpath('..\src')
 
 % Import CasADi - insert your path here.
-addpath('<yourpath>/casadi-3.6.5-windows64-matlab2018b') 
+addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
 %% Learning parameters
-K = 200; % number of PG samples
-k_d = 50; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 1000; % length of burn-in period
+K = 20; % number of PG samples
+k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 100; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 %% Number of states, etc.

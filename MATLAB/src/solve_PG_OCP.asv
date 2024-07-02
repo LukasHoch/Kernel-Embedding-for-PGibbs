@@ -162,9 +162,7 @@ for k = 1:K
 end
 
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples);
-K_chol = chol(Kernel + eye(K)*1e-8);
-alpha = 0.05;
-epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
+K_chol = chol(Kernel);
 
 %% Set up OCP.
 opti = casadi.Opti();
@@ -190,11 +188,9 @@ else
     end
 end
 
-g_rkhs = Kernel * gamma;
-Eg_rkhs = sum(g_rkhs) / K;
+g_rkhs = K * gamma;
+Eg_rkhs = sum(g_rkhs) / n_sample;
 g_norm = norm(K_chol * gamma);
-
-opti.subject_to(g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha);
 
 % Add dynamic and additional constraints for all scenarios.
 for k = 1:K
@@ -209,7 +205,7 @@ for k = 1:K
     end
 
     % Add scenario constraints.
-    opti.subject_to(max(h_scenario(U, X(n_x*(k - 1)+1:n_x*k, :), Y(n_y*(k - 1)+1:n_y*k, :)) + tk, 0) <= g0 + g_rkhs(k));
+    opti.subject_to(h_scenario(U, X(n_x*(k - 1)+1:n_x*k, :), Y(n_y*(k - 1)+1:n_y*k, :)) <= 0);
 end
 
 % Add constraints for the input.

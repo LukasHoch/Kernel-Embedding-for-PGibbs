@@ -1,0 +1,67 @@
+function K = rbf_kernel(X, V, W)
+% RBF_KERNEL Compute kernel matrix.
+
+
+    M = size(X, 2);
+
+    X_dis = zeros(M);
+    for n = 1:M
+        X_rep = repmat(X(:,n), 1, M);
+        X_dis(n,:) = vecnorm(X - X_rep);
+    end
+    
+    sigma = sqrt(0.5 * median(X_dis, 'all'));
+
+    K_X = zeros(M);
+
+    for k = 1:size(X, 1)
+        K_X = K_X + (repmat(X(k, :), [M, 1]) - repmat(X(k, :)', [1, M])).^2;
+    end
+
+    K_X = exp(-K_X/(2*sigma^2));
+
+    %Processing Noise Kernel
+    V_stacked = reshape(V, [], size(V, 3));
+
+    M = size(V_stacked, 2);
+
+    V_dis = zeros(M);
+    for n = 1:M
+        V_rep = repmat(V_stacked(:,n), 1, M);
+        V_dis(n,:) = vecnorm(V_stacked - V_rep);
+    end
+    
+    sigma = sqrt(0.5 * median(V_dis, 'all'));
+
+    K_V = zeros(M);
+
+    for k = 1:size(X, 1)
+        K_V = K_V + (repmat(V_stacked(k, :), [M, 1]) - repmat(V_stacked(k, :)', [1, M])).^2;
+    end
+
+    K_V = exp(-K_V/(2*sigma^2));
+
+
+    %Measurement Noise Kernel
+    W_stacked = reshape(W, [], size(W, 3));
+
+    M = size(W_stacked, 2);
+
+    W_dis = zeros(M);
+    for n = 1:M
+        W_rep = repmat(W_stacked(:,n), 1, M);
+        W_dis(n,:) = vecnorm(W_stacked - W_rep);
+    end
+    
+    sigma = sqrt(0.5 * median(W_dis, 'all'));
+
+    K_W = zeros(M);
+
+    for k = 1:size(X, 1)
+        K_W = K_W + (repmat(W_stacked(k, :), [M, 1]) - repmat(W_stacked(k, :)', [1, M])).^2;
+    end
+
+    K_W = exp(-K_W/(2*sigma^2));
+
+    K = K_X .* K_V .* K_W;
+end

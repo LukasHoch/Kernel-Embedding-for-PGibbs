@@ -158,31 +158,31 @@ if solve_successful
     active_scenarios = scenarios_sorted;
 
     % Greedily remove constraints and check whether the solution changes to determine a support sub-sample.
-    for i = 1:K
-        % Print progress.
-        fprintf("Started optimization with new constraint set\nIteration: %i/%i\n", i, K);
-
-        % Temporarily remove the constraints corresponding to the PG samples with index i from the constraint set.
-        temp_scenarios = active_scenarios(active_scenarios ~= scenarios_sorted(i));
-
-        % Get the initial states of the active scenarios.
-        x_vec_0_temp = zeros(n_x*length(temp_scenarios), 1);
-        for k = 1:length(temp_scenarios)
-            x_vec_0_temp((k - 1)*n_x+1:n_x*k) = x_vec_0((temp_scenarios(k) - 1)*n_x+1:n_x*temp_scenarios(k));
-        end
-
-        % Solve the OCP with reduced constraint set.
-        [u_opt_temp, ~, ~, J_opt_temp, solve_successful_temp, ~, ~] = solve_PG_OCP(PG_samples(temp_scenarios), phi, g, R, H, J, h_scenario, h_u, 'J_u', J_u, 'x_vec_0', x_vec_0_temp, 'v_vec', v_vec(:, :, temp_scenarios), 'e_vec', e_vec(:, :, temp_scenarios), 'u_init', u_init, 'casadi_opts', casadi_opts, 'solver_opts', solver_opts, 'print_progress', print_progress);
-
-        % If the optimization is successful and the solution does not change, permanently remove the constraints corresponding to the PG samples with index i from the constraint set.
-        % A valid subsample has the same local minimum. However, since the numerical solver does not reach this minimum exactly, a threshold value is used here to check whether the solutions are the same.
-        if solve_successful_temp && all(abs(u_opt_temp-u_opt) < 1e-6) && (abs(J_opt_temp-J_opt) < 1e-6)
-            active_scenarios = temp_scenarios;
-        elseif ~solve_successful_temp
-            warning("Optimization with temporarily removed constraints failed. Proceeding with next candidate for a support sub-sample.");
-            num_failed_optimizations = num_failed_optimizations + 1;
-        end
-    end
+    % for i = 1:K
+    %     % Print progress.
+    %     fprintf("Started optimization with new constraint set\nIteration: %i/%i\n", i, K);
+    % 
+    %     % Temporarily remove the constraints corresponding to the PG samples with index i from the constraint set.
+    %     temp_scenarios = active_scenarios(active_scenarios ~= scenarios_sorted(i));
+    % 
+    %     % Get the initial states of the active scenarios.
+    %     x_vec_0_temp = zeros(n_x*length(temp_scenarios), 1);
+    %     for k = 1:length(temp_scenarios)
+    %         x_vec_0_temp((k - 1)*n_x+1:n_x*k) = x_vec_0((temp_scenarios(k) - 1)*n_x+1:n_x*temp_scenarios(k));
+    %     end
+    % 
+    %     % Solve the OCP with reduced constraint set.
+    %     [u_opt_temp, ~, ~, J_opt_temp, solve_successful_temp, ~, ~] = solve_PG_OCP(PG_samples(temp_scenarios), phi, g, R, H, J, h_scenario, h_u, 'J_u', J_u, 'x_vec_0', x_vec_0_temp, 'v_vec', v_vec(:, :, temp_scenarios), 'e_vec', e_vec(:, :, temp_scenarios), 'u_init', u_init, 'casadi_opts', casadi_opts, 'solver_opts', solver_opts, 'print_progress', print_progress);
+    % 
+    %     % If the optimization is successful and the solution does not change, permanently remove the constraints corresponding to the PG samples with index i from the constraint set.
+    %     % A valid subsample has the same local minimum. However, since the numerical solver does not reach this minimum exactly, a threshold value is used here to check whether the solutions are the same.
+    %     if solve_successful_temp && all(abs(u_opt_temp-u_opt) < 1e-6) && (abs(J_opt_temp-J_opt) < 1e-6)
+    %         active_scenarios = temp_scenarios;
+    %     elseif ~solve_successful_temp
+    %         warning("Optimization with temporarily removed constraints failed. Proceeding with next candidate for a support sub-sample.");
+    %         num_failed_optimizations = num_failed_optimizations + 1;
+    %     end
+    % end
 
     % Determine the cardinality of the support sub-sample.
     s = length(active_scenarios);
