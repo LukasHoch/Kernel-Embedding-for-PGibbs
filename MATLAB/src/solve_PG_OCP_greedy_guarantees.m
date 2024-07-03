@@ -208,5 +208,6 @@ else
     time_guarantees = NaN;
     time_first_solve = NaN;
     num_failed_optimizations = 0;
+    s = 0;
 end
 end

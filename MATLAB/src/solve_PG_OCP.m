@@ -172,9 +172,21 @@ U = opti.variable(n_u, H);
 X = opti.variable(n_x*K, H+1);
 Y = opti.variable(n_y*K, H);
 
-gamma = opti.variable(K, 1);
+
+gammaN = opti.variable(K, 1);
 g0 = opti.variable(1);
 tk = opti.variable(1);
+
+opti.set_initial(gammaN, ones(K,1));
+
+g_rkhs = Kernel * gammaN;
+Eg_rkhs = sum(g_rkhs) / K;
+g_norm = norm(K_chol * gammaN);
+
+opti.subject_to(g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha);
+
+
+
 
 % Set the initial state.
 opti.subject_to(X(:, 1) == x_vec_0);
@@ -190,11 +202,6 @@ else
     end
 end
 
-g_rkhs = Kernel * gamma;
-Eg_rkhs = sum(g_rkhs) / K;
-g_norm = norm(K_chol * gamma);
-
-opti.subject_to(g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha);
 
 % Add dynamic and additional constraints for all scenarios.
 for k = 1:K
@@ -209,6 +216,7 @@ for k = 1:K
     end
 
     % Add scenario constraints.
+    %opti.subject_to(h_scenario(U, X(n_x*(k - 1)+1:n_x*k, :), Y(n_y*(k - 1)+1:n_y*k, :)) <= 0);
     opti.subject_to(max(h_scenario(U, X(n_x*(k - 1)+1:n_x*k, :), Y(n_y*(k - 1)+1:n_y*k, :)) + tk, 0) <= g0 + g_rkhs(k));
 end
 

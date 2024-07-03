@@ -1,9 +1,5 @@
-% This code produces results for the optimal control approach with generic basis functions similar to the ones given in Section V-B (Fig. 3) of the paper
-% "Learning-Based Optimal Control with Performance Guarantees for Unknown Systems with Latent States", available as pre-print on arXiv: https://arxiv.org/abs/2303.17963.
-% Since the Julia implementation was used for the results in the paper, the results are not exactly reproduced.
-
 % Clear
-clear;
+%clear;
 clc;
 close all;
 
@@ -18,9 +14,9 @@ addpath('<yourpath>/casadi-3.6.5-windows64-matlab2018b')
 import casadi.*
 
 %% Learning parameters
-K = 10; % number of PG samples
-k_d = 10; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 10; % length of burn-in period
+K = 40; % number of PG samples
+k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 100; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 %% Number of states, etc.
@@ -152,69 +148,143 @@ u_test = u(:, T+1:end);
 x_test = x(:, T+1:end);
 y_test = y(:, T+1:end);
 
-%% Plot data.
-% figure()
-% hold on
-% u_plot = plot(u, 'linewidth', 1);
-% y_plot = plot(y, 'linewidth', 1);
-% legend([u_plot, y_plot], 'input', 'output')
-% uistack(u_plot, 'top')
-% ylabel('u | y')
-% xlabel('t')
-
 %% Learn models.
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
-PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi_sampling, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
+%PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi_sampling, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-%% Test the learned models.
-% Test the models with the test data by simulating it forward in time.
-% test_prediction(PG_samples, phi_sampling, g, R, 10, u_test, y_test);
-
-%% Plot autocorrelation.
-% plot_autocorrelation(PG_samples, 'max_lag', 100)
-
-%% Set up OCP.
-% Horizon
-H = 41;
-
-% Define constraints for u.
-u_max = 5; % max control input
-u_min = -5; % min control input
-input_constraints = @(u) bounded_input(u, u_min, u_max); % generate a function that returns the constraint vector h_u(u)
-
-% Define constraints for y.
-y_min = [-Inf * ones(20, 1); 2 * ones(6, 1); -Inf * ones(15, 1)]'; % min system output
-y_max = Inf * ones(H, 1)'; % max system output
-scenario_constraints = @(u, x, y) bounded_output(u, x, y, y_min, y_max); % generate a function that returns the constraint vector h_scenario(u, x, y)
-
-% Define cost function.
-% Objective: min sum u_t^2
-cost_function = @(u) sum(u.^2);
-
-% Redefine phi.
-% This step is necessary as the highly vectorized function phi_sampling (defined inline above) cannot be used with CasADi MX objects.
-% This function is only used for the optimization as it is less efficient.
 phi = @(x, u) phi_opt(n_phi, n_z, L, j_vec, x, u);
 
-% Ipopt options
-Ipopt_options = struct('linear_solver', 'ma57', 'max_iter', 10000);
+H = 41;
+R = 0.1;
 
-% Solve the PG OCP.
-[u_opt, x_opt, y_opt, J_opt, solve_successful, ~, ~] = solve_PG_OCP(PG_samples, phi, g, R, H, cost_function, scenario_constraints, input_constraints, 'J_u', true, 'K_pre_solve', 5, 'solver_opts', Ipopt_options);
+x_vec_0 = zeros(n_x, 1, K);
+for k = 1:K
+    % Get model.
+    A = PG_samples{k}.A;
+    Q = PG_samples{k}.Q;
+    f = @(x, u) A * phi(x, u);
 
-%% Test solution
-if solve_successful
-    % Apply input trajectory to the actual system.
-    y_sys = zeros(n_y, H);
-    x_sys = zeros(n_x, H+1);
-    x_sys(:, 1) = x_training(:, end);
-    for t = 1:H
-        x_sys(:, t+1) = f_true(x_sys(:, t), u_opt(t)) + mvnrnd(zeros(n_x, 1), Q_true)';
-        y_sys(:, t) = g_true(x_sys(:, t), u_opt(t)) + mvnrnd(zeros(n_y, 1), R_true);
-    end
+    % Sample state at t=-1.
+    star = systematic_resampling(PG_samples{k}.w_m1, 1);
+    x_m1 = PG_samples{k}.x_m1(:, star);
 
-    % Plot predictions.
-    plot_predictions(y_opt, y_sys, 'y_min', y_min)
+    % Propagate.
+    x_vec_0(:, 1, k) = f(x_m1, PG_samples{k}.u_m1) + mvnrnd(zeros(1, n_x), Q)';
 end
+
+v_vec = zeros(n_x, H, K);
+for k = 1:K
+    Q = PG_samples{k}.Q;
+    v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
+end
+
+% Sample measurement noise array e_vec if not provided.
+e_vec = zeros(n_y, H, K);
+for k = 1:K
+    e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
+end
+
+
+
+cvx_begin quiet
+    variable U(n_u, H)
+    variable X(n_x, H+1, K)
+    variable Y(n_y, H, K)
+
+    minimize( sum(U.^2) )
+
+    subject to
+        U >= -5;
+        U <= 5;
+
+        X(:, 1, :) == x_vec_0;
+
+        for k = 1:K
+            A = PG_samples{k}.A;
+            f = @(x, u) A * phi(x, u);
+
+            for t = 1:H
+                X(:, t+1, k) == f(X(:, t, k), U(:, t)) + v_vec(:, t, k)
+                Y(:, t, k) == g(X(:, t, k), U(:, t)) + e_vec(:, t, k)
+            end
+
+            %Y(:, H, :) >= 10 * ones(n_y, 1, K)
+
+            for t = 10:20
+                Y(:, t, :) <= -5 * ones(n_y, 1, K)
+            end
+        end
+cvx_end
+
+Y_max = max(max(Y));
+Y_min = min(min(Y));
+
+figure(1)
+hold on
+for k = 1:K
+    plot(1:H, Y(1, :, k))
+end
+fill([10 20 20 10], [1.1*Y_max 1.1*Y_max -5 -5], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
+ylim([Y_min, Y_max]);
+
+
+Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples);
+K_chol = chol(Kernel + eye(K)*1e-8);
+alpha = 0.05;
+epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
+
+
+
+cvx_begin quiet
+    variable U(n_u, H)
+    variable X(n_x, H+1, K)
+    variable Y(n_y, H, K)
+
+    variable gammaN(K)
+    variable tk(1)
+    variable g0(1)
+
+
+    minimize( sum(U.^2) )
+
+    subject to
+        U >= -5;
+        U <= 5;
+
+        X(:, 1, :) == x_vec_0; 
+        
+        g_rkhs = Kernel * gammaN;
+        Eg_rkhs = sum(g_rkhs) / K;
+        g_norm = norm(K_chol * gammaN);
+        
+        g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha;
+
+        for k = 1:K
+            A = PG_samples{k}.A;
+            f = @(x, u) A * phi(x, u);
+
+            for t = 1:H
+                X(:, t+1, k) == f(X(:, t, k), U(:, t)) + v_vec(:, t, k)
+                Y(:, t, k) == g(X(:, t, k), U(:, t)) + e_vec(:, t, k)
+            end
+
+            %Y(:, H, :) >= 10 * ones(n_y, 1, K)
+
+            for t = 10:20
+                max(Y(:, t, :) + 5 * ones(n_y, 1, K) + tk, 0) <= g0 + g_rkhs(k);
+            end
+        end
+cvx_end
+
+Y_max = max(max(Y));
+Y_min = min(min(Y));
+
+figure(2)
+hold on
+for k = 1:K
+    plot(1:H, Y(1, :, k))
+end
+fill([10 20 20 10], [1.1*Y_max 1.1*Y_max -5 -5], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
+ylim([Y_min, Y_max]);
