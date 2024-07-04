@@ -1,4 +1,4 @@
-clear;
+%clear;
 clc;
 close all;
 
@@ -12,8 +12,8 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 100; % number of PG samples
-k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
+K = 30; % number of PG samples
+k_d = 30; % number of samples to be skipped to decrease correlation (thinning)
 K_b = 50; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
@@ -97,7 +97,7 @@ y_test = y(:, T+1:end);
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
-PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
+%PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
 H = 41;
 R = 0.1;
@@ -129,16 +129,6 @@ for k = 1:K
     e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
 end
 
-v_true = zeros(n_x, H);
-e_true = zeros(n_y, H);
-
-for t = 1:H
-    v_true(:,t) = mvnrnd(zeros(n_x, 1), Q_true)';
-    v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
-end
-
-y_lim = -10;
-
 optimization_timer = tic;
 
 cvx_begin quiet
@@ -168,7 +158,7 @@ cvx_begin quiet
         Y(:, H, :) >= 10 * ones(n_y, 1, K)
 
         for t = 10:20
-            Y(:, t, :) <= y_lim * ones(n_y, 1, K)
+            Y(:, t, :) <= -5 * ones(n_y, 1, K)
         end
 cvx_end
 
@@ -180,22 +170,19 @@ y_true = zeros(n_y, H);
 
 x_true(:, 1) = x_training(:, end);
 for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U(t)) + e_true(:,t);
+    x_true(:, t+1) = f_true(x_true(:, t), U(t)) + mvnrnd(zeros(n_x, 1), Q_true)';
+    y_true(:, t) = g_true(x_true(:, t), U(t)) + mvnrnd(zeros(n_y, 1), R_true);
 end
 
-Y_scenario = Y;
-U_scenario = U;
+Y_max = max(max(Y));
+Y_min = min(min(Y));
 
-Y_max = max(max(Y_scenario));
-Y_min = min(min(Y_scenario));
-
-Y_upper = max(Y_scenario, [], 3);
-Y_lower = min(Y_scenario, [], 3);
+Y_upper = max(Y, [], 3);
+Y_lower = min(Y, [], 3);
 
 figure(1)
 hold on
-fill([10 20 20 10], [1.1*Y_max 1.1*Y_max y_lim y_lim], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
+fill([10 20 20 10], [1.1*Y_max 1.1*Y_max -5 -5], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
 fill([1:H, flip(1:H)], [Y_lower, flip(Y_upper)], 0.7*[1, 1, 1], 'linestyle', 'none', 'DisplayName', 'all predictions');
 plot(1:H, y_true, 'linewidth', 2)
 ylim([Y_min, Y_max]);
@@ -208,9 +195,11 @@ xlabel('t');
 optimization_timer = tic;
 
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples);
-K_chol = chol(Kernel);
-alpha = 0.001;
+K_chol = chol(Kernel + eye(K)*1e-8);
+alpha = 0.5;
 epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
+
+time_kernel = toc(optimization_timer)
 
 cvx_begin quiet
     variable U(n_u, H)
@@ -251,7 +240,7 @@ cvx_begin quiet
         Y(:, H, :) >= 10 * ones(n_y, 1, K)
         for k = 1:K
             for t = 10:20
-                max(Y(:, t, k) - y_lim * ones(n_y, 1, 1) + tk, 0) <= g0 + g_rkhs(k)
+                max(Y(:, t, k) + 5 * ones(n_y, 1, K) + tk, 0) <= g0 + g_rkhs(k)
             end
         end
 cvx_end
@@ -263,22 +252,20 @@ y_true = zeros(n_y, H);
 
 x_true(:, 1) = x_training(:, end);
 for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U(t)) + e_true(:,t);
+    x_true(:, t+1) = f_true(x_true(:, t), U(t)) + mvnrnd(zeros(n_x, 1), Q_true)';
+    y_true(:, t) = g_true(x_true(:, t), U(t)) + mvnrnd(zeros(n_y, 1), R_true);
 end
 
-Y_kernel = Y;
-U_kernel = U;
 
-Y_max = max(max(Y_kernel));
-Y_min = min(min(Y_kernel));
+Y_max = max(max(Y));
+Y_min = min(min(Y));
 
-Y_upper = max(Y_kernel, [], 3);
-Y_lower = min(Y_kernel, [], 3);
+Y_upper = max(Y, [], 3);
+Y_lower = min(Y, [], 3);
 
 figure(2)
 hold on
-fill([10 20 20 10], [1.1*Y_max 1.1*Y_max y_lim y_lim], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
+fill([10 20 20 10], [1.1*Y_max 1.1*Y_max -5 -5], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
 fill([1:H, flip(1:H)], [Y_lower, flip(Y_upper)], 0.7*[1, 1, 1], 'linestyle', 'none', 'DisplayName', 'all predictions');
 plot(1:H, y_true, 'linewidth', 2)
 ylim([Y_min, Y_max]);
