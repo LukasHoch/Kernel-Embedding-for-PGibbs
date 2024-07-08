@@ -1,6 +1,7 @@
 function K = rbf_kernel(X, V, W, P_Samples)
 % RBF_KERNEL Compute kernel matrix.
     M = size(V, 3);
+    
 
     X_stacked = reshape(X, [], M);
 
@@ -10,7 +11,7 @@ function K = rbf_kernel(X, V, W, P_Samples)
         X_dis(n,:) = vecnorm(X_stacked - X_rep);
     end
     
-    sigma = 4 * sqrt(0.5 * median(X_dis, 'all'));
+    sigma = 3 * sqrt(0.5 * median(X_dis, 'all'));
 
     K_X = zeros(M);
 
@@ -29,7 +30,7 @@ function K = rbf_kernel(X, V, W, P_Samples)
         V_dis(n,:) = vecnorm(V_stacked - V_rep);
     end
     
-    sigma = 4 * sqrt(0.5 * median(V_dis, 'all'));
+    sigma = 3 * sqrt(0.5 * median(V_dis, 'all'));
 
     K_V = zeros(M);
 
@@ -49,7 +50,7 @@ function K = rbf_kernel(X, V, W, P_Samples)
         W_dis(n,:) = vecnorm(W_stacked - W_rep);
     end
     
-    sigma = 4 * sqrt(0.5 * median(W_dis, 'all'));
+    sigma = 3 * sqrt(0.5 * median(W_dis, 'all'));
 
     K_W = zeros(M);
 
@@ -72,7 +73,7 @@ function K = rbf_kernel(X, V, W, P_Samples)
         A_dis(n,:) = vecnorm(A_stacked - A_rep);
     end
     
-    sigma = 4 * sqrt(0.5 * median(A_dis, 'all'));
+    sigma = 3 * sqrt(0.5 * median(A_dis, 'all'));
 
     K_A = zeros(M);
 
@@ -82,5 +83,8 @@ function K = rbf_kernel(X, V, W, P_Samples)
 
     K_A = exp(-K_A/(2*sigma^2));
 
-     K = K_X .* K_V .* K_W .* K_A;
+    K = K_X .* K_V .* K_W .* K_A;
+    % beta = [size(X_stacked, 1), size(V_stacked, 1), size(W_stacked, 1), size(A_stacked, 1)];
+    % beta = beta / sum(beta);
+    % K = beta(1) * K_X + beta(2) * K_V + beta(3) * K_W + beta(4) * K_A;
 end

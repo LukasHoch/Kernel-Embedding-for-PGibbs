@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 100; % number of PG samples
-k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 50; % length of burn-in period
+K = 200; % number of PG samples
+k_d = 30; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 500; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -139,53 +139,22 @@ end
 
 y_lim = -10;
 
-optimization_timer = tic;
+y_min = [-inf * ones(1, H-1) 10];
+y_max = [inf * ones(1, 9), y_lim * ones(1, 11), inf * ones(1, 21)];
 
-cvx_begin quiet
-    variable U(n_u, H)
 
-    expression X(n_x, H+1, K)
-    expression Y(n_y, H, K)
 
-    X(:, 1, :) = x_vec_0;
 
-    for k = 1:K
-        A = PG_samples{k}.A;
-        f = @(x, u) A * phi(x, u);
-
-        for t = 1:H
-            X(:, t+1, k) = f(X(:, t, k), U(:, t)) + v_vec(:, t, k);
-            Y(:, t, k) = g(X(:, t, k), U(:, t)) + e_vec(:, t, k);
-        end
-    end
-
-    minimize( sum(U.^2) )
-
-    subject to
-        U >= -10;
-        U <= 10;
-
-        Y(:, H, :) >= 10 * ones(n_y, 1, K)
-
-        for t = 10:20
-            Y(:, t, :) <= y_lim * ones(n_y, 1, K)
-        end
-cvx_end
-
-time_scenario = toc(optimization_timer)
-clear optimization_timer
+[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
 
 x_true(:, 1) = x_training(:, end);
 for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U(t)) + e_true(:,t);
+    x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
+    y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
 end
-
-Y_scenario = Y;
-U_scenario = U;
 
 Y_max = max(max(Y_scenario));
 Y_min = min(min(Y_scenario));
@@ -205,70 +174,24 @@ ylabel('y');
 xlabel('t');
 
 
-optimization_timer = tic;
+
+
 
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples);
 K_chol = chol(Kernel);
-alpha = 0.001;
+alpha = 0.8;
 epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
 
-cvx_begin quiet
-    variable U(n_u, H)
-    variable gammaN(K)
-    variable tk(1)
-    variable g0(1)
-
-    expression X(n_x, H+1, K)
-    expression Y(n_y, H, K)
-    expression g_rkhs(K)
-    expression Eg_rkhs(1)
-    expression g_norm(1)
-
-    X(:, 1, :) = x_vec_0;
-
-    for k = 1:K
-        A = PG_samples{k}.A;
-        f = @(x, u) A * phi(x, u);
-
-        for t = 1:H
-            X(:, t+1, k) = f(X(:, t, k), U(:, t)) + v_vec(:, t, k);
-            Y(:, t, k) = g(X(:, t, k), U(:, t)) + e_vec(:, t, k);
-        end
-    end
-
-    g_rkhs = Kernel * gammaN;
-    Eg_rkhs = sum(g_rkhs) / K;
-    g_norm = norm(K_chol * gammaN);
-
-    minimize( sum(U.^2) )
-
-    subject to
-        U >= -10;
-        U <= 10;
-
-        g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha;
-
-        Y(:, H, :) >= 10 * ones(n_y, 1, K)
-        for k = 1:K
-            for t = 10:20
-                max(Y(:, t, k) - y_lim * ones(n_y, 1, 1) + tk, 0) <= g0 + g_rkhs(k)
-            end
-        end
-cvx_end
-
-time_DRCC = toc(optimization_timer)
+[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
 
 x_true(:, 1) = x_training(:, end);
 for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U(t)) + e_true(:,t);
+    x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
+    y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
 end
-
-Y_kernel = Y;
-U_kernel = U;
 
 Y_max = max(max(Y_kernel));
 Y_min = min(min(Y_kernel));
@@ -276,7 +199,7 @@ Y_min = min(min(Y_kernel));
 Y_upper = max(Y_kernel, [], 3);
 Y_lower = min(Y_kernel, [], 3);
 
-figure(2)
+figure(3)
 hold on
 fill([10 20 20 10], [1.1*Y_max 1.1*Y_max y_lim y_lim], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
 fill([1:H, flip(1:H)], [Y_lower, flip(Y_upper)], 0.7*[1, 1, 1], 'linestyle', 'none', 'DisplayName', 'all predictions');
@@ -286,3 +209,5 @@ ylim([Y_min, Y_max]);
 title('Kernel Approach');
 ylabel('y');
 xlabel('t');
+
+
