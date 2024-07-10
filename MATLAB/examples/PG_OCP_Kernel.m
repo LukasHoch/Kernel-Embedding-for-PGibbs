@@ -1,5 +1,5 @@
 clear;
-clc;
+%clc;
 close all;
 
 % Specify seed (for reproducible results).
@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 200; % number of PG samples
-k_d = 30; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 500; % length of burn-in period
+K = 1000; % number of PG samples
+k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 300; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -27,7 +27,7 @@ n_y = 1; % number of outputs
 % Scaling the basis functions facilitates the exploration of the posterior distribution and reduces the required thinning parameter k_d.
 n_phi = 3; % number of basis functions
 %phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); 0.01 * cos(3*x(1, :)) .* x(2, :); 0.1 * sin(2*x(2, :)) .* u(1, :)]; % basis functions
-phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :)]; % basis functions
+phi = @(x, u) [0.5 * x(1, :); 0.5 * x(2, :); 0.5 * u(1, :)]; % basis functions
 %phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); x(1, :) .* x(2, :); x(1, :) .* u(1, :)]; % basis functions
 
 % Prior for Q - inverse Wishart distribution
@@ -99,8 +99,14 @@ y_test = y(:, T+1:end);
 % where phi are the basis functions defined above.
 PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-H = 41;
+H = 101;
 R = 0.1;
+alpha = 0.1;
+
+K_opt = 40;
+if K_opt > K
+    K_opt = K;
+end
 
 x_vec_0 = zeros(n_x, 1, K);
 for k = 1:K
@@ -118,15 +124,20 @@ for k = 1:K
 end
 
 v_vec = zeros(n_x, H, K);
+v_vec_0 = mvnrnd(zeros(1, n_x), Q_true, H)';
 for k = 1:K
     Q = PG_samples{k}.Q;
     v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
+    %v_vec(:, :, k) = v_vec_0;
 end
 
 % Sample measurement noise array e_vec if not provided.
 e_vec = zeros(n_y, H, K);
+e_vec_0 = mvnrnd(zeros(1, n_y), R, H)';
+
 for k = 1:K
     e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
+    %e_vec(:, :, k) = e_vec_0;
 end
 
 v_true = zeros(n_x, H);
@@ -137,15 +148,39 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
-y_lim = -10;
+% H = 11
 
-y_min = [-inf * ones(1, H-1) 10];
-y_max = [inf * ones(1, 9), y_lim * ones(1, 11), inf * ones(1, 21)];
+% y_min = [-inf * ones(1, 7) 10 -inf * ones(1, 3)];
+% y_max = [inf * ones(1, 11)];
+
+% H = 41
+
+% y_min = [-inf * ones(1, 31), 10 * ones(1, 10)];
+% y_max = [inf * ones(1, 9), -10* ones(1, 11), inf * ones(1, 21)];
 
 
+% H = 101
+
+% y_min = [-inf * ones(1, 41), 10 * ones(1, 10), -inf * ones(1, 40), 10 * ones(1, 10)];
+% y_max = [inf * ones(1, 9), -10* ones(1, 11), inf * ones(1, 41),-10* ones(1, 19), inf * ones(1, 21)];
 
 
-[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max);
+% y_min = [-inf * ones(1, 96), zeros(1,5)];
+% y_max = [inf * ones(1, 29), -3* ones(1, 10), -6 * ones(1, 10), -9 * ones(1, 10),  -12 * ones(1, 20), inf * ones(1, 22)];
+
+
+% y_min = [-inf * ones(1, 20), -5* ones(1, 20), 5* ones(1, 10), -5* ones(1, 20), -inf * ones(1, 21), 10* ones(1, 10)];
+% y_max = [inf * ones(1, 20), 0* ones(1, 10), 10 * ones(1, 30), 0 * ones(1, 10), inf * ones(1, 31)];
+
+
+% y_min = [-inf * ones(1, 20), -10* ones(1, 20), -5 * ones(1, 10), 0 * ones(1, 10),  5 * ones(1, 10), -inf * ones(1, 31)];
+% y_max = [inf * ones(1, 20), -5* ones(1, 10), 0 * ones(1, 10), 5 * ones(1, 10),  10 * ones(1, 20), inf * ones(1, 31)];
+
+
+y_min = [-inf * ones(1, 20), -10:0.25:5, -inf * ones(1, 20)];
+y_max = [inf * ones(1, 20), -5:0.25:10, inf * ones(1, 20)];
+
+[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
@@ -156,33 +191,9 @@ for t = 1:H
     y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
 end
 
-Y_max = max(max(Y_scenario));
-Y_min = min(min(Y_scenario));
+plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
 
-Y_upper = max(Y_scenario, [], 3);
-Y_lower = min(Y_scenario, [], 3);
-
-figure(1)
-hold on
-fill([10 20 20 10], [1.1*Y_max 1.1*Y_max y_lim y_lim], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
-fill([1:H, flip(1:H)], [Y_lower, flip(Y_upper)], 0.7*[1, 1, 1], 'linestyle', 'none', 'DisplayName', 'all predictions');
-plot(1:H, y_true, 'linewidth', 2)
-ylim([Y_min, Y_max]);
-
-title('Scenario Approach')
-ylabel('y');
-xlabel('t');
-
-
-
-
-
-Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples);
-K_chol = chol(Kernel);
-alpha = 0.8;
-epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
-
-[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
+[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
@@ -193,21 +204,50 @@ for t = 1:H
     y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
 end
 
-Y_max = max(max(Y_kernel));
-Y_min = min(min(Y_kernel));
-
-Y_upper = max(Y_kernel, [], 3);
-Y_lower = min(Y_kernel, [], 3);
-
-figure(3)
-hold on
-fill([10 20 20 10], [1.1*Y_max 1.1*Y_max y_lim y_lim], 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'constraints')
-fill([1:H, flip(1:H)], [Y_lower, flip(Y_upper)], 0.7*[1, 1, 1], 'linestyle', 'none', 'DisplayName', 'all predictions');
-plot(1:H, y_true, 'linewidth', 2)
-ylim([Y_min, Y_max]);
-
-title('Kernel Approach');
-ylabel('y');
-xlabel('t');
+plot_predictions(Y_kernel, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach)')
 
 
+
+C_upper = all(Y_kernel > y_min);
+C_lower = all(Y_kernel < y_max);
+
+C = C_upper & C_lower;
+
+sum(reshape(C, K_opt, 1))
+
+if K > K_opt
+
+    X_tmp = zeros(n_x, H+1, K - K_opt);
+    Y_tmp = zeros(n_y, H, K - K_opt);
+
+    for k = 1:(K-K_opt)
+        A = PG_samples{k+K_opt}.A;
+        Q = PG_samples{k+K_opt}.Q;
+
+        f = @(x, u) A * phi(x, u);
+
+        % Sample state at t=-1.
+        star = systematic_resampling(PG_samples{k+K_opt}.w_m1, 1);
+        x_m1 = PG_samples{k+K_opt}.x_m1(:, star);
+    
+        % Propagate.
+        x_vec_0_tmp = f(x_m1, PG_samples{k+K_opt}.u_m1) + mvnrnd(zeros(1, n_x), Q)';
+
+        v_vec_tmp = mvnrnd(zeros(1, n_x), Q, H)';
+        e_vec_tmp = mvnrnd(zeros(1, n_y), R, H)';
+
+        X_tmp(:,1, k) = x_vec_0_tmp;
+
+        for t = 1:H
+            X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec_tmp(:,t);
+            Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec_tmp(:,t);
+        end
+    end
+
+    C_upper = all(Y_tmp > y_min);
+    C_lower = all(Y_tmp < y_max);
+
+    C = C_upper & C_lower;
+
+    sum(reshape(C, K - K_opt, 1))
+end

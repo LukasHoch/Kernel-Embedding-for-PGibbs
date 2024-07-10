@@ -1,6 +1,9 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, varargin)
 
 optimization_timer = tic;
+
+x_vec_0 = x_vec_0(:,:,1:K);
+v_vec = v_vec(:,:,1:K);
 
 cvx_begin quiet
     variable U(n_u, H)

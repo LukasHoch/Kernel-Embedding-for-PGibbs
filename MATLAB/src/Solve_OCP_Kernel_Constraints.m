@@ -2,9 +2,11 @@ function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_
 
 optimization_timer = tic;
 
+x_vec_0 = x_vec_0(:,:,1:K);
+v_vec = v_vec(:,:,1:K);
 
-Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples);
-K_chol = chol(Kernel);
+Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples, K);
+K_chol = chol(Kernel + 1e-8 * eye(K));
 epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
 
 
@@ -18,6 +20,7 @@ cvx_begin quiet
 
     expression X(n_x, H+1, K)
     expression Y(n_y, H, K)
+
     expression g_rkhs(K, N_constr)
     expression Eg_rkhs(1, N_constr)
     expression g_norm(N_constr)
@@ -33,6 +36,7 @@ cvx_begin quiet
             Y(:, t, k) = g(X(:, t, k), U(:, t)) + e_vec(:, t, k);
         end
     end
+    
     for t = 1:N_constr
         g_rkhs(:, t) = Kernel * gammaN(:, t);
         Eg_rkhs(t) = sum(g_rkhs(:, t)) / K;
