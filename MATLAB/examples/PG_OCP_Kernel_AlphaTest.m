@@ -99,7 +99,7 @@ y_test = y(:, T+1:end);
 % where phi are the basis functions defined above.
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-s = 3;
+ s = 8;
 
 
 if s == 1
@@ -145,14 +145,6 @@ elseif s == 8
 end
 
 
-R = 0.1;
-alpha = 0.99;
-
-K_opt = 80;
-if K_opt > K
-    K_opt = K;
-end
-
 x_vec_0 = zeros(n_x, 1, K);
 for k = 1:K
     % Get model.
@@ -193,43 +185,58 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
-[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
 
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
+R = 0.1;
+alpha = 0.9;
 
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
+K_opt_max = 40;
+
+K_opt_range = 10:10:K_opt_max;
+
+Z = zeros(length(K_opt_range) , 1);
+cnt = 1;
+
+for K_opt = K_opt_range
+    
+    %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
+    
+    [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
+    
+    %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
+
+    x_true = zeros(n_x, H + 1);
+    y_true = zeros(n_y, H);
+    
+    x_true(:, 1) = x_training(:, end);
+    for t = 1:H
+        x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
+        y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
+    end
+    
+    plot_predictions(Y_kernel, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach)')
+
+    X_tmp = zeros(n_x, H+1, 1000);
+    Y_tmp = zeros(n_y, H, 1000);
+
+    for k = 1:1000
+        X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
+
+        for t = 1:H
+            X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k+200);
+            Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k+200);
+        end
+    end
+
+    C_upper = all(Y_tmp > y_min);
+    C_lower = all(Y_tmp < y_max);
+
+    C = C_upper & C_lower;
+
+    Z(cnt) = sum(reshape(C, 1000, 1));
+    cnt = cnt + 1;
+
 end
 
-plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
-
-%[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_kernel, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach)')
-
-
-
-[U_maxConstr, X_maxConstr, Y_maxConstr] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_maxConstr(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_maxConstr(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_maxConstr, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint)')
+fig = figure;
+plot(K_opt_range, Z / 10)
+saveas(fig, 'FigureSaved')
