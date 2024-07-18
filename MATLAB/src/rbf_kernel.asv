@@ -12,9 +12,6 @@ function K = rbf_kernel(X, V, W, P_Samples, M, sigma_mult)
     end
     
     sigma(1) = sigma_mult(1) * sqrt(0.5 * median(X_dis, 'all'));
-    if sigma(1) == 0
-        sigma(1) = 1;
-    end
 
     K_X = zeros(M);
 
@@ -34,10 +31,6 @@ function K = rbf_kernel(X, V, W, P_Samples, M, sigma_mult)
     end
     
     sigma(2) = sigma_mult(2) * sqrt(0.5 * median(V_dis, 'all'));
-    if sigma(2) == 0
-        sigma(2) = 1;
-    end
-
 
     K_V = zeros(M);
 
@@ -58,9 +51,7 @@ function K = rbf_kernel(X, V, W, P_Samples, M, sigma_mult)
     end
     
     sigma(3) = sigma_mult(3) * sqrt(0.5 * median(W_dis, 'all'));
-    if sigma(3) == 0
-        sigma(3) = 1;
-    end
+    %sigma = 1;
 
     K_W = zeros(M);
 
@@ -84,10 +75,9 @@ function K = rbf_kernel(X, V, W, P_Samples, M, sigma_mult)
     end
     
     sigma(4) = sigma_mult(4) * sqrt(0.5 * median(A_dis, 'all'));
-    if sigma(4) == 0
-        sigma(4) = 1;
-    end
-
+        if sigma(4) == 0
+        K_A = ones(M);
+    else
     
     K_A = zeros(M);
 

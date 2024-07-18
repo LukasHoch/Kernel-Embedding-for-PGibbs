@@ -146,9 +146,10 @@ end
 
 
 R = 0.1;
-alpha = 0.5;
+alpha = 0.9;
+sigma_mult = [1.5 5 5 1];
 
-K_opt = 80;
+K_opt = 100;
 if K_opt > K
     K_opt = K;
 end
@@ -168,23 +169,6 @@ for k = 1:K
     x_vec_0(:, 1, k) = f(x_m1, PG_samples{k}.u_m1) + mvnrnd(zeros(1, n_x), Q)';
 end
 
-v_vec = zeros(n_x, H, K);
-v_vec_0 = mvnrnd(zeros(1, n_x), Q_true, H)';
-for k = 1:K
-    Q = PG_samples{k}.Q;
-    v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
-    %v_vec(:, :, k) = v_vec_0;
-end
-
-% Sample measurement noise array e_vec if not provided.
-e_vec = zeros(n_y, H, K);
-e_vec_0 = mvnrnd(zeros(1, n_y), R, H)';
-
-for k = 1:K
-    e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
-    %e_vec(:, :, k) = e_vec_0;
-end
-
 v_true = zeros(n_x, H);
 e_true = zeros(n_y, H);
 
@@ -193,7 +177,23 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
-%[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
+v_vec = zeros(n_x, H, K);
+
+for k = 1:K
+    Q = PG_samples{k}.Q;
+    %v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
+    v_vec(:, :, k) = v_true;
+end
+
+% Sample measurement noise array e_vec if not provided.
+e_vec = zeros(n_y, H, K);
+
+for k = 1:K
+    %e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
+    e_vec(:, :, k) = e_true;
+end
+
+[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
@@ -206,7 +206,7 @@ end
 
 plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
 
-[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
+[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
@@ -218,18 +218,3 @@ for t = 1:H
 end
 
 plot_predictions(Y_kernel, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach)')
-
-
-
-[U_maxConstr, X_maxConstr, Y_maxConstr] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_maxConstr(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_maxConstr(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_maxConstr, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint)')

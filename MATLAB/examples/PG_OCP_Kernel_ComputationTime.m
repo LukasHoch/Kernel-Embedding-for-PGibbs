@@ -97,9 +97,11 @@ y_test = y(:, T+1:end);
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
+PG_samples = load("PGibbs_Samples.mat");
+PG_samples = PG_samples.PG_samples;
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-s = 3;
+ s = 2;
 
 
 if s == 1
@@ -145,15 +147,6 @@ elseif s == 8
 end
 
 
-R = 0.1;
-alpha = 0.6;
-sigma_mult = [1.5 5 5 1];
-
-K_opt = 150;
-if K_opt > K
-    K_opt = K;
-end
-
 x_vec_0 = zeros(n_x, 1, K);
 for k = 1:K
     % Get model.
@@ -194,43 +187,38 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
-[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
 
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
+R = 0.1;
+alpha = 0.9;
+sigma_mult = [1.5 5 5 1];
 
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
+K_opt_max = 200;
+
+K_opt_range = 10:10:K_opt_max;
+
+cnt = 1;
+
+time_scenario = zeros(length(K_opt_range) , 1);
+time_kernel = zeros(length(K_opt_range) , 1);
+
+for K_opt = K_opt_range
+    optimization_timer = tic;
+    [~, ~, ~] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
+    time_scenario(cnt) = toc(optimization_timer);
+
+
+    [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+    time_kernel(cnt) = toc(optimization_timer) - time_scenario(cnt);
+    cnt = cnt + 1;
+
+    %clear optimization_timer
 end
 
-plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
-
-[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_kernel, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach)')
-
-
-
-[U_maxConstr, X_maxConstr, Y_maxConstr] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_maxConstr(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_maxConstr(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_maxConstr, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint)')
+fig = figure;
+plot(K_opt_range, time_scenario, 'linewidth', 2, 'DisplayName', 'Scenario Approach')
+hold on
+plot(K_opt_range, time_kernel, 'linewidth', 2, 'DisplayName', 'Kernel Approach')
+ylabel('Computation Time [s]')
+xlabel('Number of Samples')
+legend('Location', 'northwest');
+saveas(fig, 'ComputationTimeFigure')
