@@ -192,7 +192,7 @@ R = 0.1;
 alpha = 0.9;
 sigma_mult = [1.5 5 5 1];
 
-K_opt_max = 200;
+K_opt_max = 250;
 
 K_opt_range = 10:10:K_opt_max;
 
@@ -221,4 +221,5 @@ plot(K_opt_range, time_kernel, 'linewidth', 2, 'DisplayName', 'Kernel Approach')
 ylabel('Computation Time [s]')
 xlabel('Number of Samples')
 legend('Location', 'northwest');
+xlim([K_opt_range(1), K_opt_range(end)]);
 saveas(fig, 'ComputationTimeFigure')

@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 1200; % number of PG samples
-k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 300; % length of burn-in period
+K = 2200; % number of PG samples
+k_d = 30; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 1000; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -97,6 +97,9 @@ y_test = y(:, T+1:end);
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
+PG_samples = load("PGibbs_Samples.mat");
+PG_samples = PG_samples.PG_samples;
+
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
  s = 2;
@@ -187,12 +190,12 @@ end
 
 
 R = 0.1;
-alpha = 0.6;
+alpha = 0.3;
 sigma_mult = [1.5 5 5 1];
 
-K_opt_max = 60;
+K_opt_max = 400;
 
-K_opt_range = 10:10:K_opt_max;
+K_opt_range = 20:20:K_opt_max;
 
 Accuracy_scenario = zeros(length(K_opt_range) , 1);
 Accuracy_kernel = zeros(length(K_opt_range) , 1);
@@ -211,10 +214,10 @@ for K_opt = K_opt_range
         y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
     end
 
-    X_tmp = zeros(n_x, H+1, 1000);
-    Y_tmp = zeros(n_y, H, 1000);
+    X_tmp = zeros(n_x, H+1, 2000);
+    Y_tmp = zeros(n_y, H, 2000);
 
-    for k = 1:1000
+    for k = 1:2000
         X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
 
         for t = 1:H
@@ -228,7 +231,7 @@ for K_opt = K_opt_range
 
     C = C_upper & C_lower;
 
-    Accuracy_scenario(cnt) = sum(reshape(C, 1000, 1)) / 10;
+    Accuracy_scenario(cnt) = sum(reshape(C, 2000, 1)) / 20;
 
 
 
@@ -243,10 +246,10 @@ for K_opt = K_opt_range
         y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
     end
 
-    X_tmp = zeros(n_x, H+1, 1000);
-    Y_tmp = zeros(n_y, H, 1000);
+    X_tmp = zeros(n_x, H+1, 2000);
+    Y_tmp = zeros(n_y, H, 2000);
 
-    for k = 1:1000
+    for k = 1:2000
         X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
 
         for t = 1:H
@@ -260,7 +263,7 @@ for K_opt = K_opt_range
 
     C = C_upper & C_lower;
 
-    Accuracy_kernel(cnt) = sum(reshape(C, 1000, 1)) / 10;
+    Accuracy_kernel(cnt) = sum(reshape(C, 2000, 1)) / 20;
     cnt = cnt + 1;
 
 end
@@ -272,4 +275,5 @@ plot(K_opt_range, Accuracy_kernel, 'linewidth', 2, 'DisplayName', 'Kernel Approa
 ylabel('Robustness [%]')
 xlabel('Number of Samples')
 legend('Location', 'northwest');
+xlim([K_opt_range(1), K_opt_range(end)])
 saveas(fig, 'RobustnessFigure')
