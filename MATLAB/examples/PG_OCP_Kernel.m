@@ -1,6 +1,6 @@
 %clear;
 %clc;
-close all;
+%close all;
 
 % Specify seed (for reproducible results).
 rng(5);
@@ -97,9 +97,13 @@ y_test = y(:, T+1:end);
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
+
+PG_samples = load("PGibbs_Samples.mat");
+PG_samples = PG_samples.PG_samples;
+
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-s = 3;
+s = 2;
 
 
 if s == 1
@@ -146,10 +150,10 @@ end
 
 
 R = 0.1;
-alpha = 0.6;
+alpha = 0.3;
 sigma_mult = [1.5 5 5 1];
 
-K_opt = 150;
+K_opt = 100;
 if K_opt > K
     K_opt = K;
 end

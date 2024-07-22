@@ -7,8 +7,9 @@ v_vec = v_vec(:,:,1:K);
 
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples, K, sigma_mult);
 K_chol = chol(Kernel + 1e-7 * eye(K));
-epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
+%epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
 
+epsilon = BootstrapAmbiguity(Kernel, 1000, 0.95);
 
 N_constr = length(y_min(y_min ~= -inf)) + length(y_max(y_max ~= inf));
 

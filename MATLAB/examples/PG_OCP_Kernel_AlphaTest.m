@@ -1,6 +1,6 @@
 %clear;
 %clc;
-close all;
+%close all;
 
 % Specify seed (for reproducible results).
 rng(5);
@@ -190,19 +190,24 @@ end
 
 
 R = 0.1;
-alpha = 0.3;
+%alpha = 0.2;
 sigma_mult = [1.5 5 5 1];
 
-K_opt_max = 400;
+K_opt_max = 100;
 
-K_opt_range = 20:20:K_opt_max;
+K_opt_range = [1 5 10 20:20:K_opt_max];
+Alpha_range = 0.1:0.1:0.4;
 
 Accuracy_scenario = zeros(length(K_opt_range) , 1);
-Accuracy_kernel = zeros(length(K_opt_range) , 1);
-cnt = 1;
+Accuracy_kernel = zeros(length(K_opt_range) , length(Alpha_range));
+
+cntk = 1;
 
 for K_opt = K_opt_range
-    
+    K_opt
+
+    cnta = 1;
+
     [U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
     
     x_true = zeros(n_x, H + 1);
@@ -231,47 +236,54 @@ for K_opt = K_opt_range
 
     C = C_upper & C_lower;
 
-    Accuracy_scenario(cnt) = sum(reshape(C, 2000, 1)) / 20;
+    Accuracy_scenario(cntk) = sum(reshape(C, 2000, 1)) / 20;
 
-
-
-    [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
-
-    x_true = zeros(n_x, H + 1);
-    y_true = zeros(n_y, H);
+    for alpha = Alpha_range
     
-    x_true(:, 1) = x_training(:, end);
-    for t = 1:H
-        x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
-        y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
-    end
+        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+    
+        [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
-    X_tmp = zeros(n_x, H+1, 2000);
-    Y_tmp = zeros(n_y, H, 2000);
-
-    for k = 1:2000
-        X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
-
+        x_true = zeros(n_x, H + 1);
+        y_true = zeros(n_y, H);
+        
+        x_true(:, 1) = x_training(:, end);
         for t = 1:H
-            X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k+200);
-            Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k+200);
+            x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
+            y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
         end
+    
+        X_tmp = zeros(n_x, H+1, 2000);
+        Y_tmp = zeros(n_y, H, 2000);
+    
+        for k = 1:2000
+            X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
+    
+            for t = 1:H
+                X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k+200);
+                Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k+200);
+            end
+        end
+    
+        C_upper = all(Y_tmp > y_min);
+        C_lower = all(Y_tmp < y_max);
+    
+        C = C_upper & C_lower;
+    
+        Accuracy_kernel(cntk,cnta) = sum(reshape(C, 2000, 1)) / 20;
+        cnta = cnta + 1;
     end
-
-    C_upper = all(Y_tmp > y_min);
-    C_lower = all(Y_tmp < y_max);
-
-    C = C_upper & C_lower;
-
-    Accuracy_kernel(cnt) = sum(reshape(C, 2000, 1)) / 20;
-    cnt = cnt + 1;
+    cntk = cntk + 1;
 
 end
 
 fig = figure;
 hold on
 plot(K_opt_range, Accuracy_scenario, 'linewidth', 2, 'DisplayName', 'Scenario Approach')
-plot(K_opt_range, Accuracy_kernel, 'linewidth', 2, 'DisplayName', 'Kernel Approach')
+for t = 1:length(Alpha_range)
+    text = ['Kernel Approach (alpha = ' num2str(Alpha_range(t)) ')'];
+    plot(K_opt_range, Accuracy_kernel(:,t), 'linewidth', 2, 'DisplayName', text)
+end
 ylabel('Robustness [%]')
 xlabel('Number of Samples')
 legend('Location', 'northwest');
