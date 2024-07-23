@@ -102,7 +102,7 @@ PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
- s = 2;
+ s = 3;
 
 
 if s == 1
@@ -193,10 +193,12 @@ R = 0.1;
 %alpha = 0.2;
 sigma_mult = [1.5 5 5 1];
 
-K_opt_max = 100;
+K_opt_max = 200;
+
+K_test = K - K_opt_max;
 
 K_opt_range = [1 5 10 20:20:K_opt_max];
-Alpha_range = 0.1:0.1:0.4;
+Alpha_range = 0.05:0.05:0.2;
 
 Accuracy_scenario = zeros(length(K_opt_range) , 1);
 Accuracy_kernel = zeros(length(K_opt_range) , length(Alpha_range));
@@ -219,15 +221,15 @@ for K_opt = K_opt_range
         y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
     end
 
-    X_tmp = zeros(n_x, H+1, 2000);
-    Y_tmp = zeros(n_y, H, 2000);
+    X_tmp = zeros(n_x, H+1, K_test);
+    Y_tmp = zeros(n_y, H, K_test);
 
-    for k = 1:2000
-        X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
+    for k = 1:K_test
+        X_tmp(:,1, k) = x_vec_0(:, 1, k + K_opt_max);
 
         for t = 1:H
-            X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_scenario(:, t)) + v_vec(:,t,k+200);
-            Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_scenario(:, t)) + e_vec(:,t,k+200);
+            X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_scenario(:, t)) + v_vec(:,t,k + K_opt_max);
+            Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_scenario(:, t)) + e_vec(:,t,k + K_opt_max);
         end
     end
 
@@ -236,13 +238,13 @@ for K_opt = K_opt_range
 
     C = C_upper & C_lower;
 
-    Accuracy_scenario(cntk) = sum(reshape(C, 2000, 1)) / 20;
+    Accuracy_scenario(cntk) = 100 * sum(reshape(C, K_test, 1)) / (K - K_opt_max);
 
     for alpha = Alpha_range
     
-        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+        [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
     
-        [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
         x_true = zeros(n_x, H + 1);
         y_true = zeros(n_y, H);
@@ -253,15 +255,15 @@ for K_opt = K_opt_range
             y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
         end
     
-        X_tmp = zeros(n_x, H+1, 2000);
-        Y_tmp = zeros(n_y, H, 2000);
+        X_tmp = zeros(n_x, H+1, K_test);
+        Y_tmp = zeros(n_y, H, K_test);
     
-        for k = 1:2000
-            X_tmp(:,1, k) = x_vec_0(:, 1, k+200);
+        for k = 1:K_test
+            X_tmp(:,1, k) = x_vec_0(:, 1, k + K_opt_max);
     
             for t = 1:H
-                X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k+200);
-                Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k+200);
+                X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k + K_opt_max);
+                Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k + K_opt_max);
             end
         end
     
@@ -270,7 +272,7 @@ for K_opt = K_opt_range
     
         C = C_upper & C_lower;
     
-        Accuracy_kernel(cntk,cnta) = sum(reshape(C, 2000, 1)) / 20;
+        Accuracy_kernel(cntk,cnta) = 100 * sum(reshape(C, K_test, 1)) / (K - K_opt_max) ;
         cnta = cnta + 1;
     end
     cntk = cntk + 1;
