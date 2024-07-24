@@ -1,4 +1,5 @@
 function epsilon = BootstrapAmbiguity(Kernel, B, beta)
+
     K = size(Kernel, 1);
     MMD = zeros(B,1);
     for b = 1:B

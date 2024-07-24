@@ -2,7 +2,44 @@
 
 \section{Particle Gibbs Sampling}
 
-\section{Chance-Constraint Optimization with Kernel Approximation}
+\begin{algorithm}
+	\caption{Scenario generation}\label{alg:PGibbs}
+	\hspace*{\algorithmicindent} \textbf{Input}: Dataset $\mathbb{D}$, parametric model $\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{V}_{\boldsymbol{\theta}}, \boldsymbol{W}			_{\boldsymbol{\theta}}\}$, \\
+	\hspace*{\algorithmicindent} \hspace*{\algorithmicindent} priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_T)$, $N, H, T$ \\
+	\hspace*{\algorithmicindent} \textbf{Output}: Scenarios $ \boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
+	\begin{algorithmic}[1]
+		\For{$n = 1, \dots , N$}
+			\State Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{T:\text{-}1} \mid \mathbb{D} \right)$ using a PMCMC method
+			\For{$t = \text{-}1, \dots , H$}
+				\State Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{V}_{\boldsymbol{\theta}^{[n]}}$
+				\State Sample $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{W}_{\boldsymbol{\theta}^{[n]}}$
+			\EndFor
+			\State $\boldsymbol{x}_0^{[n]} \gets \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[k]}$
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+
+\section{Chance-Constraint Optimization with Kernel Approximation} \label{Sec:CCOKernel}
+
+\subsection{Bootstrap construction of MMD ambiguity sets}
+\begin{algorithm}
+	\caption{Bootstrap MMD ambiguity set}\label{alg:Bootstrap}
+	\hspace*{\algorithmicindent} \textbf{Input}: Scenarios $ \boldsymbol{\delta}^{[1:N]} $, Number of bootstrap samples $B$, Confidence level $\beta$ \\
+	\hspace*{\algorithmicindent} \textbf{Output}: Radius of MMD ambiguity set $\varepsilon$
+	\begin{algorithmic}[1]
+		\State $K \gets \textit{kernel}(\boldsymbol{\delta}, \boldsymbol{\delta})$
+		\For{$m = 1, \dots , B$}
+			\State $I \gets N$ numbers from $\{1, \dots N \}$ with replacement
+			\State $K_x \gets \sum_{i,j = 1}^N K_{ij};$
+			\State $K_y \gets \sum_{i,j \in I} K_{ij};$
+			\State $K_{xy} \gets \sum_{j \in I} \sum_{i = 1}^N K_{ij}$;
+			\State MMD$[m] \gets \frac{1}{N^2} \left( K_x + K_y - 2 K_{xy} \right) ;$
+		\EndFor
+		\State MMD $\gets$ \textit{sort}(MMD)
+		\State $\varepsilon \gets$ MMD$\left[ \textit{ceil} (B \beta) \right]$
+	\end{algorithmic}
+\end{algorithm}
 
 \subsection{Reproducing Kernel Hilbert Spaces}
 
