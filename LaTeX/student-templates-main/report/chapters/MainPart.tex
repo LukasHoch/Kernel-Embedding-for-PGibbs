@@ -24,7 +24,8 @@
 
 \subsection{Bootstrap construction of MMD ambiguity sets}
 \begin{algorithm}
-	\caption{Bootstrap MMD ambiguity set}\label{alg:Bootstrap}
+	\caption{Bootstrap MMD ambiguity set}
+	\label{alg:Bootstrap}
 	\hspace*{\algorithmicindent} \textbf{Input}: Scenarios $ \boldsymbol{\delta}^{[1:N]} $, Number of bootstrap samples $B$, Confidence level $\beta$ \\
 	\hspace*{\algorithmicindent} \textbf{Output}: Radius of MMD ambiguity set $\varepsilon$
 	\begin{algorithmic}[1]
@@ -40,6 +41,12 @@
 		\State $\varepsilon \gets$ MMD$\left[ \textit{ceil} (B \beta) \right]$
 	\end{algorithmic}
 \end{algorithm}
+
+
+
+\begin{equation} \label{Kernel equation}
+K_{ij} = k_{A}(\boldsymbol{A}^{[i]}, \boldsymbol{A}^{[j]})  k_{\mathcal{X}}(\boldsymbol{x}_0^{[i]}, \boldsymbol{x}_0^{[j]})    k_{\mathcal{V}^H}(\boldsymbol{v}_{0:H}^{[i]}, \boldsymbol{v}_{0:H}^{[j]})  k_{\mathcal{W}^H}(\boldsymbol{w}_{0:H}^{[i]}, \boldsymbol{w}_{0:H}^{[j]})  
+\end{equation}
 
 \subsection{Reproducing Kernel Hilbert Spaces}
 

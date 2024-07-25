@@ -113,8 +113,8 @@ if s == 1
 
 elseif s == 2
     H = 41;
-    y_min = [-inf * ones(1, 31), 10 * ones(1, 10)];
-    y_max = [inf * ones(1, 9), -10* ones(1, 11), inf * ones(1, 21)];
+    y_min = [-inf * ones(1, 30), 10 * ones(1, 11)];
+    y_max = [inf * ones(1, 10), -10* ones(1, 11), inf * ones(1, 20)];
 
 elseif s == 3  
     H = 41;
