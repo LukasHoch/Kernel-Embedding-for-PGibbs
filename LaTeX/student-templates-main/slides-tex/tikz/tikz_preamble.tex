@@ -5,28 +5,13 @@
 \pgfdeclarelayer{edgelayer}
 \pgfdeclarelayer{foreground}
 \pgfsetlayers{background,edgelayer,nodelayer,main,foreground}
-\tikzset{robotRec/.style={rectangle, draw=black,line width=2.5pt, fill=tum_gray, rounded corners=9pt, minimum width=60pt, minimum height=30pt}}
-\tikzset{robotCirc/.style={circle, draw=black, fill=black, line width=1.5pt}}
 % robot name for tikz figure
-\newcommand{\RobotName}{$\mathbf{R}$}
+%\newcommand{\RobotName}{$\mathbf{R}$}
 
 \def\CheckAttentionSlide{
     \begin{frame}
         \begin{center}
             {\fontsize{40}{50} \structure{Sorry for your attention}\\}
-            \renewcommand{\RobotName}{I}
-            \resizebox {!} {0.16\textwidth} {\input{tikz/robot.tikz}}
-            \renewcommand{\RobotName}{DID}
-            \resizebox {!} {0.16\textwidth} {\input{tikz/robot.tikz}}
-            \renewcommand{\RobotName}{NOT}
-            \resizebox {!} {0.16\textwidth} {\input{tikz/robot.tikz}}
-            \renewcommand{\RobotName}{CHECK}
-            \resizebox {!} {0.16\textwidth} {\input{tikz/robot.tikz}}
-            \renewcommand{\RobotName}{THIS}
-            \resizebox {!} {0.16\textwidth} {\input{tikz/robot.tikz}}
-            \renewcommand{\RobotName}{SLIDE}
-            \resizebox {!} {0.16\textwidth} {\input{tikz/robot.tikz}}
-            \hfill %
         \end{center}
     \end{frame}
 }
