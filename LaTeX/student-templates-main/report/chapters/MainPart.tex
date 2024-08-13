@@ -54,16 +54,16 @@ To ensure that the samples drawn through this method are an accurate representat
 \begin{algorithm}
 	\caption{Scenario generation}\label{alg:PGibbs}
 	\hspace*{\algorithmicindent} \textbf{Input}: Dataset $\mathbb{D}$, parametric model $\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}}, \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}\}$, \\
-	\hspace*{\algorithmicindent} \hspace*{\algorithmicindent} priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_T)$, $N, H, T$ \\
+	\hspace*{\algorithmicindent} \hspace*{\algorithmicindent} priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$, $N, H, T$ \\
 	\hspace*{\algorithmicindent} \textbf{Output}: Scenarios $ \boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
 	\begin{algorithmic}[1]
 		\For{$n = 1, \dots , N$}
-			\State Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{T:\text{-}1} \mid \mathbb{D} \right)$ using a PMCMC method
+			\State Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using a PMCMC method
 			\For{$t = \text{-}1, \dots , H$}
 				\State Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$
 				\State Sample $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$
 			\EndFor
-			\State $\boldsymbol{x}_0^{[n]} \gets \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[k]}$
+			\State $\boldsymbol{x}_0^{[n]} \gets \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}

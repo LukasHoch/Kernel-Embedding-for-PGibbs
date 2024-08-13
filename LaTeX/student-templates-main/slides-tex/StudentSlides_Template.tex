@@ -15,7 +15,7 @@
 % - `draft` for fast compilation (without graphics)
 % do not remove STUDENT option!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[student, noshadow, lsr, english, aspectratio=169]{ITR_LSR_slides}
+\documentclass[student, noshadow, itr, english, aspectratio=169]{ITR_LSR_slides}
 \input{./tikz/tikz_preamble}
 \addbibresource{./refs/mybib.bib}
 \graphicspath{{pics/}{logos/}}
@@ -30,6 +30,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{empheq}
+
+
 
 \begin{document}
 
@@ -54,37 +56,91 @@ Kernel Embeddings:
 
 \end{frame}
 
+\begin{frame}{Problem Statement - System}	
+	\textbf{Given:} Dataset $\mathbb{D} = \left\{\boldsymbol{u}_{t}, \boldsymbol{y}_{t}\right\}_{t = \text{-}T:\text{-}1}$ from unknown system
+	\begin{equation*}
+	\begin{split}
+	\boldsymbol{x}_{t+1} &= \boldsymbol{f} \left( \boldsymbol{x}_{t}, \boldsymbol{u}_t \right) + \boldsymbol{v}_{t}, \makebox[1cm]{\hfill} \; \boldsymbol{v}_{t} \sim \boldsymbol{\mathcal{V}},\\
+	\boldsymbol{y}_{t} &= \boldsymbol{g} \left( \boldsymbol{x}_{t}, \boldsymbol{u}_t \right) + \boldsymbol{w}_{t}, \makebox[1cm]{\hfill} \boldsymbol{w}_{t} \sim \boldsymbol{\mathcal{W}}
+	\end{split}
+	\end{equation*}
 
-\begin{frame}{Problem Statement}	
-...
+	\begin{block}{Assumptions}
+	\begin{itemize}
+		\item 
+		Known system structure
+	\begin{equation*}
+	\begin{split}
+	\boldsymbol{x}_{t+1} &= \boldsymbol{f}_{\boldsymbol{\theta}} \left( \boldsymbol{x}_{t}, \boldsymbol{u}_t \right) + \boldsymbol{v}_{t}, \makebox[1cm]{\hfill} \; \boldsymbol{v}_{t} \sim \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}},\\
+	\boldsymbol{y}_{t} &= \boldsymbol{g}_{\boldsymbol{\theta}} \left( \boldsymbol{x}_{t}, \boldsymbol{u}_t \right) + \boldsymbol{w}_{t}, \makebox[1cm]{\hfill} \boldsymbol{w}_{t} \sim \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}.
+	\end{split}
+	\end{equation*}
+	\item 
+	Known priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$
+	\end{itemize}
+	\end{block}	
+
+
+\end{frame}
+
+\begin{frame}{Problem Statement - Optimal Control Problem}	
+	\textbf{Goal:} Solve optimal control problem (OCP)\\
+	\begin{block}{Stochastic OCP}
+		\begin{equation*}
+		\min\limits_{\boldsymbol{u}_{0:H}} \overline{J_H}
+		\end{equation*}
+		subject to: 
+		\begin{equation*}
+		P_0 \left[J_H \leq \overline{J_H} \right] \geq 1 - \alpha,
+		\end{equation*}
+		\begin{equation*}
+		P_0 \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
+		\end{equation*}
+	\end{block}	
+	\textbf{Idea:} Reformulate stochastic OCP to deterministic OCP
 \end{frame}
 
 
 \section{Particle Gibbs}
 
-\begin{frame}{Particle Markov Chain Monte Carlo}
-...
-\end{frame}
-
-\begin{frame}{Particle Markov Chain Monte Carlo - Samples}
-...
-\end{frame}
-
 \begin{frame}{Scenario Generation}
-...
+\textbf{Goal:} Generate scenarios $\boldsymbol{\delta}^{[1:N]}$ using the observations $\mathbb{D}$\\
+\begin{block}{Algorithm: Scenario Generation}
+For $n = 1,...,N$:
+\begin{enumerate}
+  \item Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using PMCMC \cite{Robert_24}.
+  \item Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$ and  $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$ for $t = \text{-}1, ..., H$
+  \item Set $\boldsymbol{x}_0^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
+\end{enumerate}
+\textbf{Output:} Scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
+\end{block}
 \end{frame}
 
 
 \section{Kernel Embedding}
 
 \begin{frame}
-	\frametitle{MMD ambiguity sets}
-	
+	\frametitle{Maximum Mean Discrepancy (MMD) ambiguity sets}
+\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
+\begin{block}{Expanded Chance-Constraints}
+\begin{equation*}
+\inf\limits_{P \in \mathcal{P}}P \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\end{equation*}
+\end{block}	
+
+$\mathcal{P}$ is constructed with the samples $\boldsymbol{\delta}^{[1:N]}$ as
+
+\begin{block}{MMD ambiguity set}
+\begin{equation*}
+\mathcal{P} =  \left\{ P : \text{MMD} (P, P_N) \leq \varepsilon \right\}.
+\end{equation*}
+\end{block}	
+
 \end{frame}
 
 \begin{frame}
 	\frametitle{Constraint Reformulation}
-\textbf{Goal:} Reformulate chance-constraint problem with $\boldsymbol{\delta}^{[1:N]}$
+\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{block}{Feasible Region of chance constraint}
 \begin{equation*}
 Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in \mathcal{P}}P \left[ \tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
@@ -93,7 +149,7 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in 
 
 \makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
-\begin{block}{Reformulated Feasible Region}
+\begin{block}{Reformulated Feasible Region \cite{Yassine_22}}
 \begin{empheq}[right = \empheqrbrace, left= Z_i \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
     & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t \alpha \\
     & [\tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t]_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 0,...,N \\
@@ -108,7 +164,7 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in 
 \textbf{Goal:} Reformulate chance-constraint problem with $\boldsymbol{\delta}^{[1:N]}$ \\
 \begin{align*} 
  &\min\limits_{\boldsymbol{u}_{0:H}, \overline{J_H}}  \overline{J_H}\\
-\text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall \in \mathbb{N}_{\leq H}^0  \\
+\text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0  \\
 &\left. 
 \begin {aligned}
 \boldsymbol{x}_{t+1}^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]} , \boldsymbol{u}_t \right) + & \boldsymbol{v}_{t}^{[n]} \\
@@ -141,11 +197,9 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \end{bmatrix}
 \right).$
 
-\item Known observation function $g(\boldsymbol{x}, u) = x_1$ and measurement noise $w_t \sim \mathcal{N} (0, 0.1)$
+\item Known measurement model $g(\boldsymbol{x}, u) = x_1, \; w_t \sim \mathcal{N} (0, 0.1)$
 
-\item Known initial state $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$ 
-
-\item Known input/output measurements $\mathbb{D} = \left\{\boldsymbol{u}_{t}, \boldsymbol{y}_{t}\right\}_{t = \text{-}T:\text{-}1}$
+\item Known initial state for measurements $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$ 
 
 \item Cost function $J_H = \sum_{t = 0}^H u_t^2$
 
@@ -158,22 +212,25 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \begin{frame}{Simulation Setup (2/2)}
 Particle Marcov chain Monte Carlo \cite{Svensson_17}:
 \begin{itemize}
-\item Known basis functions $\boldsymbol{\varphi}(\boldsymbol{x}_t, u_t) =  \left[ x_1,  x_2,  u \right]^\text{T}$ \\
-	$\Rightarrow \boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \boldsymbol{\varphi}(\boldsymbol{x}_t, u_t) + \boldsymbol{v}_{t}, \; \boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q}), \; \boldsymbol{\theta} = \{\boldsymbol{A}, \boldsymbol{Q}\}$
-
+\item 
+\makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[ x_1,  x_2,  u \right]^\text{T} + \boldsymbol{v}_{t}, \; \boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ 
+\item 
+\makebox[4.5cm]{Model parameters: \hfill} $\boldsymbol{\theta} = \{\boldsymbol{A}, \boldsymbol{Q}\}$
 \item
-\makebox[3cm]{Priors: \hfill} $\boldsymbol{Q} \sim \mathcal{IW} (100 \boldsymbol{I}_2, 10)$ 
-\makebox[3cm]{\hfill} $\boldsymbol{A} \sim \mathcal{MN} (\boldsymbol{0}, \boldsymbol{Q}, 10 \boldsymbol{I}_2)$ 
-\item $N_p = 1000,\; n_d = 30$
+\makebox[4.5cm]{Priors: \hfill} $\boldsymbol{Q} \sim \mathcal{IW} (100 \boldsymbol{I}_2, 10)$ \\
+\makebox[4.5cm]{\hfill} $\boldsymbol{A} \sim \mathcal{MN} (\boldsymbol{0}, \boldsymbol{Q}, 10 \boldsymbol{I}_2)$ 
+%\item $N_p = 1000,\; n_d = 30$
 \end{itemize}
+
 Kernel Embedding:
 \begin{itemize}
-\item Gaussian kernels $k(x,y) = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||x - y||_2^2 \right)$ for all 4 random varibles
+\item Gaussian kernels $k(x,x') = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||x - x'||_2^2 \right)$ for all 4 random varibles
 \item Bandwidth $\sigma$ set via the median heuristic \cite{Damien_18} and scaled with factors $\left[ 1.5, 5, 5, 1 \right]^\text{T}$
+\item Ambiguity set radius $\varepsilon$ set via bootstrap construction ($B = 1000, \beta = 0.95$) \cite{Yassine_22}.
 \end{itemize}
 \end{frame}	
 
-\begin{frame}{Optimal Control with Constrained Outputs}
+\begin{frame}{Optimal Control with Constrained Outputs (1/2)}
 
 Number of scenarios used for optimization: $N = 200$
 \vspace{.3cm}
@@ -189,6 +246,22 @@ Number of scenarios used for optimization: $N = 200$
 	\end{columns}\vspace{.5cm}
 \end{frame}	
 
+\begin{frame}{Optimal Control with Constrained Outputs (2/2)}
+
+Number of scenarios used for optimization: $N = 200$
+\vspace{.3cm}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			$\;\;$ Kernel Approach  ($\alpha = 0.01$)
+			\includegraphics[width= .9\textwidth]{Kernel_plot_alpha001}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			$\;\;$ Kernel Approach  ($\alpha = 0.3$)
+			\includegraphics[width=.9\textwidth]{Kernel_plot_alpha03}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}	
+
 \begin{frame}{Successrate of Solution}
 	\vspace{.2cm}
 	\begin{columns}[onlytextwidth, T]
@@ -196,9 +269,15 @@ Number of scenarios used for optimization: $N = 200$
 			\includegraphics[width=.9\textwidth]{robustness_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			xAxis: Number of scenarios used to find the solution $u_{0:H}$ \\
-			\vspace{.1cm}yAxis: Percentage of scenarios where $u_{0:H}$ satisfies the output constraints \\
-			\vspace{.4cm}$N = 2000$ Number of Scenarios used to test $u_{0:H}$
+			\vspace{.4cm}$N = 2000$: Number of Scenarios used to test $u_{0:H}$
+
+			\vspace{1cm}
+			\fcolorbox{blue}{white}{
+				\parbox{.95\textwidth}{
+				Successrate does \textbf{not} converge to $(1 - \alpha)$ \\
+				Potential explaination: \\
+				Guarantee constraint is applied to each output constraint seperately
+			}}
 		\end{column}
 	\end{columns}\vspace{.5cm}
 \end{frame}	
@@ -207,9 +286,12 @@ Number of scenarios used for optimization: $N = 200$
 \vspace{.2cm}
 \begin{columns}[onlytextwidth, T]
 		\begin{column}{.5\textwidth}
-			\vspace{.4cm}
-			xAxis: Number of scenarios used to formulate OCP \\
-			\vspace{.2cm}yAxis: Time to find solution $u_{u:H}$ \\
+			\vspace{0.4cm}
+			\fcolorbox{blue}{white}{
+				\parbox{.9\textwidth}{
+				Computation time increases faster for the kernel approach\\
+				\vspace{.2cm} \textbf{But:} Kernel approach comes with adjustable risk factor $\alpha$
+			}}
 		\end{column}
 		\begin{column}{.5\textwidth}
 			\includegraphics[width=\textwidth]{/computationtime_plot}
@@ -225,9 +307,9 @@ Number of scenarios used for optimization: $N = 200$
 
 \begin{frame}{Future Plans}
 	\begin{itemize}
+	\item Use Kernel Embeddings on non-linear systems
 	\item Parameter tuning of $\sigma$
 	\item Risk factor for all constraints at once instead of individually
-	\item Use Kernel Embeddings on non-linear systems
 	\end{itemize}
 \end{frame}
 
@@ -237,7 +319,6 @@ Number of scenarios used for optimization: $N = 200$
 	%	2. testing if you actually checked the content of this template
 	% 	3. subtly preventing you from adding a "Thank you..." slide at the end of your presentation
 	% If this slide is still in your final presentation... well, congratulation!
-	\CheckAttentionSlide
 
 
 %\nocite{buss11}

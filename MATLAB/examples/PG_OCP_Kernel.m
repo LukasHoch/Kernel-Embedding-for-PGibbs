@@ -150,7 +150,7 @@ end
 
 
 R = 0.1;
-alpha = 0.1;
+alpha = 0.2;
 sigma_mult = [1.5 5 5 1];
 
 K_opt = 200;
@@ -198,18 +198,18 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
-[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
+% [U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
+% 
+% x_true = zeros(n_x, H + 1);
+% y_true = zeros(n_y, H);
+% 
+% x_true(:, 1) = x_training(:, end);
+% for t = 1:H
+%     x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
+%     y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
+% end
+% 
+% plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
 
 [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
