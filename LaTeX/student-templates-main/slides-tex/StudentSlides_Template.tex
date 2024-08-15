@@ -48,11 +48,17 @@
 
 
 \begin{frame}{Related Works}
-Particle Markov Chain	
-\cite{Robert_24}, \cite{Andrieu_10}
+Particle Markov chain Monte Carlo \cite[3]{Andrieu_10}
 
-Kernel Embeddings:
-\cite{Yassine_22}
+\vspace{.4cm}
+
+Chance Constraints:
+\begin{itemize}
+\item Scenario Approach \cite[3]{Robert_24}
+\item Wasserstein Ambiguity \cite[3]{Hota_19}
+\item \makebox[3cm]{Kernel Embeddings \hfill} \cite[3]{Adam_22} \\
+\makebox[3cm]{\hfill} \cite[3]{Yassine_22}
+\end{itemize}
 
 \end{frame}
 
@@ -204,8 +210,6 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \item Cost function $J_H = \sum_{t = 0}^H u_t^2$
 
 \item Input constraints $\left| u \right| \leq 10$
-
-\item Output constraints $y_{10:20} \leq (\text{-} 10)$ and $10 \leq y_{30:40}$
 \end{itemize}
 \end{frame}
 
@@ -224,8 +228,7 @@ Particle Marcov chain Monte Carlo \cite{Svensson_17}:
 
 Kernel Embedding:
 \begin{itemize}
-\item Gaussian kernels $k(x,x') = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||x - x'||_2^2 \right)$ for all 4 random varibles
-\item Bandwidth $\sigma$ set via the median heuristic \cite{Damien_18} and scaled with factors $\left[ 1.5, 5, 5, 1 \right]^\text{T}$
+\item Gaussian kernels with bandwidth $\sigma$ set via the median heuristic \cite{Damien_18}
 \item Ambiguity set radius $\varepsilon$ set via bootstrap construction ($B = 1000, \beta = 0.95$) \cite{Yassine_22}.
 \end{itemize}
 \end{frame}	
@@ -282,34 +285,22 @@ Number of scenarios used for optimization: $N = 200$
 	\end{columns}\vspace{.5cm}
 \end{frame}	
 
-\begin{frame}{Computation Time}
-\vspace{.2cm}
-\begin{columns}[onlytextwidth, T]
-		\begin{column}{.5\textwidth}
-			\vspace{0.4cm}
-			\fcolorbox{blue}{white}{
-				\parbox{.9\textwidth}{
-				Computation time increases faster for the kernel approach\\
-				\vspace{.2cm} \textbf{But:} Kernel approach comes with adjustable risk factor $\alpha$
-			}}
-		\end{column}
-		\begin{column}{.5\textwidth}
-			\includegraphics[width=\textwidth]{/computationtime_plot}
-		\end{column}
-	\end{columns}\vspace{.5cm}
-\end{frame}	
-
 \section{Conclusion}
 
-\begin{frame}{Summary}
-	...
-\end{frame}
-
-\begin{frame}{Future Plans}
+\begin{frame}{Conclusion}
+	\textbf{Summary:}
+	Kernel Embeddings allow for ...
 	\begin{itemize}
-	\item Use Kernel Embeddings on non-linear systems
-	\item Parameter tuning of $\sigma$
-	\item Risk factor for all constraints at once instead of individually
+		\item Solving of chance-constrained OCPs
+		\item Controlling of risk factor $\alpha$
+	\end{itemize}
+	\vspace{.5cm}
+	
+	\textbf{Future Plans:}
+	\begin{itemize}
+		\item Use Kernel Embeddings on non-linear systems
+		\item Parameter tuning of $\sigma$
+		\item Alternative approach of reformulating chance constraints
 	\end{itemize}
 \end{frame}
 
@@ -326,6 +317,24 @@ Number of scenarios used for optimization: $N = 200$
 \begin{frame}{\LSRITRRefTitle}
 	\printbibliography
 \end{frame}
+
+
+\begin{frame}{Computation Time}
+\vspace{.2cm}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\vspace{0.4cm}
+			\fcolorbox{blue}{white}{
+				\parbox{.9\textwidth}{
+				Computation time increases faster for the kernel approach\\
+				\vspace{.2cm} \textbf{But:} Kernel approach comes with adjustable risk factor $\alpha$
+			}}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\includegraphics[width=\textwidth]{/computationtime_plot}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}	
 
 
 \end{document}
