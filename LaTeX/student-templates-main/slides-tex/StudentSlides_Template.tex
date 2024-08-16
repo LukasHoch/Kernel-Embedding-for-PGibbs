@@ -43,23 +43,8 @@
 
 \section{Introduction}
 \begin{frame}{Motivation}	
-...
-\end{frame}
-
-
-\begin{frame}{Related Works}
-Particle Markov chain Monte Carlo \cite[3]{Andrieu_10}
-
-\vspace{.4cm}
-
-Chance Constraints:
-\begin{itemize}
-\item Scenario Approach \cite[3]{Robert_24}
-\item Wasserstein Ambiguity \cite[3]{Hota_19}
-\item \makebox[3cm]{Kernel Embeddings \hfill} \cite[3]{Adam_22} \\
-\makebox[3cm]{\hfill} \cite[3]{Yassine_22}
-\end{itemize}
-
+\includegraphics[width= .5\textwidth]{Motivation_pic}
+\cite[4]{Xiloyannis_19}
 \end{frame}
 
 \begin{frame}{Problem Statement - System}	
@@ -93,17 +78,28 @@ Chance Constraints:
 	\textbf{Goal:} Solve optimal control problem (OCP)\\
 	\begin{block}{Stochastic OCP}
 		\begin{equation*}
-		\min\limits_{\boldsymbol{u}_{0:H}} \overline{J_H}
+		\min\limits_{\boldsymbol{u}_{0:H}} J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) 
 		\end{equation*}
 		subject to: 
 		\begin{equation*}
-		P_0 \left[J_H \leq \overline{J_H} \right] \geq 1 - \alpha,
-		\end{equation*}
-		\begin{equation*}
-		P_0 \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
+		P \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
 		\end{equation*}
 	\end{block}	
-	\textbf{Idea:} Reformulate stochastic OCP to deterministic OCP
+	\textbf{Problem:} Underlying data distribution $P$ is unknown
+\end{frame}
+
+\begin{frame}{Related Works}
+Particle Markov chain Monte Carlo \cite[3]{Andrieu_10}
+
+\vspace{.4cm}
+
+Chance Constraints:
+\begin{itemize}
+\item Scenario Approach \cite[4]{Robert_24}
+\item Wasserstein Ambiguity \cite[4]{Hota_19}
+\item \makebox[3cm]{ Kernel Embeddings \hfill} \cite[4]{Adam_22} \\
+\makebox[3cm]{\hfill} \cite[4]{Yassine_22}
+\end{itemize}
 \end{frame}
 
 
@@ -130,7 +126,7 @@ For $n = 1,...,N$:
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
 \begin{block}{Expanded Chance-Constraints}
 \begin{equation*}
-\inf\limits_{P \in \mathcal{P}}P \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
 \end{equation*}
 \end{block}	
 
@@ -138,9 +134,11 @@ $\mathcal{P}$ is constructed with the samples $\boldsymbol{\delta}^{[1:N]}$ as
 
 \begin{block}{MMD ambiguity set}
 \begin{equation*}
-\mathcal{P} =  \left\{ P : \text{MMD} (P, P_N) \leq \varepsilon \right\}.
+\mathcal{P} =  \left\{ \tilde{P} : \text{MMD} (\tilde{P}, P_N) \leq \varepsilon \right\}.
 \end{equation*}
 \end{block}	
+
+With large enough $N \Rightarrow$ $P$ is an element of $\mathcal{P}$
 
 \end{frame}
 
@@ -149,7 +147,7 @@ $\mathcal{P}$ is constructed with the samples $\boldsymbol{\delta}^{[1:N]}$ as
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{block}{Feasible Region of chance constraint}
 \begin{equation*}
-Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in \mathcal{P}}P \left[ \tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
+Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
 \end{equation*}
 \end{block}	
 
@@ -169,16 +167,15 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in 
 	\frametitle{Problem Formulation}
 \textbf{Goal:} Reformulate chance-constraint problem with $\boldsymbol{\delta}^{[1:N]}$ \\
 \begin{align*} 
- &\min\limits_{\boldsymbol{u}_{0:H}, \overline{J_H}}  \overline{J_H}\\
-\text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0  \\
+ &\min\limits_{\boldsymbol{u}_{0:H}, J_H, \{g_0, \boldsymbol{\gamma}, t\}^{[1:n_c]}} J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \\
+\text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0, \; \forall i \in \mathbb{N}_{\leq n_c}  \\
 &\left. 
 \begin {aligned}
-\boldsymbol{x}_{t+1}^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]} , \boldsymbol{u}_t \right) + & \boldsymbol{v}_{t}^{[n]} \\
-\boldsymbol{y}_{t} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + & \boldsymbol{w}_{t}^{[n]}
+\boldsymbol{x}_{t+1}^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]} , \boldsymbol{u}_t \right) + & \boldsymbol{v}_{t}^{[n]}\\
+\boldsymbol{y}_{t}^{[n]} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + & \boldsymbol{w}_{t}^{[n]} 
 \end{aligned}
- \;\;\; \right\} \; \text{Dynamic Constraints} \\
-&\;\;\;\; J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]})  \leq \overline{J_H} \\
-&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i, \forall i = 1, ...,n_c \;\;\;\;\;\;\;\;\; \Bigl\} \; \text{Reformulated Chance Constraints}
+ \;\;  \right\} \; \text{Dynamic Constraints} \\
+&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i(g_0^{[i]}, \boldsymbol{\gamma}^{[i]}, t^{[i]}) \;\;\;\;\;\; \;\;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
 \end{align*}
 
 
@@ -203,33 +200,23 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \end{bmatrix}
 \right).$
 
-\item Known measurement model $g(\boldsymbol{x}, u) = x_1, \; w_t \sim \mathcal{N} (0, 0.1)$
+\item 
+\makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[ x_1,  x_2,  u \right]^\text{T} + \boldsymbol{v}_{t}, \; \boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ 
+\item
+\makebox[4.5cm]{Priors: \hfill} $\boldsymbol{Q} \sim \mathcal{IW} (100 \boldsymbol{I}_2, 10)$ \\
+\makebox[4.5cm]{\hfill} $\boldsymbol{A} \sim \mathcal{MN} (\boldsymbol{0}, \boldsymbol{Q}, 10 \boldsymbol{I}_2)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;$ \cite{Svensson_17}\\
+\makebox[4.5cm]{\hfill} $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$
 
-\item Known initial state for measurements $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$ 
+
+\item Known measurement model $g(\boldsymbol{x}, u) = x_1, \; w_t \sim \mathcal{N} (0, 0.1)$
 
 \item Cost function $J_H = \sum_{t = 0}^H u_t^2$
 
 \item Input constraints $\left| u \right| \leq 10$
-\end{itemize}
-\end{frame}
 
-\begin{frame}{Simulation Setup (2/2)}
-Particle Marcov chain Monte Carlo \cite{Svensson_17}:
-\begin{itemize}
-\item 
-\makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[ x_1,  x_2,  u \right]^\text{T} + \boldsymbol{v}_{t}, \; \boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ 
-\item 
-\makebox[4.5cm]{Model parameters: \hfill} $\boldsymbol{\theta} = \{\boldsymbol{A}, \boldsymbol{Q}\}$
-\item
-\makebox[4.5cm]{Priors: \hfill} $\boldsymbol{Q} \sim \mathcal{IW} (100 \boldsymbol{I}_2, 10)$ \\
-\makebox[4.5cm]{\hfill} $\boldsymbol{A} \sim \mathcal{MN} (\boldsymbol{0}, \boldsymbol{Q}, 10 \boldsymbol{I}_2)$ 
-%\item $N_p = 1000,\; n_d = 30$
-\end{itemize}
-
-Kernel Embedding:
-\begin{itemize}
 \item Gaussian kernels with bandwidth $\sigma$ set via the median heuristic \cite{Damien_18}
-\item Ambiguity set radius $\varepsilon$ set via bootstrap construction ($B = 1000, \beta = 0.95$) \cite{Yassine_22}.
+
+\item Ambiguity set radius $\varepsilon$ set via bootstrap construction \cite{Yassine_22}.
 \end{itemize}
 \end{frame}	
 
@@ -318,6 +305,26 @@ Number of scenarios used for optimization: $N = 200$
 	\printbibliography
 \end{frame}
 
+\begin{frame}{Timeline}
+...
+\end{frame}
+
+\begin{frame}{Scenario Generation}
+\textbf{Goal:} Generate scenarios $\boldsymbol{\delta}^{[1:N]}$ using the observations $\mathbb{D}$\\
+\begin{block}{Algorithm: Scenario Generation}
+For $n = 1,...,N$:
+\begin{enumerate}
+  \item Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using PMCMC \cite{Robert_24}.
+  \item Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$ and  $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$ for $t = \text{-}1, ..., H$
+  \item Set $\boldsymbol{x}_0^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
+\end{enumerate}
+\textbf{Output:} Scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
+\end{block}
+\end{frame}
+
+\begin{frame}{Bootstrap Construction}
+...
+\end{frame}
 
 \begin{frame}{Computation Time}
 \vspace{.2cm}
