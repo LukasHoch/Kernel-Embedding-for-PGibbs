@@ -7,9 +7,46 @@ Introduce the problem (gently!). Try to give the reader an appreciation of the d
 
 Make sure you clearly state the vision/aims of your work, which problem you are trying to solve, and why it is important. While the introduction is the part that is read first (ignoring title and abstract), it is usually best written last (when you actually know what you have really achieved). Remember, it is the first thing that is read and will have a major influence on the how the reader approaches your work. If you bore them now, you have most likely lost them already. If you make outrageous claims, pretend to solve the world's problems, etc, you are likely fighting an uphill battle later on. Also, make sure you pick up any threads spun in the introduction later on, to ensure that the reader thinks they get what they have been promised. Do not create an expectation that you will deliver more than you actually do. Remember, the reader may be your marker (of a thesis) or referee (of a paper), and you do not want to annoy them.
 
-\section{Problem Statement}
+\section{Problem Statement} \label{Problem Statement}
 
-You can either state the problem you are trying to solve in the general introduction, providing the transition from the overall picture to your specific approach, or state it in a separate section. Even if you do not use the separate section, writing down in a few sentences why the problem you are trying to solve is actually hard and has not been solved before can give you a better idea of how to approach the topic. This can be also merged with the related work part.
+Consider the general nonlinear discrete-time system of the form
+
+\begin{subequations} \label{System equation}
+\begin{equation}
+\boldsymbol{x}_{t+1} = \boldsymbol{f} \left( \boldsymbol{x}_{t}, \boldsymbol{u}_t \right) + \boldsymbol{v}_{t}
+\end{equation}
+\begin{equation}
+\boldsymbol{y}_{t} = \boldsymbol{g} \left( \boldsymbol{x}_{t}, \boldsymbol{u}_t \right) + \boldsymbol{w}_{t}
+\end{equation}
+\end{subequations}
+
+with the state $\boldsymbol{x} \in \mathbb{R}^{n_x \in \mathbb{N}}$, the input $\boldsymbol{u} \in \mathbb{R}^{n_u \in \mathbb{N}}$, the output $\boldsymbol{y} \in \mathbb{R}^{n_y \in \mathbb{N}}$, the process noise $\boldsymbol{v}_{t} \in \mathbb{R}^{n_x}$, the measurement noise $\boldsymbol{w}_{t} \in \mathbb{R}^{n_y}$ and time $t \in \mathbb{Z}$. 
+
+In our setting, only the output $\boldsymbol{y}$ is observable and the state transition function $\boldsymbol{f}(\cdot)$ and the observation function $\boldsymbol{g}(\cdot)$, as well as the distributions $\boldsymbol{\mathcal{V}}$ and $\boldsymbol{\mathcal{W}}$ of the process noise $\boldsymbol{v}$ and measurement noise $\boldsymbol{w}$ are unknown.
+
+We assume that a dataset $\mathbb{D} = \left\{\boldsymbol{u}_{t}, \boldsymbol{y}_{t}\right\}_{t = \text{-}T:\text{-}1}$ containing the last $T \in \mathbb{N}$ measurements of the input $\boldsymbol{u}$ and output $\boldsymbol{y}$ is available.
+
+We further assume that the structure of the model $\left\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}}, \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}\right\}$ is known and is dependent on a finite number of unknown parameters $\boldsymbol{\theta}$. In addition to that, the priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$ are available as well.
+
+The objective is to minimize a given cost function 
+
+\begin{equation} \label{cost function}
+J_H = \sum_{t = 0}^H c(\boldsymbol{u}_t,  \boldsymbol{x}_t,  \boldsymbol{y}_t)
+\end{equation}
+
+over the horizon $H$ while satisfying the constraints 
+
+\begin{equation} \label{constraints}
+\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq \boldsymbol{0}
+\end{equation}
+
+with $\boldsymbol{h} \in \mathbb{R}^{n_c}$ being a vector of arbitrary deterministic function. As the states $\boldsymbol{x}_{0:H}$ are unknown to us and there are several uncertain factors in our system, the constraints are transformed into chance-constraints and since it is possible that $\boldsymbol{h}$ is impossible to satisfy for every possible $\boldsymbol{x}_{0:H}$, we also introduce a risk factor $\alpha \in [0, 1]$ that relaxes these constraints, turning them into
+
+\begin{equation} \label{risk constraints}
+P \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
+\end{equation}
+
+with $h_i$ being the $i$-th element of $\boldsymbol{h}$ and $P$ being generally unknown.
 
 \section{Related Work}
 

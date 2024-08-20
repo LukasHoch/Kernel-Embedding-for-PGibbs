@@ -1,4 +1,5 @@
 \ProvidesClass{LSR_thesis}[2016/04/05 class for LSR slides]
+\typeout{-- 2024/07/22 revision V0.5 by D.Wollherr}
 \typeout{-- 2018/03/20 revision V0.4 by V.Gabler}
 \typeout{-- 2017/07/24 revision V0.3 by D.Wollherr}
 \typeout{-- 2017/01/17 revision V0.2 by V.Gabler}
@@ -369,14 +370,16 @@
 \def\@vartitlefour{\mbox{}}
 \newcommand{\studtitlefour}[1]{\def\@vartitlefour{\mbox{}#1}}
 
-\def\@varyearone{DD. MM. YYYY}
-\newcommand{\yearofbirth}[1]{\def\@varyearone{#1}}
-\def\@varstreetone{Bakerstreet 221B}
-\newcommand{\street}[1]{\def\@varstreetone{#1}}
-\def\@varcity{8xxxx München}
-\newcommand{\city}[1]{\def\@varcity{#1}}
-\def\@vartele{089 - 1234567}
-\newcommand{\phone}[1]{\def\@vartele{#1}}
+\def\@varemailstud{email@tum.de}
+\newcommand{\emailaddress}[1]{\def\@varemailstud{#1}}
+%\def\@varyearone{DD. MM. YYYY}
+%\newcommand{\yearofbirth}[1]{\def\@varyearone{#1}}
+%\def\@varstreetone{Bakerstreet 221B}
+%\newcommand{\street}[1]{\def\@varstreetone{#1}}
+%\def\@varcity{8xxxx München}
+%\newcommand{\city}[1]{\def\@varcity{#1}}
+%\def\@vartele{089 - 1234567}
+%\newcommand{\phone}[1]{\def\@vartele{#1}}
 % todo: additional informations for multiple students
 %_____________________________________________________
 \ifx\@institute\@instituteLSR
@@ -573,10 +576,8 @@
   \textbf{Eingereicht von}\>
     \begin{minipage}[t]{8cm}
       \@vartitle~\@student\\
-      \@varstreetone\\
-      \@varcity\\
-      \@vartele
-    \end{minipage}\\[2mm]
+      \@varemailstud
+    \end{minipage}\\[4.3mm]
 
   \textbf{Eingereicht am}\>
     \begin{minipage}[t]{10cm}
@@ -603,10 +604,8 @@
   \textbf{Submitted by}\>
     \begin{minipage}[t]{8cm}
       \@vartitle~\@student\\
-      \@varstreetone\\
-      \@varcity\\
-      \@vartele
-    \end{minipage}\\[2mm]
+      \@varemailstud
+    \end{minipage}\\[4.3mm]
 
   \textbf{Submitted on}\>
     \begin{minipage}[t]{10cm}

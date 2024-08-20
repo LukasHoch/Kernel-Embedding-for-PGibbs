@@ -1,4 +1,4 @@
-\documentclass[LSR, MA, english, intermediate]{LSR_thesis} 
+\documentclass[ITR, MA, english, intermediate]{LSR_thesis} 
 \graphicspath{{pics/}}
 
 %% Options:
@@ -27,7 +27,8 @@
 %%________________________________________________%
 %% add customize first so you can access your commands in gloss
 \input{./include/customize.tex} % add custom commands etc in this file 
-%\input{./include/gloss.tex}		% add your glossary in this file 
+\input{./include/gloss.tex}		% add your glossary in this file 
+
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -52,11 +53,8 @@
 
 %% insert your data here:
 \student{Lukas Hochschwarzer} % your name
-%\studtitle{} % your title
-\street{Koenigswieser Strasse 75e} % your address
-\city{81475 Munich} % postal code and city
-\phone{089 - 1015332} % your telephone number
-
+\studtitle{???} % your title
+\emailaddress{l.hochschwarzer@gmail.com} % your email address, pls use @tum.de
  
 %-if more students are involved (e.g., PP)-
 %\studenttwo{Second Student}
@@ -142,51 +140,6 @@
 \input{./chapters/Evaluation.tex}
 \input{./chapters/Discussion.tex}
 \input{./chapters/Conclusion.tex}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\appendix
-
-% Add optional appendix here
-\input{./chapters/Appendix.tex}
-
-% List of figures
-\cleardoublepage
-\phantomsection
-\addcontentsline{toc}{chapter}{\listfigurename} 
-\listoffigures 	
-
-% List of tables
-\cleardoublepage
-\phantomsection
-\addcontentsline{toc}{chapter}{\listtablename} 
-\listoftables
-
-% Acronyms and notation
-% -> see include/gloss.tex
-\ifdefined\AddMyGloss
-    \AddMyGloss 
-\fi
-
-% Bibliography
-\cleardoublepage
-\phantomsection
-\addcontentsline{toc}{chapter}{Bibliography}
-\bibliography{./refs/mybib}
-\bibliographystyle{alphaurl}
-
-% License
-\cleardoublepage
-\chapter*{License}
-\markright{LICENSE}
-This work is licensed under the Creative Commons Attribution 3.0 Germany License. To view a copy of this license, visit \href{http://creativecommons.org/licenses/by/3.0/de/}{http://creativecommons.org} or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California 94105, USA.
-
-% Todo list
-% This MUST be empty and/or removed in the final version!
-\listoftodos
-\end{document}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

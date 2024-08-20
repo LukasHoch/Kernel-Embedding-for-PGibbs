@@ -2,7 +2,7 @@
 
 In this section, the proposed optimal control approach is implemented and its effectiveness tested and compared to the previous approach. The simulation setup is described in Sec. \ref{PG setup} and \ref{Kernel setup}. The results of the OCP are shown in Sec. \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in Sec. \ref{performance guarantees} and Sec. \ref{computation time} by looking at the robustness of the solution and the computation times of the optimization process and compare it to the commonly used scenario approach.
 
-\section{Particle Gibbs Setup} \label{PG setup}
+\section{Simulation Setup} \label{Setup}
 
 We consider a system with the state transition function
 
@@ -28,23 +28,15 @@ and the process noise distribution
 Both the state transition function and the process noise distribution are unknown to the user. Meanwhile, the observation function $g(\boldsymbol{x}, u) = x_1$ and measurement noise $w_t \sim \mathcal{N} (0, 0.1)$ are known. 
 
 
-For the scenario generation, we consider a $\mathbb{D}$ that is made up of $T = 2000$ input and output measurements of the true system. These measurements are obtained with a random input trajectory $u \sim \mathcal{N} (0, 3)$ while starting from a random initial state $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$. To infer the state model parameters, the approach from \cite{Svensson_17} is used. It is assumed that $\boldsymbol{f}(\cdot)$ is a linear combination of $n_a$ basis functions $\boldsymbol{\varphi}(\boldsymbol{x}_t, u_t)$ and the process noise is normally distributed. As such, the state transition can be rewritten as
+For the scenario generation, we consider a set containing $T = 2000$ input and output measurements of the true system for our dataset $\mathbb{D}$. These measurements are obtained with a random input trajectory $u \sim \mathcal{N} (0, 3)$ while starting from a random initial state $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$. To infer the state model parameters, the approach from \cite{Svensson_17} is used. It is assumed that $\boldsymbol{f}(\cdot)$ is a linear combination of $n_a$ basis functions $\boldsymbol{\varphi}(\boldsymbol{x}_t, u_t)$ and the process noise is normally distributed. As such, the state transition can be rewritten as
 
 \begin{equation} \label{State transition}
 \boldsymbol{x}_{t+1} = \boldsymbol{A} \boldsymbol{\varphi}(\boldsymbol{x}_t, u_t) + \boldsymbol{v}_{t}
 \end{equation}
 
-with $\boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ and the unknown parameters being $\boldsymbol{A}$ and $\boldsymbol{Q}$. An inverse Wishart  prior with $l$ degrees of freedom and positive definite scale matrix $\Lambda$ is assumed for the matrix $\boldsymbol{Q}$. For the matrix $\boldsymbol{A}$ matrix normal prior with mean matrix $\boldsymbol{M} = \boldsymbol{0}$, right covariance $\boldsymbol{U} = \boldsymbol{Q}$ and left covariance matrix $\boldsymbol{V} \in \mathbb{R}^{n_a \times n_a}.$
+with the basis functions $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[ x_1,  x_2,  u \right]^\text{T}$, the process noise $\boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ and the unknown parameters $\boldsymbol{\theta}$ consisting of $\boldsymbol{A}$ and $\boldsymbol{Q}$. An inverse Wishart  prior with $l$ degrees of freedom and positive definite scale matrix $\Lambda$ is assumed for the matrix $\boldsymbol{Q}$. For the matrix $\boldsymbol{A}$ matrix normal prior with mean matrix $\boldsymbol{M} = \boldsymbol{0}$, right covariance $\boldsymbol{U} = \boldsymbol{Q}$ and left covariance matrix $\boldsymbol{V} \in \mathbb{R}^{n_a \times n_a}.$ For the estimation of the posterior disdribution with the PG sampler, we scale the basisvector with the weights $\left[ 0.1,  0.1,  1 \right]^\text{T}$ and for the prior the weights are chosen as $\boldsymbol{V} = 10 \boldsymbol{I}_5$.
 
-
-
-In our case, we assume that the basis functions $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[ x_1,  x_2,  u \right]^\text{T}$ are known and $\boldsymbol{\theta}$ is only formed of the parameters $\boldsymbol{A}$ and $\boldsymbol{Q}$ which must be inferred. For the estimation of the posterior disdribution with the PG sampler, we scale the basisvector with the weights $\left[ 0.1,  0.1,  1 \right]^\text{T}$ and for the prior the weights are chosen as $\boldsymbol{V} = 10 \boldsymbol{I}_5$.
-
-The PG Sampler can then be used to draw as many samples as are needed for further use. 
-
-\section{Kernel Setup} \label{Kernel setup}
-
-In the following simulations, we use gaussian kernels $k(x,y) = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||x - y||_2^2 \right)$ with the bandwidth $\sigma$ set individually for all random parameters $\left\{\boldsymbol{x}_0^{[k]}, \boldsymbol{v}_{0:H}^{[k]}, w_{0:H}^{[k]},  \boldsymbol{A}^{[k]}\right\}$ via the median heuristic \cite{Damien_18} and scaled with the factors $\left[ 1.5, 5, 5, 1 \right]^\text{T}$. As such, the elements of the Gram matrix $\boldsymbol{K} \in \mathbb{R}^{N \times N }$ are defined as
+We use gaussian kernels $k(x,y) = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||x - y||_2^2 \right)$ with the bandwidth $\sigma$ set individually for all random parameters $\left\{\boldsymbol{x}_0^{[k]}, \boldsymbol{v}_{0:H}^{[k]}, w_{0:H}^{[k]},  \boldsymbol{A}^{[k]}\right\}$ via the median heuristic \cite{Damien_18} and scaled with the factors $\left[ 1.5, 5, 5, 1 \right]^\text{T}$. As such, the elements of the Gram matrix $\boldsymbol{K} \in \mathbb{R}^{N \times N }$ are defined as
 
 \begin{equation} \label{Kernel equation}
 K_{ij} = k_{A}(\boldsymbol{A}^{[i]}, \boldsymbol{A}^{[j]})  k_{\mathcal{X}}(\boldsymbol{x}_0^{[i]}, \boldsymbol{x}_0^{[j]})    k_{\mathcal{V}^H}(\boldsymbol{v}_{0:H}^{[i]}, \boldsymbol{v}_{0:H}^{[j]})  k_{\mathcal{W}^H}(\boldsymbol{w}_{0:H}^{[i]}, \boldsymbol{w}_{0:H}^{[j]}).
@@ -53,13 +45,13 @@ K_{ij} = k_{A}(\boldsymbol{A}^{[i]}, \boldsymbol{A}^{[j]})  k_{\mathcal{X}}(\bol
 
 \section{Optimal Control with Constrained Output} \label{optimal control}
 
-In the following, we show how well the proposed optimal control approach works when applied to a OCP with constrained output by putting it side by side with the solution of the same problem where we have used the Scenario approach.
+In the following, we show how well the proposed optimal control approach works when applied to a OCP with constrained output by putting it side by side with the solution of the same problem where we have used the Scenario approach which implements the chance-constraints by ensuring that the constraints are satisfied for every scenario $n \in \mathbb{N}_{\leq N}$.
 
-For this simulation, we are scenarios that have been generated using the PG sampler. To this end, $9170$ samples were created and the first $N_p = 1000$ were discarded as training samples and the remaining samples were once again thinned with $n_d = 30$. The remaining $K = 200$ samples are then used as scenarios for the OCPs.
+For this simulation, we are scenarios that have been generated using the PG sampler. To this end, $9170$ samples were created and the first $N_p = 1000$ were discarded as training samples and the remaining samples were once again thinned with $n_d = 30$. The remaining $N = 200$ samples are then used as scenarios for the OCPs.
 
-For the cost function, we consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 10$ as well as the temporarily active output-constraints $y_{10:20} \leq (\text{-} 10)$ and $10 \leq y_{30:40}$. The risk level $\alpha$ is fixed at $0.1$ for this experiment and $\epsilon$ is chosen through Alg. \ref{alg:Bootstrap}.
+For the cost function, we consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 10$ as well as the temporarily active output-constraints $y_{10:20} \leq \text{-} 10$ and $10 \leq y_{30:40}$. The risk level $\alpha$ is fixed at $0.1$ for this experiment and $\epsilon$ is chosen through Algorithm \ref{alg:Bootstrap}.
 
-The OCP can then be formulated as described in \ref{}. Since the problem has been chosen as convex in this example, a solution for both the scenario and kernel approach can be found easily by using a convex solver. The results of an exemplary run is shown in Fig. \ref{ScenarioKernelComparison}. 
+The OCP can then be formulated as described in \ref{OCP final}. Since the problem has been chosen as convex in this example, a solution for both the scenario and kernel approach can be found easily by using a convex solver. The results of an exemplary run is shown in Fig. \ref{ScenarioKernelComparison}. 
 
 \begin{figure}[htb]
 \centering
@@ -72,33 +64,33 @@ The OCP can then be formulated as described in \ref{}. Since the problem has bee
    \includegraphics[width=0.4\textwidth] {pics/Kernel_plot.png}
    \label{fig:subfigKernel}
  }
-\caption{Example of the optimal control with known basis functions for scenario approach (left) and kernel approach (right). The red and blue area show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the orange line being the average. The blue line is one realization the true output.}
+\caption{Example of the optimal control with known basis functions for scenario approach (left) and kernel approach (right). The red and blue area show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the orange line being the average. The blue line is one realization of the true output.}
 \label{ScenarioKernelComparison}
 \end{figure}
 
-The figure includes the two plots for the scenario and kernel approach and shows the output $y$ of their respective OCPs over the time $t = 0, ..., H$. The graphs show the area that the trajectories of all $K = 200$ scenarios generate on top of the mean and true output. Where the two graphs differ however is to what extend the solutions fulfill the constraints. By its definition, the scenario approach requires all scenarios to fulfill the constraints which can be seen in the solution. While the gray area touches the min and max constraints in several places, it never violates the constraints. The kernel approach on the other hand has a risk factor $\alpha$ built in which allows for a number of scenarios to violate the constraints as long a sufficient number satisfies them. This can be seen in the constraint still being met by the majority of the scenarios and only the trajectory of a small number of scenarios actively overlapping with the marked area. As a result, a solution with a lower cost was found in exchange for an increased risk of the true output violating one or more of the constraints.
+The figure includes the two plots for the scenario and kernel approach and shows the output $y$ of their respective OCPs. The graphs shows the spread of the $N = 200$ trajectories that are generated when the input $\boldsymbol{u}_{0:H}$ is applied to the scenarios that were used to find the optimal input. On top that, it also shows of the mean of these trajectories and true output. Where the two graphs differ however is to what extend the solutions fulfill the constraints. By its definition, the scenario approach requires all scenarios to fulfill the constraints which can be seen in the solution. While the gray area touches the min and max constraints in several places, it never violates the constraints. The kernel approach on the other hand has a risk factor $\alpha$ built in which allows for a number of scenarios to violate the constraints as long a sufficient number satisfies them. This can be seen in the constraint still being met by the majority of the scenarios and only the trajectory of a small number of scenarios actively overlapping with the marked area. As a result, a solution with a lower cost was found in exchange for an increased risk of the true output violating one or more of the constraints.
 
 
 
 
 \section{Robustness} \label{performance guarantees}
 
-The biggest advantage that this kernel approximation proves compared to the scenario approach is the adjustable risk factor. As described in Sec. \ref{Sec:CCOKernel}, this method includes a parameter $\alpha \in [0, 1]$ which can be chosen depending on how accurate the final solution is supposed to be. 
+The biggest advantage that this kernel approximation proves compared to the scenario approach is the adjustable risk factor. As described in Sec. \ref{Sec:CCOKernel}, this method includes a parameter $\alpha \in [0, 1]$ which can be chosen depending on how successful the final solution is supposed to be when it comes to satisfying the constraints in future scenarios. 
 
 In this section, this parameter is tested by running the same problem setup as was used in Sec. \ref{optimal control} for different values of $\alpha$ as well as an increasing number of samples $N$ and testing how well the solution holds up for future scenarios.
 
-Similar to Sec. \ref{optimal control}, $N = 200$ scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of 200 scenarios, a small subset is then taken and used to formulate several OCPs as was already described in Sec. \ref{optimal control}. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is then used on $N = 2000$ more independant scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated over and over for a slightly larger subset of scenarios until finally the full set of $N = 200$ scenarios is used.
+Similar to Sec. \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set scenarios, a small subset is then taken and used to formulate several OCPs as was already described in Sec. \ref{optimal control}. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is then used on $N = 2000$ more independant scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10 and 25 samples and then increased with a step size of 25 until a $N = 250$ samples are used in the optimization.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.7\textwidth]{pics/robustness_plot.png}
-\caption{Estimated percentage of scenarios where $u_{0:H}$ is a viable solution. The blue line shows the result of the scenario approach while the other lines are for the Kernel approach with various values of $\alpha$}
+\caption{Percentage of scenarios where $u_{0:H}$ is a viable solution. The blue line shows the result of the scenario approach while the other lines are for the Kernel approach with various values of $\alpha$}
 \label{fig:robustness_plot}
 \end{figure}
 
-In Fig. \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 200. The various $\alpha$ values are shown as separate lines. Initially, all five plots show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution and at this point all cases are still in the process of improving their accuracy. As the number of scenarios is increased, the approximation of the distribution becomes better as well and the solution of the OCP now represents a larger number of the distribution. 
+In Fig. \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 250. The various $\alpha$ values are shown as separate lines. Initially, all five plots show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution. As the number of scenarios is increased, the approximation of the distribution becomes better leading to a higher percentage of scenarios where the constraints are satisfied.
 
-After around 10 scenarios, the plots start diverging for the first time. While the scenario approach and the plots with smaller $\alpha$ values are very similar, the lines that represent larger $\alpha$ values are starting to display worse percentage of cases that satisfy the constraints. This trend continues as the number of scenarios used in the optimization keeps increasing. While the scenario approach keeps increasing, the Kernel approach seems to converge to a significantly lower level of robustness based on the selection of the parameter $\alpha$. This shows that through $\alpha$ we are able to control how distributionally robust the solution is.
+After around 10 scenarios, the plots start diverging for the first time. While the scenario approach and the plots with smaller $\alpha$ values are very similar, the lines that represent larger $\alpha$ values are starting to display worse percentage of cases that satisfy the constraints. This trend continues as the number of scenarios used in the optimization keeps increasing. While the scenario approach keeps increasing, the kernel approach seems to converge to a significantly lower level of robustness based on the selection of the parameter $\alpha$. This shows that through $\alpha$ we are able to control how distributionally robust the solution is.
 
  
 
