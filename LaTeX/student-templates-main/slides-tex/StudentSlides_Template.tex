@@ -43,8 +43,22 @@
 
 \section{Introduction}
 \begin{frame}{Motivation}	
-\includegraphics[width= .5\textwidth]{Motivation_pic}
-\cite[4]{Xiloyannis_19}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\includegraphics[width= .8\textwidth]{Motivation_pic}
+			\cite[4]{Xiloyannis_19}
+		\end{column}
+		\begin{column}{.5\textwidth}
+		\vspace{1cm}
+		\textbf{Challenges}:
+		\vspace{.2cm}
+			\begin{itemize}
+			\item Unknown Dynamic
+			\item Latent States
+			\item Safety
+			\end{itemize}
+		\end{column}
+	\end{columns}\vspace{.5cm}
 \end{frame}
 
 \begin{frame}{Problem Statement - System}	
@@ -89,33 +103,48 @@
 \end{frame}
 
 \begin{frame}{Related Works}
-Particle Markov chain Monte Carlo \cite[3]{Andrieu_10}
+
+Particle Gibbs Based Optimal Control \textbf{\cite[4]{Robert_24}}
+
+$\;\; \Rightarrow \;$ Risk factor $\alpha$ has to be calculated retroactively and cannot be controlled directly
 
 \vspace{.4cm}
 
-Chance Constraints:
+Alternative Approaches:
 \begin{itemize}
-\item Scenario Approach \cite[4]{Robert_24}
 \item Wasserstein Ambiguity \cite[4]{Hota_19}
 \item \makebox[3cm]{ Kernel Embeddings \hfill} \cite[4]{Adam_22} \\
-\makebox[3cm]{\hfill} \cite[4]{Yassine_22}
+\makebox[3cm]{\hfill}  \textbf{\cite[4]{Yassine_22}}
 \end{itemize}
 \end{frame}
 
 
 \section{Particle Gibbs}
 
-\begin{frame}{Scenario Generation}
-\textbf{Goal:} Generate scenarios $\boldsymbol{\delta}^{[1:N]}$ using the observations $\mathbb{D}$\\
-\begin{block}{Algorithm: Scenario Generation}
-For $n = 1,...,N$:
-\begin{enumerate}
-  \item Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using PMCMC \cite{Robert_24}.
-  \item Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$ and  $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$ for $t = \text{-}1, ..., H$
-  \item Set $\boldsymbol{x}_0^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
-\end{enumerate}
-\textbf{Output:} Scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
+\begin{frame}{Particle Gibbs Scenarios}
+Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$ that characterize the system\\
+
+\textbf{Goal:} Use scenarios to reformulate the OCP
+
+\begin{block}{Chance Constraints}
+	\begin{equation*}
+		P \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
+	\end{equation*}
+\end{block}	
+
+\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
+
+\begin{block}{Scenario Approach (used in \cite{Robert_24})}
+	\begin{equation*}
+		 h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N, \; \forall i = 1,...,n_c
+	\end{equation*}
 \end{block}
+
+$\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
+
+
+
+
 \end{frame}
 
 
@@ -126,7 +155,7 @@ For $n = 1,...,N$:
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
 \begin{block}{Expanded Chance-Constraints}
 \begin{equation*}
-\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
 \end{equation*}
 \end{block}	
 
@@ -220,7 +249,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \end{itemize}
 \end{frame}	
 
-\begin{frame}{Optimal Control with Constrained Outputs (1/2)}
+\begin{frame}{Optimal Control with Constrained Outputs}
 
 Number of scenarios used for optimization: $N = 200$
 \vspace{.3cm}
@@ -230,24 +259,14 @@ Number of scenarios used for optimization: $N = 200$
 			\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			$\;\;$ Kernel Approach  ($\alpha = 0.1$)
-			\includegraphics[width=.9\textwidth]{Kernel_plot}
-		\end{column}
-	\end{columns}\vspace{.5cm}
-\end{frame}	
+			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
+			\includegraphics[width=.9\textwidth]{Kernel_plot}}
 
-\begin{frame}{Optimal Control with Constrained Outputs (2/2)}
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.01$)
+			\includegraphics[width=.9\textwidth]{Kernel_plot_alpha001}}
 
-Number of scenarios used for optimization: $N = 200$
-\vspace{.3cm}
-\begin{columns}[onlytextwidth, T]
-		\begin{column}{.5\textwidth}
-			$\;\;$ Kernel Approach  ($\alpha = 0.01$)
-			\includegraphics[width= .9\textwidth]{Kernel_plot_alpha001}
-		\end{column}
-		\begin{column}{.5\textwidth}
-			$\;\;$ Kernel Approach  ($\alpha = 0.3$)
-			\includegraphics[width=.9\textwidth]{Kernel_plot_alpha03}
+			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.3$)
+			\includegraphics[width=.9\textwidth]{Kernel_plot_alpha03}}
 		\end{column}
 	\end{columns}\vspace{.5cm}
 \end{frame}	
@@ -323,8 +342,22 @@ For $n = 1,...,N$:
 \end{frame}
 
 \begin{frame}{Bootstrap Construction}
-...
+\begin{block}{Algorithm: Bootstrap MMD ambiguity set}
+\begin{enumerate}
+\item $\boldsymbol{K} \leftarrow \textit{kernel}(\boldsymbol{\delta}, \boldsymbol{\delta})$
+\item \textbf{For} $m = 1,...,B$
+\item \;\; $I \leftarrow N$ numbers from $\{1, \dots N \}$ with replacement
+\item \;\; $K_x \leftarrow \sum_{i,j = 1}^N K_{ij}, \;K_y \leftarrow \sum_{i,j \in I} K_{ij}, \;K_{xy} \leftarrow \sum_{j \in I} \sum_{i = 1}^N K_{ij}$
+\item \;\; MMD$[m] \leftarrow \frac{1}{N^2} \left( K_x + K_y - 2 K_{xy} \right) $
+\item MMD $ \leftarrow$ \textit{sort}(MMD)
+\item $\varepsilon \gets$ MMD$\left[ \textit{ceil} (B \beta) \right]$
+\end{enumerate}
+\textbf{Output:} Gram matrix $\boldsymbol{K}$, Radius of MMD ambiguity set $\varepsilon$
+\end{block}
+$B = 1000, \beta = 0.95$
 \end{frame}
+
+
 
 \begin{frame}{Computation Time}
 \vspace{.2cm}
