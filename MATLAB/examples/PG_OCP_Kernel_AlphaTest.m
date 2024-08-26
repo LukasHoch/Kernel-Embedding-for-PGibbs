@@ -100,7 +100,7 @@ y_test = y(:, T+1:end);
 PG_samples = load("PGibbs_Samples.mat");
 PG_samples = PG_samples.PG_samples;
 
-PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
+%PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
  s = 2;
 
@@ -193,12 +193,16 @@ R = 0.1;
 %alpha = 0.2;
 sigma_mult = [1.5 5 5 1];
 
-K_opt_max = 150;
+K_opt_max = 200;
 
 K_test = K - K_opt_max;
 
-K_opt_range = [1 5 10 25:25:K_opt_max];
-Alpha_range = 0.01:0.01:0.04;
+%K_opt_range = [1 5 10 25:25:K_opt_max];
+K_opt_range = [1 5 10 25 50 100:100:K_opt_max];
+
+%Alpha_range = 0.2:0.1:0.4;
+%Alpha_range = [0.05 0.1 0.4];
+Alpha_range = [0.01 0.1]
 
 Accuracy_scenario = zeros(length(K_opt_range) , 1);
 Accuracy_kernel = zeros(length(K_opt_range) , length(Alpha_range));
@@ -242,11 +246,11 @@ for K_opt = K_opt_range
 
     for alpha = Alpha_range
     
-        [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
     
         %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraintsv2(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
         
-        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+        [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
         x_true = zeros(n_x, H + 1);
         y_true = zeros(n_y, H);
@@ -288,7 +292,7 @@ for t = 1:length(Alpha_range)
     text = ['Kernel Approach (alpha = ' num2str(Alpha_range(t)) ')'];
     plot(K_opt_range, Accuracy_kernel(:,t), 'linewidth', 2, 'DisplayName', text)
 end
-ylabel('Robustness [%]')
+ylabel('Constraints satisfied [%]')
 xlabel('Number of Samples')
 legend('Location', 'northwest');
 xlim([K_opt_range(1), K_opt_range(end)])

@@ -124,7 +124,7 @@ Alternative Approaches:
 \begin{frame}{Particle Gibbs Scenarios}
 Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$ that characterize the system\\
 
-\textbf{Goal:} Use scenarios to reformulate the OCP
+\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 
 \begin{block}{Chance Constraints}
 	\begin{equation*}
@@ -194,9 +194,9 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 
 \begin{frame}
 	\frametitle{Problem Formulation}
-\textbf{Goal:} Reformulate chance-constraint problem with $\boldsymbol{\delta}^{[1:N]}$ \\
+\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{align*} 
- &\min\limits_{\boldsymbol{u}_{0:H}, J_H, \{g_0, \boldsymbol{\gamma}, t\}^{[1:n_c]}} J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \\
+ &\min\limits_{\boldsymbol{u}_{0:H}, \{g_0, \boldsymbol{\gamma}, t\}^{[1:n_c]}} J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \\
 \text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0, \; \forall i \in \mathbb{N}_{\leq n_c}  \\
 &\left. 
 \begin {aligned}
@@ -213,7 +213,7 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 
 \section{Simulation}
 
-\begin{frame}{Simulation Setup (1/2)}
+\begin{frame}{Simulation Setup}
 \begin{itemize}
 \item 
 \makebox[4cm]{Unknown system: \hfill}
@@ -325,7 +325,7 @@ Number of scenarios used for optimization: $N = 200$
 \end{frame}
 
 \begin{frame}{Timeline}
-...
+\includegraphics[width= .9\textwidth]{Timeline_pic}
 \end{frame}
 
 \begin{frame}{Scenario Generation}
@@ -349,6 +349,7 @@ For $n = 1,...,N$:
 \item \;\; $I \leftarrow N$ numbers from $\{1, \dots N \}$ with replacement
 \item \;\; $K_x \leftarrow \sum_{i,j = 1}^N K_{ij}, \;K_y \leftarrow \sum_{i,j \in I} K_{ij}, \;K_{xy} \leftarrow \sum_{j \in I} \sum_{i = 1}^N K_{ij}$
 \item \;\; MMD$[m] \leftarrow \frac{1}{N^2} \left( K_x + K_y - 2 K_{xy} \right) $
+\item \textbf{End For} 
 \item MMD $ \leftarrow$ \textit{sort}(MMD)
 \item $\varepsilon \gets$ MMD$\left[ \textit{ceil} (B \beta) \right]$
 \end{enumerate}
@@ -359,21 +360,25 @@ $B = 1000, \beta = 0.95$
 
 
 
-\begin{frame}{Computation Time}
-\vspace{.2cm}
+\begin{frame}{Max Constraint}
+
+\begin{block}{Chance Constraint}
+	\begin{equation*}
+		P \left[ \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha
+	\end{equation*}
+\end{block}	
+
 \begin{columns}[onlytextwidth, T]
 		\begin{column}{.5\textwidth}
-			\vspace{0.4cm}
-			\fcolorbox{blue}{white}{
-				\parbox{.9\textwidth}{
-				Computation time increases faster for the kernel approach\\
-				\vspace{.2cm} \textbf{But:} Kernel approach comes with adjustable risk factor $\alpha$
-			}}
+			\;\; Constrained Output ($\alpha = 0.5$)
+			\includegraphics[width= .9\textwidth]{MaxConstraint_pic1}
 		\end{column}
+
 		\begin{column}{.5\textwidth}
-			\includegraphics[width=\textwidth]{/computationtime_plot}
+			\;\; Successrate
+			\includegraphics[width= .9\textwidth]{MaxConstraint_pic2}
 		\end{column}
-	\end{columns}\vspace{.5cm}
+\end{columns}
 \end{frame}	
 
 

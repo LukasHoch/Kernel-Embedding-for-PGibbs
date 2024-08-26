@@ -8,7 +8,8 @@ v_vec = v_vec(:,:,1:K);
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples, K, sigma_mult);
 K_chol = chol(Kernel + 1e-8 * eye(K));
 %epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
-epsilon = BootstrapAmbiguity(Kernel, 1000, 0.95);
+
+epsilon = BootstrapAmbiguity(Kernel, 10000, 0.95);
 
 N_constr = length(y_min(y_min ~= -inf)) + length(y_max(y_max ~= inf));
 
@@ -66,11 +67,11 @@ cvx_begin quiet
         U <= 10;
         g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha;
 
-        % for k = 1:K
-        %     max(max(f_constr(:,k)) + tk, 0) <= g0 + g_rkhs(k)
-        % end
+        for k = 1:K
+            max(max(f_constr(:,k)) + tk, 0) <= g0 + g_rkhs(k)
+        end
 
-        max(max(f_constr)' + tk, 0) <= g0 + g_rkhs
+        %max(max(f_constr)' + tk, 0) <= g0 + g_rkhs
 
 cvx_end
 
