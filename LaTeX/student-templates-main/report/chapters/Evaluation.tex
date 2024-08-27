@@ -1,6 +1,6 @@
 \chapter{Evaluation}
 
-In this section, the proposed optimal control approach is implemented and its effectiveness tested and compared to the previous approach. The simulation setup is described in Sec. \ref{PG setup} and \ref{Kernel setup}. The results of the OCP are shown in Sec. \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in Sec. \ref{performance guarantees} and Sec. \ref{computation time} by looking at the robustness of the solution and the computation times of the optimization process and compare it to the commonly used scenario approach.
+In this section, the proposed optimal control approach is implemented and its effectiveness tested and compared to the previous approach. The simulation setup is described in Sec. \ref{Setup}. The results of the OCP are shown in Sec. \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in Sec. \ref{performance guarantees} by looking at the robustness of the solution and compare it to the commonly used scenario approach.
 
 \section{Simulation Setup} \label{Setup}
 
@@ -52,7 +52,7 @@ For this simulation, we are scenarios that have been generated using the PG samp
 For the cost function, we consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 10$ as well as the temporarily active output-constraints $y_{10:20} \leq \text{-} 10$ and $10 \leq y_{30:40}$. The risk level $\alpha$ is fixed at $0.1$ for this experiment and $\epsilon$ is chosen through Algorithm \ref{alg:Bootstrap}.
 
 The OCP can then be formulated as described in \ref{OCP final}. Since the problem has been chosen as convex in this example, a solution for both the scenario and kernel approach can be found easily by using a convex solver. The results of an exemplary run is shown in Fig. \ref{ScenarioKernelComparison}. 
-
+\iffalse
 \begin{figure}[htb]
 \centering
 \subfigure[Scenario Approach]{
@@ -67,6 +67,95 @@ The OCP can then be formulated as described in \ref{OCP final}. Since the proble
 \caption{Example of the optimal control with known basis functions for scenario approach (left) and kernel approach (right). The red and blue area show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the orange line being the average. The blue line is one realization of the true output.}
 \label{ScenarioKernelComparison}
 \end{figure}
+\fi
+
+\begin{figure}[htb]
+\centering
+\subfigure[Scenario Approach]{
+\pgfplotsset{width=.47\textwidth, compat = 1.18, 
+			height = .4\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/Scenario_K200_S2.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=none,
+		xmin=0, xmax=40,
+		ymin=-14, ymax=14,
+		xtick={0, 10, 20, 30, 40},
+		ytick={-10, -5, 0, 5, 10},
+		ylabel=$y$, xlabel=$t$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+		\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+		\tikzfillbetween[of=A and B]{opacity=0.2};
+		\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+		
+		\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+		\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+		
+		\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+		\addlegendentry{$y_{0:H}$}
+		
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (10,15) rectangle (20,-10); 
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+		\end{axis}
+		\end{tikzpicture}
+ }
+%\quad % puts next subfigure right next to the previous subfigure
+\subfigure[Kernel Approach]{
+\pgfplotsset{width=.47\textwidth, compat = 1.18, 
+			height = .4\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/Kernel_K200_Alpha01_S2.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=none,
+		xmin=0, xmax=40,
+		ymin=-14, ymax=14,
+		xtick={0, 10, 20, 30, 40},
+		ytick={-10, -5, 0, 5, 10},
+		%ylabel=$y$, 
+		xlabel=$t$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+		\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+		\tikzfillbetween[of=A and B]{opacity=0.2};
+		\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+		
+		\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+		\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+		
+		\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+		\addlegendentry{$y_{0:H}$}
+		
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (10,15) rectangle (20,-10); 
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+		\end{axis}
+		\end{tikzpicture}
+ }
+\caption{Example of the optimal control with known basis functions for scenario approach (left) and kernel approach (right). The red areas show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the green line being the average. The blue line is one realization of the true output.}
+\label{ScenarioKernelComparison}
+\end{figure}
+
+
 
 The figure includes the two plots for the scenario and kernel approach and shows the output $y$ of their respective OCPs. The graphs shows the spread of the $N = 200$ trajectories that are generated when the input $\boldsymbol{u}_{0:H}$ is applied to the scenarios that were used to find the optimal input. On top that, it also shows of the mean of these trajectories and true output. Where the two graphs differ however is to what extend the solutions fulfill the constraints. By its definition, the scenario approach requires all scenarios to fulfill the constraints which can be seen in the solution. While the gray area touches the min and max constraints in several places, it never violates the constraints. The kernel approach on the other hand has a risk factor $\alpha$ built in which allows for a number of scenarios to violate the constraints as long a sufficient number satisfies them. This can be seen in the constraint still being met by the majority of the scenarios and only the trajectory of a small number of scenarios actively overlapping with the marked area. As a result, a solution with a lower cost was found in exchange for an increased risk of the true output violating one or more of the constraints.
 
@@ -81,19 +170,67 @@ In this section, this parameter is tested by running the same problem setup as w
 
 Similar to Sec. \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set scenarios, a small subset is then taken and used to formulate several OCPs as was already described in Sec. \ref{optimal control}. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is then used on $N = 2000$ more independant scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10 and 25 samples and then increased with a step size of 25 until a $N = 250$ samples are used in the optimization.
 
+\iffalse
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.7\textwidth]{pics/robustness_plot.png}
 \caption{Percentage of scenarios where $u_{0:H}$ is a viable solution. The blue line shows the result of the scenario approach while the other lines are for the Kernel approach with various values of $\alpha$}
 \label{fig:robustness_plot}
 \end{figure}
+\fi
+
+\begin{figure}[t]
+		\pgfplotsset{width=13cm, compat = 1.18, 
+			height = 9cm, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/AlphaTest_K250_MultipleConstraints_S2_Alpha02.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=both,
+		xmin=1, xmax=250,
+		ymin=0, ymax=100,
+		xtick={0, 50, 100, 150, 200, 250},
+		ytick={0, 20, 40, 60, 80, 100},
+		ylabel={Constraints Satisfied [\%]}, xlabel=$N$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[ultra thick,black!20!red] table[x=K,y=Kernel02]{\file};
+		\addlegendentry{Kernel Approach ($\alpha = 0.2$)}
+		
+		\addplot[ultra thick,black!20!orange] table[x=K,y=Kernel015]{\file};
+		\addlegendentry{Kernel Approach ($\alpha = 0.15$)}
+
+		\addplot[ultra thick,black!20!yellow] table[x=K,y=Kernel01]{\file};
+		\addlegendentry{Kernel Approach ($\alpha = 0.1$)}
+
+		\addplot[ultra thick,black!20!green] table[x=K,y=Kernel005]{\file};
+		\addlegendentry{Kernel Approach ($\alpha = 0.05$)}
+
+		\addplot[ultra thick,black!20!blue] table[x=K,y=Scenario]{\file};
+		\addlegendentry{Scenario Approach}
+		\end{axis}
+		\end{tikzpicture}
+		\vspace*{-0.4cm}
+		
+		\caption{Percentage of scenarios where $u_{0:H}$ is a viable solution. The blue line shows the result of the scenario approach while the other lines are for the kernel approach with various values of $\alpha$.}
+		\label{fig:robustness_plot}
+\end{figure}
+
 
 In Fig. \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 250. The various $\alpha$ values are shown as separate lines. Initially, all five plots show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution. As the number of scenarios is increased, the approximation of the distribution becomes better leading to a higher percentage of scenarios where the constraints are satisfied.
 
 After around 10 scenarios, the plots start diverging for the first time. While the scenario approach and the plots with smaller $\alpha$ values are very similar, the lines that represent larger $\alpha$ values are starting to display worse percentage of cases that satisfy the constraints. This trend continues as the number of scenarios used in the optimization keeps increasing. While the scenario approach keeps increasing, the kernel approach seems to converge to a significantly lower level of robustness based on the selection of the parameter $\alpha$. This shows that through $\alpha$ we are able to control how distributionally robust the solution is.
 
  
-
+\iffalse
 \section{Computation Time} \label{computation time}
 
 While the previous sections focused on comparing the results of the Scenario approach to the kernel approach, the runtime of both methods is another important factor that needs to be considered when choosing which algorithm is best suited for a specific problem. As such, Fig. \ref{fig:runtime_plot} shows the runtime of both scenario approach and kernel approach over the number of scenarios that are used to formulate the OCPs. The parameters and constraints are chosen the same as in Sec. \ref{optimal control}. When looking at the figure, it quickly becomes apparent that while both curves start around the same level, the kernel approach runtime increases significantly faster and with more of a curvature than the scenario approach. By the end of the plot, the kernel approach already takes about 5 times as long as the scenario approach. This shows that at least when it comes to finding a solution quickly, the Scenario approach is still the better choice.
@@ -104,3 +241,4 @@ While the previous sections focused on comparing the results of the Scenario app
 \caption{Runtime over number of scenarios $N$ for scenario and kernel approach}
 \label{fig:runtime_plot}
 \end{figure}
+\fi
