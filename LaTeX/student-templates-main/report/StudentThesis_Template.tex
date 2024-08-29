@@ -27,7 +27,7 @@
 %%________________________________________________%
 %% add customize first so you can access your commands in gloss
 \input{./include/customize.tex} % add custom commands etc in this file 
-\input{./include/gloss.tex}		% add your glossary in this file 
+%\input{./include/gloss.tex}		% add your glossary in this file 
 
 
 \usepackage{algorithm}
@@ -158,6 +158,7 @@
 \input{./chapters/Appendix.tex}
 
 % List of figures
+\iffalse
 \cleardoublepage
 \phantomsection
 \addcontentsline{toc}{chapter}{\listfigurename} 
@@ -168,6 +169,7 @@
 \phantomsection
 \addcontentsline{toc}{chapter}{\listtablename} 
 \listoftables
+\fi
 
 % Acronyms and notation
 % -> see include/gloss.tex
