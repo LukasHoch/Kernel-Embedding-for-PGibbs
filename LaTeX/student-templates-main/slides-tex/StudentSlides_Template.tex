@@ -97,7 +97,7 @@
 	\textbf{Goal:} Solve optimal control problem (OCP)\\
 	\begin{block}{Stochastic OCP}
 		\begin{equation*}
-		\min\limits_{\boldsymbol{u}_{0:H}} J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) 
+		\min\limits_{\boldsymbol{u}_{0:H}} J_H(\boldsymbol{u}_{0:H}) 
 		\end{equation*}
 		subject to: 
 		\begin{equation*}
@@ -201,7 +201,7 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 	\frametitle{Problem Formulation}
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{align*} 
- &\min\limits_{\boldsymbol{u}_{0:H}, \{g_0, \boldsymbol{\gamma}, t\}^{[1:n_c]}} J_H(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \\
+ &\min\limits_{\boldsymbol{u}_{0:H}, \{g_0, \boldsymbol{\gamma}, t'\}^{[1:n_c]}} J_H(\boldsymbol{u}_{0:H}) \\
 \text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0, \; \forall i \in \mathbb{N}_{\leq n_c}  \\
 &\left. 
 \begin {aligned}
@@ -209,7 +209,7 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 \boldsymbol{y}_{t}^{[n]} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + & \boldsymbol{w}_{t}^{[n]} 
 \end{aligned}
  \;\;  \right\} \; \text{Dynamic Constraints} \\
-&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i(g_0^{[i]}, \boldsymbol{\gamma}^{[i]}, t^{[i]}) \;\;\;\;\;\; \;\;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
+&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i(g_0^{[i]}, \boldsymbol{\gamma}^{[i]}, t'^{[i]}) \;\;\;\;\;\; \;\;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
 \end{align*}
 
 
