@@ -102,7 +102,7 @@ PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
- s = 2;
+ s = 1;
 
 
 if s == 1
@@ -193,7 +193,7 @@ R = 0.1;
 %alpha = 0.2;
 sigma_mult = [1.5 5 5 1];
 
-K_opt_max = 200;
+K_opt_max = 300;
 
 K_test = K - K_opt_max;
 
@@ -201,8 +201,8 @@ K_test = K - K_opt_max;
 K_opt_range = [1 5 10 25 50 100:100:K_opt_max];
 
 %Alpha_range = 0.2:0.1:0.4;
-%Alpha_range = [0.05 0.1 0.4];
-Alpha_range = [0.01 0.1]
+Alpha_range = 0.05:0.05:0.2;
+%Alpha_range = [0.01 0.1]
 
 Accuracy_scenario = zeros(length(K_opt_range) , 1);
 Accuracy_kernel = zeros(length(K_opt_range) , length(Alpha_range));

@@ -118,8 +118,10 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ has to be calculated retroactively an
 Alternative Approaches:
 \begin{itemize}
 \item Wasserstein Ambiguity \cite[4]{Hota_19}
-\item \makebox[3cm]{ Kernel Embeddings \hfill} \cite[4]{Adam_22} \\
-\makebox[3cm]{\hfill}  \textbf{\cite[4]{Yassine_22}}
+
+$\;\; \Rightarrow \;$ Constraints limited to affine functions
+\item \makebox[3cm]{ Kernel Embeddings \hfill} \textbf{\cite[4]{Yassine_22}}\\
+\makebox[3cm]{\hfill}   \cite[4]{Adam_22} 
 \end{itemize}
 \end{frame}
 
@@ -141,7 +143,7 @@ Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsym
 
 \begin{block}{Scenario Approach (used in \cite{Robert_24})}
 	\begin{equation*}
-		 h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N, \; \forall i = 1,...,n_c
+		 \boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N
 	\end{equation*}
 \end{block}
 
@@ -158,19 +160,22 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 \begin{frame}
 	\frametitle{Maximum Mean Discrepancy (MMD) ambiguity sets}
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
-\begin{block}{Expanded Chance-Constraints}
-\begin{equation*}
-\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
-\end{equation*}
-\end{block}	
-
-$\mathcal{P}$ is constructed with the samples $\boldsymbol{\delta}^{[1:N]}$ as
+\textbf{Idea:} Replace distribution $P$ with the ambiguity set $\mathcal{P}$\\
 
 \begin{block}{MMD ambiguity set}
 \begin{equation*}
 \mathcal{P} =  \left\{ \tilde{P} : \text{MMD} (\tilde{P}, P_N) \leq \varepsilon \right\}.
 \end{equation*}
 \end{block}	
+
+\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
+
+
+\begin{block}{Expanded Chance-Constraints}
+\begin{equation*}
+\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\end{equation*}
+\end{block}
 
 With large enough $N \Rightarrow$ $P$ is an element of $\mathcal{P}$
 
@@ -597,7 +602,7 @@ $B = 1000, \beta = 0.95$
 
 			\only<2>{\begin{figure}[t]
 			\pgfplotsset{width=.75\textwidth, compat = 1.18, 
-			height = .44\textwidth, grid= major, 
+			height = .41\textwidth, grid= major, 
 			legend cell align = left, ticklabel style = {font=\scriptsize},
 			every axis label/.append style={font=\scriptsize},
 			legend style = {font=\scriptsize},
@@ -636,5 +641,22 @@ $B = 1000, \beta = 0.95$
 \end{figure}}
 \end{frame}	
 
+\begin{frame}{Maximum Mean Discrepancy (MMD)}
+\begin{block}{Maximum Mean Discrepancy}
+\begin{equation*}
+\begin{aligned}
+\text{MMD}(\tilde{P}, P_N) &= ||\mu_{\tilde{P}} - \mu_{P_N} ||_{\mathcal{H}}\\
+&= \text{E}_{x,x' \sim \tilde{P}}[k(x,x')] + \text{E}_{y,y' \sim P_N}[k(y,y')] - 2\text{E}_{x\sim \tilde{P}, y \sim P_N}[k(x,y)]
+\end{aligned}
+\end{equation*}
+\end{block}
+
+\begin{block}{(Biased) MMD estimator}
+\begin{equation*}
+\widehat{\text{MMD}} (\tilde{P}, P_N) = \frac{1}{N^2} \sum_{i,j = 1}^N k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]}) + k(\tilde{\boldsymbol{\delta}}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]}) - 2 k(\boldsymbol{\delta}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]})
+\end{equation*}
+\end{block}
+
+\end{frame}
 
 \end{document}
