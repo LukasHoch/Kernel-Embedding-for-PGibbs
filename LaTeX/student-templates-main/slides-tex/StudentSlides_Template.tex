@@ -162,22 +162,29 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
 \textbf{Idea:} Replace distribution $P$ with the ambiguity set $\mathcal{P}$\\
 
+\begin{columns}[onlytextwidth, T]
+\begin{column}{.65\textwidth}
+
 \begin{block}{MMD ambiguity set}
 \begin{equation*}
 \mathcal{P} =  \left\{ \tilde{P} : \text{MMD} (\tilde{P}, P_N) \leq \varepsilon \right\}.
 \end{equation*}
 \end{block}	
 
-\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
-
+\makebox[4.2cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
 \begin{block}{Expanded Chance-Constraints}
 \begin{equation*}
 \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
 \end{equation*}
 \end{block}
-
-With large enough $N \Rightarrow$ $P$ is an element of $\mathcal{P}$
+\end{column}
+\begin{column}{.3\textwidth}
+\vspace{.5cm}
+\includegraphics[width= \textwidth]{AmbiguitySetDrawing}
+\end{column}
+\end{columns}
+%With large enough $N \Rightarrow$ $P$ is an element of $\mathcal{P}$
 
 \end{frame}
 
@@ -269,9 +276,8 @@ Number of scenarios used for optimization: $N = 200$
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
+			ticklabel style = {font=\scriptsize},
 			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
 	        }
 			\def\file{data/Scenario_K200_S2.txt}
 			
@@ -284,21 +290,18 @@ Number of scenarios used for optimization: $N = 200$
 			xtick={0, 10, 20, 30, 40},
 			ytick={-10, -5, 0, 5, 10},
 			ylabel=$y$, xlabel=$t$,
-			set layers=standard,
-			reverse legend,
-			legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
-			ylabel shift = -6 pt]
+			set layers=standard]
 			
 			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
 			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
 			\tikzfillbetween[of=A and B]{opacity=0.2};
-			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			%\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
 			
 			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
-			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			%\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
 			
 			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
-			\addlegendentry{$y_{0:H}$}
+			%\addlegendentry{$y_{0:H}$}
 			
 			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (10,15) rectangle (20,-10); 
 			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
