@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 2200; % number of PG samples
-k_d = 30; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 1000; % length of burn-in period
+K = 2300; % number of PG samples
+k_d = 70; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 2000; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -100,7 +100,7 @@ y_test = y(:, T+1:end);
 PG_samples = load("PGibbs_Samples.mat");
 PG_samples = PG_samples.PG_samples;
 
-%PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
+PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
 PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
