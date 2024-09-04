@@ -111,7 +111,7 @@
 
 Particle Gibbs Based Optimal Control \textbf{\cite[4]{Robert_24}}
 
-$\;\; \Rightarrow \;$ Risk factor $\alpha$ has to be calculated retroactively and cannot be controlled directly
+$\;\; \Rightarrow \;$ Guarantees determined retroactively
 
 \vspace{.4cm}
 
@@ -201,9 +201,9 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 
 \begin{block}{Reformulated Feasible Region \cite{Yassine_22}}
 \begin{empheq}[right = \empheqrbrace, left= Z_i \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
-    & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t \alpha \\
-    & [\tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t]_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 0,...,N \\
-    & g_0 \in \mathbb{R}, \boldsymbol{\gamma} \in \mathbb{R}^N, t \in \mathbb{R}
+    & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t' \alpha \\
+    & [\tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t']_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 0,...,N \\
+    & g_0 \in \mathbb{R}, \boldsymbol{\gamma} \in \mathbb{R}^N, t' \in \mathbb{R}
   \end{empheq}
 \end{block}
 \end{frame}
@@ -221,7 +221,7 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 \boldsymbol{y}_{t}^{[n]} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + & \boldsymbol{w}_{t}^{[n]} 
 \end{aligned}
  \;\;  \right\} \; \text{Dynamic Constraints} \\
-&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i(g_0^{[i]}, \boldsymbol{\gamma}^{[i]}, t'^{[i]}) \;\;\;\;\;\; \;\;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
+&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i(g_0^{[i]}, \boldsymbol{\gamma}^{[i]}, t'^{[i]}) \;\;\;\;\;\; \;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
 \end{align*}
 
 
@@ -656,7 +656,7 @@ $B = 1000, \beta = 0.95$
 
 \begin{block}{(Biased) MMD estimator}
 \begin{equation*}
-\widehat{\text{MMD}} (\tilde{P}, P_N) = \frac{1}{N^2} \sum_{i,j = 1}^N k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]}) + k(\tilde{\boldsymbol{\delta}}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]}) - 2 k(\boldsymbol{\delta}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]})
+\widehat{\text{MMD}} (P, W) = \frac{1}{N^2} \sum_{i,j = 1}^N k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]}) + k(\tilde{\boldsymbol{\delta}}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]}) - 2 k(\boldsymbol{\delta}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]})
 \end{equation*}
 \end{block}
 

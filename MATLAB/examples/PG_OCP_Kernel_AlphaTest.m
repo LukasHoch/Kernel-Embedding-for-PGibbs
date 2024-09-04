@@ -97,15 +97,18 @@ y_test = y(:, T+1:end);
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
-PG_samples = load("PGibbs_Samples.mat");
+% PG_samples = load("PGibbs_Samples.mat");
+% PG_samples = PG_samples.PG_samples;
+
+PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
 PG_samples = PG_samples.PG_samples;
 
-PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
+%PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
 PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-s = 3;
+s = 2;
 
 
 if s == 1
@@ -205,7 +208,7 @@ K_opt_range = [1 5 10 25 50 100:100:K_opt_max];
 
 Alpha_range = 0.2:0.1:0.4;
 %Alpha_range = 0.05:0.05:0.2;
-%Alpha_range = [0.01 0.1]
+%Alpha_range = 0.4:0.1:0.8;
 
 Accuracy_scenario = zeros(length(K_opt_range) , 1);
 Accuracy_kernel = zeros(length(K_opt_range) , length(Alpha_range));
