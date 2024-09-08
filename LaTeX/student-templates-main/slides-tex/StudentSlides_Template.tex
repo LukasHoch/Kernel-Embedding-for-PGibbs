@@ -58,8 +58,8 @@
 		\textbf{Challenges}:
 		\vspace{.2cm}
 			\begin{itemize}
-			\item Unknown Dynamic
-			\item Latent States
+			\item Unknown dynamics
+			\item Latent states
 			\item Safety
 			\end{itemize}
 		\end{column}
@@ -109,7 +109,7 @@
 
 \begin{frame}{Related Works}
 
-Particle Gibbs Based Optimal Control \textbf{\cite[4]{Robert_24}}
+Particle Gibbs based optimal control via scenario theory \textbf{\cite[4]{Robert_24}}
 
 $\;\; \Rightarrow \;$ Guarantees determined retroactively
 
@@ -117,10 +117,10 @@ $\;\; \Rightarrow \;$ Guarantees determined retroactively
 
 Alternative Approaches:
 \begin{itemize}
-\item Wasserstein Ambiguity \cite[4]{Hota_19}
+\item Wasserstein ambiguity \cite[4]{Hota_19}
 
 $\;\; \Rightarrow \;$ Constraints limited to affine functions
-\item \makebox[3cm]{ Kernel Embeddings \hfill} \textbf{\cite[4]{Yassine_22}}\\
+\item \makebox[3cm]{ Kernel embeddings \hfill} \textbf{\cite[4]{Yassine_22}}\\
 \makebox[3cm]{\hfill}   \cite[4]{Adam_22} 
 \end{itemize}
 \end{frame}
@@ -129,7 +129,7 @@ $\;\; \Rightarrow \;$ Constraints limited to affine functions
 \section{Particle Gibbs}
 
 \begin{frame}{Particle Gibbs Scenarios}
-Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$ that characterize the system\\
+Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$\\
 
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 
@@ -143,7 +143,7 @@ Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsym
 
 \begin{block}{Scenario Approach (used in \cite{Robert_24})}
 	\begin{equation*}
-		 \boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N
+		 h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N, \; \forall i = 1, ..., n_c
 	\end{equation*}
 \end{block}
 
@@ -311,7 +311,7 @@ Number of scenarios used for optimization: $N = 200$
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -353,7 +353,7 @@ Number of scenarios used for optimization: $N = 200$
 			\end{tikzpicture}
 			\end{figure}}
 
-			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.01$)
+			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.01$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -442,7 +442,7 @@ Number of scenarios used for optimization: $N = 200$
 
 \begin{frame}{Successrate of Solution}
 	\vspace{.2cm}
-	$N = 2000$: Number of Scenarios used to test $u_{0:H}$
+	$N' = 2000$ scenarios used to test $u_{0:H}$
 		\begin{figure}[t]
 		\pgfplotsset{width=.8\textwidth, compat = 1.18, 
 			height = .48\textwidth, grid= major, 
@@ -492,14 +492,14 @@ Number of scenarios used for optimization: $N = 200$
 	\textbf{Summary:}
 	Kernel Embeddings allow for ...
 	\begin{itemize}
-		\item Solving of chance-constrained OCPs
-		\item Controlling of risk factor $\alpha$
+		\item solving chance-constrained OCPs
+		\item Choosing risk factor $\alpha$
 	\end{itemize}
 	\vspace{.5cm}
 	
 	\textbf{Future Plans:}
 	\begin{itemize}
-		\item Use Kernel Embeddings on non-linear systems
+		\item Use kernel embeddings on non-linear systems
 		\item Parameter tuning of $\sigma$
 		\item Alternative approach of reformulating chance constraints
 	\end{itemize}
