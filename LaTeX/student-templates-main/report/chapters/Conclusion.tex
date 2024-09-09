@@ -1,6 +1,11 @@
 %_____Zusammenfassung, Ausblick_________________________________
 \chapter{Conclusion} \label{Conclusion}
 
+This work presented an alternate approach to scenario theory for the use of samples generated using PMCMC methods. The samples are drawn from the persterior distribution for the trajectories of an unknown system using a PG sampler and then used to define MMD ambiguity sets with the use of kernel embeddings. These sets are then used to reformulate a chance-constrained OCP while including a parameter for the permitted failure probability. This problem can then be solved used well-known methods.
+
+The viability of this approach has been shown in several simulations where the methods were tested for an unknown linear system with a constrained output. The predicted output has been plotted and compared with the real output for the OCPs that were generated using scenario theory and MMD ambiguity sets. The effect of the permitted failure probability has also been shown for various numbers of scenarios being used when formulating the OCP. These results have demonstrated that the failure percentage is not converging to the selected parameter. Future work will investigate the cause of this and also try to expand the linear systems to non-linear ones.
+
+
 %Do not just leave it at the discussion: discuss what you/the reader can learn from the results. Draw some real conclusions. Separate discussion/interpretation of the results clearly from the conclusions you draw from them. (So-called ``conclusion creep'' tends to upset reviewers. It means surrendering your scientific objectivity.) Identify all shortcomings/limitations of your work, and discuss how they could be fixed (``future work''). It is not a sign of weakness of your work if you clearly analyze and state the limitations. Informed readers will notice them anyway and draw their own conclusions if not addressed properly.
 
 %\vspace{\baselineskip}
