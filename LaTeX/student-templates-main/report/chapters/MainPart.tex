@@ -49,7 +49,7 @@ To construct the set $\mathcal{P}$, a similarity measure is needed to provide a 
 \text{MMD}(Q, Q') = \text{E}_{x,x' \sim Q}[k(x,x')] + \text{E}_{y,y' \sim Q'}[k(y,y')] - 2\text{E}_{x\sim Q, y \sim Q'}[k(x,y)]
 \end{equation}
 
-The MMD-based ambiguity set $\mathcal{P}$ is then constructed as the set of distributions $\tilde{P}$ in an $\varepsilon$ radius centered around the empirical distribution $\hat{P}_N$ which is given through the scenarios $\boldsymbol{\delta}^{[1:N]}$. This gives us the set
+The MMD-based ambiguity set $\mathcal{P}$ is then constructed as the set of distributions $\tilde{P}$ in an $\varepsilon$ radius centered around the empirical distribution $P_N$ which is given through the scenarios $\boldsymbol{\delta}^{[1:N]}$. This gives us the set
 
 \begin{equation} \label{ambiguity set}
 \mathcal{P} =  \left\{ P : \text{MMD} (P, P_N) \leq \varepsilon \right\}.
@@ -125,7 +125,7 @@ This approximation can then be repeated for all other constraints $\boldsymbol{h
  &\boldsymbol{u}_{0:H} \in Z_i(\boldsymbol{\gamma}^{[i]}, g_0^{[i]}, t'^{[i]})
 \end{split}
 \end{align}
-\label{OCP}
+\label{OCP_final}
 \end{subequations}
 
 As described in Sec. \ref{Problem Statement}, we are minimizing a cost function $J_H$. The system dynamics are included through the constraints \ref{systemc1} and \ref{systemc2} and must be fulfilled for all scenarios as well. Lastly, the input $u_{0:H}$ is restricted to the feasible sets $Z_i$, i.e. $u_{0:H}$ must be an element of all $Z_i, i = 1,...,n_c$.
