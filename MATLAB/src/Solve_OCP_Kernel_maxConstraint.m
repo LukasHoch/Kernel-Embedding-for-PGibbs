@@ -1,4 +1,4 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult)
 
 optimization_timer = tic;
 
@@ -6,7 +6,7 @@ x_vec_0 = x_vec_0(:,:,1:K);
 v_vec = v_vec(:,:,1:K);
 
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples, K, sigma_mult);
-K_chol = chol(Kernel + 1e-8 * eye(K));
+K_chol = chol(Kernel + 1e-5 * eye(K));
 %epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
 
 epsilon = BootstrapAmbiguity(Kernel, 10000, 0.95);

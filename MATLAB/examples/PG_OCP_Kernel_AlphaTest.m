@@ -108,7 +108,7 @@ PG_samples = PG_samples.PG_samples;
 PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-s = 8;
+s = 1;
 
 
 if s == 1
@@ -206,7 +206,8 @@ K_test = K - K_opt_max;
 %K_opt_range = [1 5 10 25:25:K_opt_max];
 K_opt_range = [1 5 10 25 50 100:100:K_opt_max];
 
-Alpha_range = 0.2:0.1:0.4;
+Alpha_range = 0.1:0.1:0.4;
+%Alpha_range = 0.01:0.01:0.04;
 %Alpha_range = 0.05:0.05:0.2;
 %Alpha_range = 0.4:0.1:0.8;
 

@@ -108,7 +108,7 @@ PG_samples = PG_samples.PG_samples;
 %PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-s = 2;
+s = 1;
 
 
 if s == 1
@@ -196,113 +196,79 @@ end
 
 
 R = 0.1;
-alpha = 0.2;
+alpha = 0.1;
 
-sigma_cnt = 8;
-sigma_range = ones(sigma_cnt, 4);
-for sc = 1:sigma_cnt
-    %sigma_range(:, sc) = 4.5 * rand(sigma_cnt,1) + 0.5;
-    sigma_range(sc, :) = [1.5 5 5 0.25*sc];
-end
+iter_max = 5;
+sigma_cnt = 9;
 
-K_opt_max = 200;
+sigma = [1.5 5 5 1];
 
-K_test = K - K_opt_max;
+sigma_range = zeros(sigma_cnt, 4, iter_max * 4 + 1);
 
-%K_opt_range = [1 5 10 25:25:K_opt_max];
-K_opt_range = [1 5 10 25 50 100:100:K_opt_max];
+sigma_range(:,:,1) = repmat(sigma, sigma_cnt, 1);
 
-Accuracy_scenario = zeros(length(K_opt_range) , 1);
-Accuracy_kernel = zeros(length(K_opt_range) , sigma_cnt);
+K_opt = 100;
 
-cntk = 1;
+K_test = K - K_opt;
 
-for K_opt = K_opt_range
-    K_opt
+Accuracy_kernel = zeros(4, sigma_cnt, iter_max);
 
-    cnta = 1;
+cnts = 1;
 
-    [U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
-    
-    x_true = zeros(n_x, H + 1);
-    y_true = zeros(n_y, H);
-    
-    x_true(:, 1) = x_training(:, end);
-    for t = 1:H
-        x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
-        y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
-    end
-
-    X_tmp = zeros(n_x, H+1, K_test);
-    Y_tmp = zeros(n_y, H, K_test);
-
-    for k = 1:K_test
-        X_tmp(:,1, k) = x_vec_0(:, 1, k + K_opt_max);
-
-        for t = 1:H
-            X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_scenario(:, t)) + v_vec(:,t,k + K_opt_max);
-            Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_scenario(:, t)) + e_vec(:,t,k + K_opt_max);
-        end
-    end
-
-    C_upper = all(Y_tmp > y_min);
-    C_lower = all(Y_tmp < y_max);
-
-    C = C_upper & C_lower;
-
-    Accuracy_scenario(cntk) = 100 * sum(reshape(C, K_test, 1)) / (K - K_opt_max);
-
-    for sigma = 1:sigma_cnt
-    
-        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
-    
-        %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraintsv2(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+for iter = 1:iter_max
+    iter
+    for ts = 1:4
+        sigma_range(:,ts,cnts) = linspace(0.5* sigma_range(1,ts,cnts), 1.5* sigma_range(1,ts,cnts), sigma_cnt)';
+        for sigma_iter = 1:sigma_cnt
+ 
+            %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_range(sigma_iter,:,cnts));
         
-        [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_range(sigma,:));
-
-        x_true = zeros(n_x, H + 1);
-        y_true = zeros(n_y, H);
+            %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraintsv2(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+            
+            [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_range(sigma_iter,:,cnts));
         
-        x_true(:, 1) = x_training(:, end);
-        for t = 1:H
-            x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
-            y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
-        end
-    
-        X_tmp = zeros(n_x, H+1, K_test);
-        Y_tmp = zeros(n_y, H, K_test);
-    
-        for k = 1:K_test
-            X_tmp(:,1, k) = x_vec_0(:, 1, k + K_opt_max);
-    
+            x_true = zeros(n_x, H + 1);
+            y_true = zeros(n_y, H);
+            
+            x_true(:, 1) = x_training(:, end);
             for t = 1:H
-                X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k + K_opt_max);
-                Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k + K_opt_max);
+                x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
+                y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
             end
+        
+            X_tmp = zeros(n_x, H+1, K_test);
+            Y_tmp = zeros(n_y, H, K_test);
+        
+            for k = 1:K_test
+                X_tmp(:,1, k) = x_vec_0(:, 1, k + K_opt);
+        
+                for t = 1:H
+                    X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k + K_opt);
+                    Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k + K_opt);
+                end
+            end
+        
+            C_upper = all(Y_tmp > y_min);
+            C_lower = all(Y_tmp < y_max);
+        
+            C = C_upper & C_lower;
+        
+            Accuracy_kernel(ts,sigma_iter,iter) = 100 * sum(reshape(C, K_test, 1)) / (K - K_opt);
         end
-    
-        C_upper = all(Y_tmp > y_min);
-        C_lower = all(Y_tmp < y_max);
-    
-        C = C_upper & C_lower;
-    
-        Accuracy_kernel(cntk,cnta) = 100 * sum(reshape(C, K_test, 1)) / (K - K_opt_max) ;
-        cnta = cnta + 1;
+        [~, sigma_opt_idx] = min((Accuracy_kernel(ts, :, iter) - 1 + alpha).^2);
+
+        minIdx = find(Accuracy_kernel(ts, :, iter) == Accuracy_kernel(ts, sigma_opt_idx, iter));
+
+        [~, minIdx_idx] = min((minIdx - ceil(sigma_cnt/2)).^2);
+
+        sigma_opt_idx = minIdx(minIdx_idx);
+
+        sigma_opt_idx
+
+        sigma_range(:,:,cnts+1) = repmat(sigma_range(sigma_opt_idx, :, cnts), sigma_cnt, 1);
+
+        sigma = [sigma; sigma_range(sigma_opt_idx, :, cnts)];
+
+        cnts = cnts + 1;
     end
-    cntk = cntk + 1;
-
 end
-
-fig = figure;
-hold on
-plot(K_opt_range, Accuracy_scenario, 'linewidth', 2, 'DisplayName', 'Scenario Approach')
-for t = 1:sigma_cnt
-    text = ['Kernel Approach (sigma = [' num2str(sigma_range(t, :)) '])'];
-    plot(K_opt_range, Accuracy_kernel(:,t), 'linewidth', 2, 'DisplayName', text)
-end
-ylabel('Constraints satisfied [%]')
-xlabel('Number of Samples')
-legend('Location', 'northwest');
-xlim([K_opt_range(1), K_opt_range(end)])
-ylim([0, 100])
-saveas(fig, 'RobustnessFigure')
