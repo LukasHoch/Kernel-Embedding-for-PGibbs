@@ -194,82 +194,75 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
+X_stacked = reshape(x_vec_0, [], K);
+V_stacked = reshape(v_vec, [], K);
+W_stacked = reshape(e_vec, [], K);
 
-R = 0.1;
-alpha = 0.1;
 
-iter_max = 8;
-sigma_cnt = 21;
 
-%sigma = [1.5 5 5 1];
-sigma = [1.6875 0.6250 1.6406 1.6875];
+K2 = size(PG_samples{1}.A, 1) * size(PG_samples{1}.A, 2);
+A_stacked = zeros(K2, K);
+for n = 1:K
+    A_stacked(:,n) = reshape(PG_samples{n}.A, K2, 1);
+end
+
+
+iter_max = 6;
+sigma_cnt = 15;
+
+%sigma_init = [1.5 5 5 1];
+sigma_init =  [0.5716 1.4062 1.4062 0.4109];
+
+K_train = 300;
+K_test = K - K_train;
+
+sigma = zeros(iter_max * 4 + 1, 4);
+sigma(1,:) = sigma_init;
 
 sigma_range = zeros(sigma_cnt, 4, iter_max * 4 + 1);
+sigma_range(:,:,1) = repmat(sigma_init, sigma_cnt, 1);
 
-sigma_range(:,:,1) = repmat(sigma, sigma_cnt, 1);
-
-K_opt = 100;
-
-K_test = K - K_opt;
-
-Accuracy_kernel = zeros(4, sigma_cnt, iter_max);
+kernel_mean = zeros(K_test, sigma_cnt, iter_max * 4 + 1);
+kernel_mean_mean = zeros(iter_max * 4 + 1, sigma_cnt);
 
 cnts = 1;
 
 for iter = 1:iter_max
     iter
     for ts = 1:4
-        sigma_range(:,ts,cnts) = linspace(0.75* sigma_range(1,ts,cnts), 1.25* sigma_range(1,ts,cnts), sigma_cnt)';
+        sigma_range(:,ts,cnts) = linspace(0.9* sigma(cnts, ts), 1.1* sigma(cnts, ts), sigma_cnt)';
         for sigma_iter = 1:sigma_cnt
- 
-            %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_range(sigma_iter,:,cnts));
-        
-            %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraintsv2(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
-            
-            [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_range(sigma_iter,:,cnts));
-        
-            x_true = zeros(n_x, H + 1);
-            y_true = zeros(n_y, H);
-            
-            x_true(:, 1) = x_training(:, end);
-            for t = 1:H
-                x_true(:, t+1) = f_true(x_true(:, t), U_kernel(t)) + v_true(:,t);
-                y_true(:, t) = g_true(x_true(:, t), U_kernel(t)) + e_true(:,t);
-            end
-        
-            X_tmp = zeros(n_x, H+1, K_test);
-            Y_tmp = zeros(n_y, H, K_test);
-        
-            for k = 1:K_test
-                X_tmp(:,1, k) = x_vec_0(:, 1, k + K_opt);
-        
-                for t = 1:H
-                    X_tmp(:, t+1, k) = f(X_tmp(:, t, k), U_kernel(:, t)) + v_vec(:,t,k + K_opt);
-                    Y_tmp(:, t, k) = g(X_tmp(:, t, k), U_kernel(:, t)) + e_vec(:,t,k + K_opt);
+            for k_test = 1:K_test
+                for k_train = 1:K_train
+                    X_diff = norm(X_stacked(:,k_train) - X_stacked(:,k_test))^2;
+                    V_diff = norm(V_stacked(:,k_train) - V_stacked(:,k_test))^2;
+                    W_diff = norm(W_stacked(:,k_train) - W_stacked(:,k_test))^2;
+                    A_diff = norm(A_stacked(:,k_train) - A_stacked(:,k_test))^2;
+    
+                    kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,1,cnts)) * exp(-X_diff/(2*sigma_range(sigma_iter,1,cnts)^2));
+                    kernel_tmp = kernel_tmp * 1/(sqrt(2 * pi) * sigma_range(sigma_iter,2,cnts)) * exp(-V_diff/(2*sigma_range(sigma_iter,2,cnts)^2));
+                    kernel_tmp = kernel_tmp * 1/(sqrt(2 * pi) * sigma_range(sigma_iter,3,cnts)) * exp(-W_diff/(2*sigma_range(sigma_iter,3,cnts)^2));
+                    kernel_tmp = kernel_tmp * 1/(sqrt(2 * pi) * sigma_range(sigma_iter,4,cnts)) * exp(-A_diff/(2*sigma_range(sigma_iter,4,cnts)^2));
+    
+                    kernel_mean(k_test, sigma_iter, cnts) = kernel_mean(k_test, sigma_iter, cnts) + kernel_tmp;
                 end
+    
+                kernel_mean(:, sigma_iter, cnts) = kernel_mean(:, sigma_iter, cnts) / K_train;
+                kernel_mean_mean(cnts, sigma_iter) = sum(kernel_mean(:, sigma_iter, cnts)) / K_test;
             end
-        
-            C_upper = all(Y_tmp > y_min);
-            C_lower = all(Y_tmp < y_max);
-        
-            C = C_upper & C_lower;
-        
-            Accuracy_kernel(ts,sigma_iter,iter) = 100 * sum(reshape(C, K_test, 1)) / (K - K_opt);
         end
-        [~, sigma_opt_idx] = min((Accuracy_kernel(ts, :, iter) - 1 + alpha).^2);
-
-        minIdx = find(Accuracy_kernel(ts, :, iter) == Accuracy_kernel(ts, sigma_opt_idx, iter));
-
+        [~, sigma_opt_idx] = max(kernel_mean_mean(cnts, :));
+    
+        minIdx = find(kernel_mean_mean == kernel_mean_mean(sigma_opt_idx));
+    
         [~, minIdx_idx] = min((minIdx - ceil(sigma_cnt/2)).^2);
-
+    
         sigma_opt_idx = minIdx(minIdx_idx);
-
-        sigma_opt_idx
-
+    
         sigma_range(:,:,cnts+1) = repmat(sigma_range(sigma_opt_idx, :, cnts), sigma_cnt, 1);
-
-        sigma = [sigma; sigma_range(sigma_opt_idx, :, cnts)];
-
+    
+        sigma(cnts+1, :) = sigma_range(sigma_opt_idx, :, cnts);
+    
         cnts = cnts + 1;
     end
 end
