@@ -108,7 +108,7 @@ PG_samples = PG_samples.PG_samples;
 PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-s = 2;
+s = 9;
 
 
 if s == 1
@@ -150,6 +150,12 @@ elseif s == 8
     H = 101;
     y_min = [-inf * ones(1, 20), -10:0.25:5, -inf * ones(1, 20)];
     y_max = [inf * ones(1, 20), -5:0.25:10, inf * ones(1, 20)];
+elseif s== 9
+    H=21;
+    t_tmp = 5:15;
+
+    y_max = [inf * ones(1, 5), -5-sqrt(25-(t_tmp-10).^2), inf * ones(1, 5)];
+    y_min = [-inf * ones(1, 21)];
 
 end
 
@@ -205,7 +211,7 @@ sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuni
 
 %sigma_mult = [0.5716 1.4062 1.4062 0.1958];
 
-K_opt_max = 300;
+K_opt_max = 200;
 
 K_test = K - K_opt_max;
 

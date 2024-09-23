@@ -119,13 +119,9 @@ for i = 1:n_y
     end
 
     % Add title, labels...
-    if n_y > 1
-        title(['y_', num2str(i), ': predicted output vs. true output']);
-        ylabel(['y_', num2str(i)]);
-    else
-        title(Approach);
-        ylabel('y');
-    end
+
+    title(Approach);
+    ylabel('y');
     xlabel('t');
     legend('Location', 'northwest');
     ylim([min(min(y_pred_min, y_test)), max(max(y_pred_max, y_test))]);
