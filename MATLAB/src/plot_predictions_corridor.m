@@ -1,4 +1,4 @@
-function plot_predictions(y_test, varargin)
+function plot_predictions_corridor(y_test, Accuracy, varargin)
     %PLOT_PREDITIONS Plot the predictions and the test data.
     %
     %   Inputs:
@@ -43,25 +43,31 @@ function plot_predictions(y_test, varargin)
     minValue = min(min(y_test));
     maxValue = max(max(y_test));
 
-    if maxValue >= 0
-        Constraint_1 = [1.1 * maxValue, 1.1 * maxValue];
-    else
-        Constraint_1 = [0.9 * maxValue, 0.9 * maxValue];
-    end
 
+    % if maxValue >= 0
+    %     Constraint_1 = [5, 5];
+    % else
+    %     Constraint_1 = [5, 5];
+    % end
+
+    Constraint_1 = [5, 5];
     Constraint_1 = [Constraint_1, y_max1(y_max1 ~= inf)];
-    h(2) = fill([15,5, 5:15], Constraint_1, 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'Constraints');
+    h3 = fill([15,5, 5:15], Constraint_1, 0.3*[1, 1, 1], 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'Constraints');
+
 
     Constraint_2 = [y_min1(y_min1 ~= -inf), y_max2(y_max2 ~= inf)];
-    fill([flip(5:15), 5:15], Constraint_2, 'r', 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'Constraints');
-
-
+    fill([flip(5:15), 5:15], Constraint_2, 0.3*[1, 1, 1], 'linestyle', 'none', 'FaceAlpha', 0.35, 'DisplayName', 'Constraints');
+    
     for i = 1:n_y
         % Plot true output.
-        h(1) = plot(t_pred, y_test(i, :), 'b', 'linewidth', 0.5, 'DisplayName', 'true output');
+        if Accuracy(i) == 1
+            h1 = plot(t_pred, y_test(i, :), 'b', 'linewidth', 0.5, 'DisplayName', 'true output');
+        else
+            h2 = plot(t_pred, y_test(i, :), 'r', 'linewidth', 0.5, 'DisplayName', 'true output');
+        end
     end
 
-    legend('Constraints', '', 'True Output')
+    legend([h1(1), h2(1), h3(1)], 'True Output (Successful)', 'True Output (Failed)', 'Constraints');
 
     % Add title, labels...
 
@@ -69,7 +75,8 @@ function plot_predictions(y_test, varargin)
     ylabel('y');
     xlabel('t');
     %legend('Location', 'northwest');
-    ylim([min([min(Constraint_2)-1, minValue]), Constraint_1(1)]);
+    %ylim([min([min(Constraint_2)-1, minValue]), Constraint_1(1)]);
+    ylim([-12, 4])
     grid on;
     hold off;
 end

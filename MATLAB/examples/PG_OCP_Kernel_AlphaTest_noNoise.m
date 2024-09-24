@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 2300; % number of PG samples
-k_d = 70; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 2000; % length of burn-in period
+K = 1100; % number of PG samples
+k_d = 40; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 1000; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -49,7 +49,7 @@ x_init_var = 1 * ones(n_x, 1); % variance
 % Define measurement model - assumed to be known (without loss of generality).
 % Make sure that g(x,u) is defined in vectorized form, i.e., g(zeros(n_x,N), zeros(n_u, N)) should return a matrix of dimension (n_y, N).
 g = @(x, u) [1, 0] * x; % observation function
-R = 0.1; % variance of zero-mean Gaussian measurement noise
+R = 0.5; % variance of zero-mean Gaussian measurement noise
 
 %% Parameters for data generation
 T = 2000; % number of steps for training
@@ -100,26 +100,26 @@ y_test = y(:, T+1:end);
 % PG_samples = load("PGibbs_Samples.mat");
 % PG_samples = PG_samples.PG_samples;
 
-PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
+PG_samples = load("PGibbs_Samples_K1100_kd40_R05.mat");
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-PG_samples = PG_samples(randperm(K));
+%PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-s = 9;
+s = 1;
 
 
 if s == 1
     H = 11;
-    y_min = [-inf * ones(1, 7) 10 -inf * ones(1, 3)];
+    y_min = [-inf * ones(1, 7) 2 -inf * ones(1, 3)];
     y_max = inf * ones(1, 11); 
 
 elseif s == 2
     H = 41;
-    y_min = [-inf * ones(1, 30), 10 * ones(1, 11)];
-    y_max = [inf * ones(1, 10), -10* ones(1, 11), inf * ones(1, 20)];
+    y_min = [-inf * ones(1, 30), 4 * ones(1, 11)];
+    y_max = [inf * ones(1, 10), -4* ones(1, 11), inf * ones(1, 20)];
 
 elseif s == 3  
     H = 41;
@@ -172,24 +172,7 @@ for k = 1:K
     x_m1 = PG_samples{k}.x_m1(:, star);
 
     % Propagate.
-    x_vec_0(:, 1, k) = f(x_m1, PG_samples{k}.u_m1) + mvnrnd(zeros(1, n_x), Q)';
-end
-
-v_vec = zeros(n_x, H, K);
-v_vec_0 = mvnrnd(zeros(1, n_x), Q_true, H)';
-for k = 1:K
-    Q = PG_samples{k}.Q;
-    v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
-    %v_vec(:, :, k) = v_vec_0;
-end
-
-% Sample measurement noise array e_vec if not provided.
-e_vec = zeros(n_y, H, K);
-e_vec_0 = mvnrnd(zeros(1, n_y), R, H)';
-
-for k = 1:K
-    e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
-    %e_vec(:, :, k) = e_vec_0;
+    x_vec_0(:, 1, k) = f(x_m1, PG_samples{k}.u_m1) + mvnrnd(zeros(1, n_x), Q_true)';
 end
 
 v_true = zeros(n_x, H);
@@ -200,8 +183,22 @@ for t = 1:H
     e_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
+v_vec = zeros(n_x, H, K);
 
-R = 0.1;
+for k = 1:K
+    Q = PG_samples{k}.Q;
+    %v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
+    v_vec(:, :, k) = v_true;
+end
+
+% Sample measurement noise array e_vec if not provided.
+e_vec = zeros(n_y, H, K);
+
+for k = 1:K
+    %e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
+    e_vec(:, :, k) = e_true;
+end
+
 %alpha = 0.2;
 
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
@@ -211,7 +208,7 @@ sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuni
 
 %sigma_mult = [0.5716 1.4062 1.4062 0.1958];
 
-K_opt_max = 200;
+K_opt_max = 100;
 
 K_test = K - K_opt_max;
 
@@ -270,6 +267,10 @@ for K_opt = K_opt_range
         %[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraintsv2(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
         
         [U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+
+        if anynan(U_kernel)
+            1
+        end
 
         x_true = zeros(n_x, H + 1);
         y_true = zeros(n_y, H);

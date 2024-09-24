@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 1200; % number of PG samples
-k_d = 20; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 300; % length of burn-in period
+K = 100; % number of PG samples
+k_d = 70; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 1000; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -49,7 +49,7 @@ x_init_var = 1 * ones(n_x, 1); % variance
 % Define measurement model - assumed to be known (without loss of generality).
 % Make sure that g(x,u) is defined in vectorized form, i.e., g(zeros(n_x,N), zeros(n_u, N)) should return a matrix of dimension (n_y, N).
 g = @(x, u) [1, 0] * x; % observation function
-R = 0.1; % variance of zero-mean Gaussian measurement noise
+R = 0.5; % variance of zero-mean Gaussian measurement noise
 
 %% Parameters for data generation
 T = 2000; % number of steps for training
@@ -99,18 +99,21 @@ y_test = y(:, T+1:end);
 % where phi are the basis functions defined above.
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
-s = 3;
+PG_samples = load("PGibbs_Samples_K1100_kd40_R05.mat");
+PG_samples = PG_samples.PG_samples;
+
+s = 2;
 
 
 if s == 1
     H = 11;
-    y_min = [-inf * ones(1, 7) 10 -inf * ones(1, 3)];
+    y_min = [-inf * ones(1, 7) 4 -inf * ones(1, 3)];
     y_max = inf * ones(1, 11); 
 
 elseif s == 2
     H = 41;
-    y_min = [-inf * ones(1, 31), 10 * ones(1, 10)];
-    y_max = [inf * ones(1, 9), -10* ones(1, 11), inf * ones(1, 21)];
+    y_min = [-inf * ones(1, 31), 4 * ones(1, 10)];
+    y_max = [inf * ones(1, 9), -4* ones(1, 11), inf * ones(1, 21)];
 
 elseif s == 3  
     H = 41;
@@ -145,9 +148,11 @@ elseif s == 8
 end
 
 
-R = 0.1;
-alpha = 0.9;
-sigma_mult = [1.5 5 5 1];
+alpha = 0.3;
+
+%sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
+sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
+%sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
 
 K_opt = 100;
 if K_opt > K
@@ -174,7 +179,7 @@ e_true = zeros(n_y, H);
 
 for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_x, 1), Q_true)';
-    v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
+    e_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
 v_vec = zeros(n_x, H, K);
@@ -206,7 +211,7 @@ end
 
 plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach)')
 
-[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
+[U_kernel, X_kernel, Y_kernel] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);

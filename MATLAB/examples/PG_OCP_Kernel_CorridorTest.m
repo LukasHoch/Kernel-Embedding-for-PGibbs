@@ -120,21 +120,31 @@ y_max2 = [inf * ones(1, 5), -5-sqrt(25-(t_tmp-10).^2), inf * ones(1, 5)];
 y_min2 = -inf * ones(1, 21);
 
 R = 0.1;
-alpha = 0.2:0.2:0.4;
-sigma_mult = [1.5 5 5 1];
+alpha = 0.1:0.1:0.3;
+
+
+%sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
+sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
+%sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
+
+
 
 K_opt = 100;
 if K_opt > K
     K_opt = K;
 end
 
-N_S = 10;
+N_S = 50;
 
 y_true_scenario = zeros(N_S, H);
 y_true_kernel = zeros(N_S, H, length(alpha));
 
 cost_scenario = zeros(N_S, 1);
 cost_kernel = zeros(N_S, length(alpha));
+
+Accuracy_scenario  = zeros(N_S, 1);
+Accuracy_kernel = zeros(N_S, length(alpha));
+
 
 for n_s = 1:N_S
     n_s
@@ -177,7 +187,7 @@ for n_s = 1:N_S
     
     for t = 1:H
         v_true(:,t) = mvnrnd(zeros(n_x, 1), Q_true)';
-        v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
+        e_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
     end
     
     [U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min1, y_max1);
@@ -196,6 +206,15 @@ for n_s = 1:N_S
         y_true_scenario(n_s, t) = g_true(x_true_scenario(:, t), U_scenario(t)) + e_true(:,t);
     end
 
+    C_upper1 = all(y_true_scenario(n_s, :) > y_min1);
+    C_lower1 = all(y_true_scenario(n_s, :) < y_max1);
+
+    C_upper2 = all(y_true_scenario(n_s, :) > y_min2);
+    C_lower2 = all(y_true_scenario(n_s, :) < y_max2);
+    
+    Accuracy_scenario(n_s) = (C_upper1 & C_lower1) | (C_upper2 & C_lower2) ;
+
+
     for i = 1:length(alpha)
     
         [U_maxConstr, X_maxConstr, Y_maxConstr] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min1, y_max1, alpha(i), sigma_mult);
@@ -213,10 +232,19 @@ for n_s = 1:N_S
             x_true_kernel(:, t+1) = f_true(x_true_kernel(:, t), U_maxConstr(t)) + v_true(:,t);
             y_true_kernel(n_s, t, i) = g_true(x_true_kernel(:, t), U_maxConstr(t)) + e_true(:,t);
         end
-    end
-end
 
-plot_predictions_corridor(y_true_scenario, 'y_max1', y_max1, 'y_min1', y_min1, 'y_max2', y_max2, 'title', 'True output (Scenario Approach)')
+        C_upper1 = all(y_true_kernel(n_s, :, i) > y_min1);
+        C_lower1 = all(y_true_kernel(n_s, :, i) < y_max1);
+    
+        C_upper2 = all(y_true_kernel(n_s, :, i) > y_min2);
+        C_lower2 = all(y_true_kernel(n_s, :, i) < y_max2);
+        
+        Accuracy_kernel(n_s, i) = (C_upper1 & C_lower1) | (C_upper2 & C_lower2) ;
+    end 
+end
+Accuracy = [sum(Accuracy_scenario)/N_S sum(Accuracy_kernel)/N_S]
+
+plot_predictions_corridor(y_true_scenario, Accuracy_scenario, 'y_max1', y_max1, 'y_min1', y_min1, 'y_max2', y_max2, 'title', 'True output (Scenario Approach)')
 for i = 1:length(alpha)
-    plot_predictions_corridor(y_true_kernel(:,:,i), 'y_max1', y_max1, 'y_min1', y_min1, 'y_max2', y_max2, 'title', ['True output (Kernel Approach with alpha = ' num2str(alpha(i)) ')'])
+    plot_predictions_corridor(y_true_kernel(:,:,i), Accuracy_kernel(:,i), 'y_max1', y_max1, 'y_min1', y_min1, 'y_max2', y_max2, 'title', ['True output (Kernel Approach with alpha = ' num2str(alpha(i)) ')'])
 end
