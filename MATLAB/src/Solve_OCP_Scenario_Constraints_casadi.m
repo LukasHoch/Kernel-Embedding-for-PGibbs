@@ -1,4 +1,4 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, u_init)
 
 optimization_timer = tic;
 
@@ -7,7 +7,7 @@ h_scenario = @(u, x, y) bounded_output(u, x, y, y_min, y_max);
 x_vec_0 = x_vec_0(:,:,1:K);
 v_vec = v_vec(:,:,1:K);
 
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 5000, 'hessian_approximation', 'limited-memory');
+solver_opts = struct('linear_solver', 'ma57', 'max_iter', 5000, 'hessian_approximation', 'limited-memory', 'print_level', 0);
 casadi_opts = struct('expand', 1);
 
 
@@ -15,6 +15,8 @@ opti = casadi.Opti();
 U = opti.variable(n_u, H);
 X = opti.variable(n_x*K, H+1);
 Y = opti.variable(n_y*K, H);
+
+opti.set_initial(U, u_init);
 
 X_init = reshape(x_vec_0, [size(x_vec_0, 3) * n_x, 1]);
 
@@ -51,13 +53,10 @@ opti.subject_to(U >= -10);
 
 % Set numerical backend.
 opti.solver('ipopt', casadi_opts, solver_opts);
-
 sol = opti.solve();
-
 U_opt = sol.value(U);
 X_opt = reshape(sol.value(X)', [n_x, H + 1, K]);
 Y_opt = reshape(sol.value(Y)', [n_y, H, K]);
 
 time_scenario = toc(optimization_timer)
-
 end

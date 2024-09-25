@@ -3,7 +3,7 @@ function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_maxConstraint_casadi(PG_sample
 optimization_timer = tic;
 
 X_init_0 = reshape(x_vec_0, [size(x_vec_0, 3) * n_x, 1]);
-X_init_0 = X_init_0(1:(n_x*K));
+X_init_0 = 
 
 X_init = [X_init_0, zeros(n_x*K, H)]; % initial guess for X
 Y_init = zeros(n_y*K, H); % initial guess for Y
@@ -18,26 +18,18 @@ for k = 1:K
 end
 
 h_scenario = @(u, x, y) bounded_output(u, x, y, y_min, y_max);
-
-%maxfunc = @(x) log(1 + exp(x/.1)) * .1;
-maxfunc = @(x) (x + sqrt(x.^2 + 0.01))/2;
-
+maxfunc = @(x) log(1 + exp(x/1)) * 1;
 
 x_vec_0 = x_vec_0(:,:,1:K);
 v_vec = v_vec(:,:,1:K);
 
 Kernel = rbf_kernel(x_vec_0, v_vec, e_vec, PG_samples, K, sigma_mult);
-K_chol = chol(Kernel + 1e-2 * eye(K));
+K_chol = chol(Kernel + 1e-1 * eye(K));
 %epsilon = (1 + sqrt(2 * log(1 / alpha))) * sqrt(1 / K);
 
 epsilon = BootstrapAmbiguity(Kernel, 10000, 0.95);
 
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory','print_level', 0);
-
-%solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
-    %'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
-    %'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
-
+solver_opts = struct('linear_solver', 'ma57', 'max_iter', 10000, 'hessian_approximation', 'limited-memory', 'print_level', 0);
 casadi_opts = struct('expand', 1);
 
 
@@ -50,8 +42,10 @@ opti.set_initial(U, u_init);
 opti.set_initial(X, X_init);
 opti.set_initial(Y, Y_init);
 
+X_init_0 = reshape(x_vec_0, [size(x_vec_0, 3) * n_x, 1]);
+
 % Set the initial state.
-opti.subject_to(X(:, 1) == X_init_0);
+opti.subject_to(X(:, 1) == X_init_0(1:(n_x*K)));
 
 gammaN = opti.variable(K, 1);
 g0 = opti.variable(1);
@@ -66,7 +60,7 @@ g_norm = norm(K_chol * gammaN);
 opti.subject_to(g0 + Eg_rkhs + epsilon * g_norm <= tk * alpha);
 
 % Define objective.
-opti.minimize(sum(U.^2)+ 1e-6 * (sum(gammaN) + g0 + tk));
+opti.minimize(sum(U.^2));
 
 % Add dynamic and additional constraints for all scenarios.
 for k = 1:K

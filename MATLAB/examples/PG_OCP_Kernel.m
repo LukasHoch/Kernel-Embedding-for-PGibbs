@@ -113,7 +113,7 @@ s = 1;
 
 if s == 1
     H = 11;
-    y_min = [-inf * ones(1, 7) 10 -inf * ones(1, 3)];
+    y_min = [-inf * ones(1, 7) 10  -inf * ones(1, 3)];
     y_max = inf * ones(1, 11); 
 
 elseif s == 2
@@ -150,7 +150,10 @@ elseif s == 8
     H = 101;
     y_min = [-inf * ones(1, 20), -10:0.25:5, -inf * ones(1, 20)];
     y_max = [inf * ones(1, 20), -5:0.25:10, inf * ones(1, 20)];
-
+elseif s == 9
+    H = 11;
+    y_min = [-inf * ones(1, 7) 10 * ones(1, 2) -inf * ones(1, 2)];
+    y_max = inf * ones(1, 11); 
 end
 
 
@@ -161,7 +164,7 @@ alpha = 0.3;
 sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
 %sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
 
-K_opt = 20;
+K_opt = 5;
 if K_opt > K
     K_opt = K;
 end
@@ -232,21 +235,6 @@ end
 % 
 % plot_predictions(Y_kernel, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach)')
 
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint) - casadi')
-
-
-
 [U_maxConstr, X_maxConstr, Y_maxConstr] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult);
 
 x_true = zeros(n_x, H + 1);
@@ -259,3 +247,31 @@ for t = 1:H
 end
 
 plot_predictions(Y_maxConstr, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint)')
+
+
+% [U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, U_scenario);
+% 
+% x_true = zeros(n_x, H + 1);
+% y_true = zeros(n_y, H);
+% 
+% x_true(:, 1) = x_training(:, end);
+% for t = 1:H
+%     x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
+%     y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
+% end
+% 
+% plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach) - casadi')
+
+
+[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, U_maxConstr);
+
+x_true = zeros(n_x, H + 1);
+y_true = zeros(n_y, H);
+
+x_true(:, 1) = x_training(:, end);
+for t = 1:H
+    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
+    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
+end
+
+plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint) - casadi')
