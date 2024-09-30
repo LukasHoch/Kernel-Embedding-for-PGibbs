@@ -108,7 +108,7 @@ PG_samples = PG_samples.PG_samples;
 
 PG_samples = PG_samples(randperm(K));
 
-s = 1;
+s = 2;
 
 
 if s == 1
@@ -158,13 +158,13 @@ end
 
 
 R = 0.1;
-alpha = 0.3;
+alpha = 0.5;
 
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
-sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
-%sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
+%sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
+sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
 
-K_opt = 5;
+K_opt = 200;
 if K_opt > K
     K_opt = K;
 end
@@ -263,15 +263,15 @@ plot_predictions(Y_maxConstr, y_true, 'y_max', y_max, 'y_min', y_min, 'title', '
 % plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach) - casadi')
 
 
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, U_maxConstr);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint) - casadi')
+% [U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, U_maxConstr);
+% 
+% x_true = zeros(n_x, H + 1);
+% y_true = zeros(n_y, H);
+% 
+% x_true(:, 1) = x_training(:, end);
+% for t = 1:H
+%     x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
+%     y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
+% end
+% 
+% plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with Max Constraint) - casadi')

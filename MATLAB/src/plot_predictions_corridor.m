@@ -61,13 +61,13 @@ function plot_predictions_corridor(y_test, Accuracy, varargin)
     for i = 1:n_y
         % Plot true output.
         if Accuracy(i) == 1
-            h1 = plot(t_pred, y_test(i, :), 'b', 'linewidth', 0.5, 'DisplayName', 'true output');
+            h1 = plot(t_pred, y_test(i, :), 'b', 'linewidth', 0.5, 'DisplayName', 'True Output (Successful)');
         else
-            h2 = plot(t_pred, y_test(i, :), 'r', 'linewidth', 0.5, 'DisplayName', 'true output');
+            h2 = plot(t_pred, y_test(i, :), 'r', 'linewidth', 0.5, 'DisplayName', 'True Output (Failed)');
         end
     end
 
-    legend([h1(1), h2(1), h3(1)], 'True Output (Successful)', 'True Output (Failed)', 'Constraints');
+    %legend([h1(1), h2(1), h3(1)], 'True Output (Successful)', 'True Output (Failed)', 'Constraints');
 
     % Add title, labels...
 

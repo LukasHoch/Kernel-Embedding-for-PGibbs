@@ -108,7 +108,7 @@ PG_samples = PG_samples.PG_samples;
 PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-s = 9;
+s = 2;
 
 
 if s == 1
@@ -205,18 +205,16 @@ R = 0.1;
 %alpha = 0.2;
 
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
-sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
-%sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
+%sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
+sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
 
 
-%sigma_mult = [0.5716 1.4062 1.4062 0.1958];
-
-K_opt_max = 100;
+K_opt_max = 200;
 
 K_test = K - K_opt_max;
 
 %K_opt_range = [1 5 10 25:25:K_opt_max];
-K_opt_range = [1 5 10 25 50 100:100:K_opt_max];
+K_opt_range = [1 5 10 25 50 100:50:K_opt_max];
 
 Alpha_range = 0.1:0.1:0.4;
 %Alpha_range = 0.01:0.01:0.04;
