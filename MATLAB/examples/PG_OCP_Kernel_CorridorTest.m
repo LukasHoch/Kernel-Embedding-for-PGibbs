@@ -124,12 +124,12 @@ alpha = 0.1:0.1:0.3;
 
 
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
-sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
-%sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
+%sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
+sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
 
 
 
-K_opt = 100;
+K_opt = 50;
 if K_opt > K
     K_opt = K;
 end

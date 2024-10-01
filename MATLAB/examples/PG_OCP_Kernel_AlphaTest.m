@@ -209,7 +209,7 @@ R = 0.1;
 sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
 
 
-K_opt_max = 200;
+K_opt_max = 300;
 
 K_test = K - K_opt_max;
 
