@@ -1,6 +1,6 @@
 \chapter{Evaluation} \label{Evaluation}
 
-In this section, the effectiveness of the proposed optimal control approach is tested in a simulation and compared it to previously used scenario theory. The simulation setup is described in section \ref{Setup}. The results of the OCP are shown in Sec. \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in section \ref{performance guarantees} by looking at the robustness of the solution and compare it to the commonly used scenario approach.
+In this section, the effectiveness of the proposed optimal control approach is tested in a simulation and compared it to previously used scenario theory. The simulation setup is described in section \ref{Setup}. The results of the OCP are shown in section \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in section \ref{performance guarantees} by looking at the robustness of the solution and compare it to the commonly used scenario approach and finally we show the potential of this approach in section \ref{corridor}.
 
 \section{Simulation Setup} \label{Setup}
 
@@ -247,7 +247,7 @@ The biggest advantage that this kernel approximation has shown compared to the s
 
 In this section, this parameter is tested by running the same problem setup as was used in Sec. \ref{optimal control} for different values of $\alpha$ as well as increasing and lowering the number of samples $N$ and testing how well the solution holds up for other scenarios that are independent of the ones used in the optimization.
 
-Similar to Sec. \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of scenarios, a small subset is then taken and used to formulate several OCPs as was already described in Sec. \ref{optimal control}. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is applied to $N = 2000$ more independent scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10, 25 and 50 samples and then increased with a step size of 50 until $N = 300$ samples are used in the optimization.
+Similar to section \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of scenarios, a small subset is then taken and used to formulate several OCPs as was already described in Sec. \ref{optimal control}. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is applied to $N = 2000$ more independent scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10, 25 and 50 samples and then increased with a step size of 50 until $N = 300$ samples are used in the optimization.
 
 \begin{figure}[t]
 		\pgfplotsset{width=13cm, compat = 1.18, 
@@ -305,7 +305,12 @@ Meanwhile, the scenario approach is displaying a similar behavior with the perce
 
 As the number of scenarios used in the optimization keeps increasing, first signs of their behavior for $N \to \infty$ become visible. While we require more samples to be sure of the exact percentages the approaches are converging to, it is already clear that they are not converging towards $(1 - \alpha)$ as we has hoped. For example, for $\alpha = 0.4$ it seems to converge to somewhere between 85\% and 90\%, while the same example converges towards somewhere around 95\% for $\alpha = 0.1$.
  
-\section{Corridor Test}
+\section{Corridor Test} \label{corridor}
+
+In section \ref{performance guarantees} it has been shown that the kernel approach can be used to control allows us to control the risk factor $\alpha$, leading to a higher percentage of cases violating the constraints. The benefit of this becomes apparent when looking at the cost function $J_H$. Allowing a higher risk relaxes the constraints which allows us to choose a solution with a lower cost associated with it to satisfy the constraints. While this can be shown for the example used in section \ref{optimal control} and \ref{performance guarantees}, the potential of this approach becomes more clear by looking at an example where the possible solutions are seperated into two paths, one with a low costs and hard to satisfy constraints and one with low costs and easy to satisfy constraints.
+
+In this example, we consider the same system as described in section \ref{Setup} and \ref{optimal control} where the horizon has been reduced to $H = 20$ and the output $y$ has to either satisfy $-5 \leq y_t \leq -2.5$ or $y_t \leq \sqrt{25- (t - 10)^2} - 5$ for $t \in [5, 15]$. We use 2000 scenarios that were generated via Particle Gibbs and randomly select $N = 100$ scenarios to formulate and solve an optimal control problem to see. The resulting output can then be applied to the true system to obtain a true output which can be analyzed regarding which path it takes and whether or not it satisfies the constraints. This process was repeated 50 times for a different set of randomly chosen scenarios for both the scenario and kernel approach for the risk values $\alpha = 0.1$, $0.2$ and $0.3$.
+
 
 \begin{figure}[htb]
 \centering
@@ -458,3 +463,23 @@ As the number of scenarios used in the optimization keeps increasing, first sign
 
 \label{ScenarioKernelComparisonCorridor}
 \end{figure}
+
+In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for the 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs that violated at least one constraint have been colored red. Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in table \ref{tab:results_corridor} where the average cost of the 50 runs is shown. In contrast, we can look at the kernel approach for $\alpha = 0.3$ where not a single run takes the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. However, this cost reduction also comes with a higher percentage of failed runs for the kernel approach which can be seen in the bottom row of table \ref{tab:results_corridor}.
+
+ The results for $\alpha = 0.1$ and $\alpha = 0.2$ are also interesting as they show a middle ground between the two extremes. We can see that as $\alpha$ is increased, the number of runs that goes through the risky corridor increases which leads to a lower average cost and a higher number of failed runs. 
+
+
+\begin{table}
+\centering
+\begin{tabular}{|c| c| c| c| c|}
+\hline
+Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 0.1$ & $\alpha = 0.2$ & $\alpha = 0.3$ \\
+\hline
+$J_H$ & & & & \\
+\hline
+MC & & & & \\
+\hline
+\end{tabular}
+\caption{Results of the 50 runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$ and $0.3$. The table shows the average cost of the 50 runs and the percentage of failed Monte Carlo (MC) runs, i.e. runs where the true output violated at least one constraint.}
+\label{tab:results_corridor}
+\end{table} 

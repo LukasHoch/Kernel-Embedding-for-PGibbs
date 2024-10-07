@@ -129,7 +129,7 @@ sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuni
 
 
 
-K_opt = 50;
+K_opt = 100;
 if K_opt > K
     K_opt = K;
 end
