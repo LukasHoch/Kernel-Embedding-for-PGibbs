@@ -1,0 +1,36 @@
+\chapter{Technical Background} \label{Technical Background}
+
+In this chapter, an approach is outlined that allows us to effectively solve the chance-constraint problem defined in section \ref{Problem Statement}. In section \ref{PGibbs sampling} we explain how to draw samples from unknown system and use them to generate scenarios. These scenarios are then used in \ref{Scenario Approach} to reformulate and solve the OCP.
+
+\section{Particle Markov Chain Monte Carlo Methods} \label{PGibbs sampling}
+
+For practical applications, the known priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$ and the observations $\mathbb{D}$ must be used to infer the posterior $p(\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\mid \mathbb{D})$. This is necessary since the repeated propagation of $p(\boldsymbol{x}_{\text{-}T})$ would otherwise cause an excessively large variance in $p(\boldsymbol{x}_{\text{-}1})$ making stochastic OCP infeasible. We utilize PMCMC methods to draw samples from this distribution. These methods were introduced in \cite{Andrieu_10} and will be summarized in this section.
+
+We use Particle Gibbs (PG) to bypass the issue of an analytically intractable $p(\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\mid \mathbb{D})$ by iteratively drawing samples from $p(\boldsymbol{\theta} \mid \boldsymbol{x}_{\text{-}T:\text{-}1}, \mathbb{D})$ and $p(\boldsymbol{x}_{\text{-}T:\text{-}1}\mid \boldsymbol{\theta}, \mathbb{D})$. We continually update the distributions with the previously drawn set, i.e. $\boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}$ is drawn from $p(\boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}\mid \boldsymbol{\theta}^{[n]}, \mathbb{D})$ and $\boldsymbol{\theta}^{[n+1]}$ is then drawn from $p(\boldsymbol{\theta}^{[n+1]}\mid \boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}, \mathbb{D})$. This is repeated until the desired number of samples has been achieved.
+
+To ensure that the samples drawn through this method are an accurate representation of the distribution  $p(\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1})$, additional steps are taken. For one, the first $N_p$ samples must be discarded as they are heavily reliant on the initialization and as such might show a strong bias. This burn in period should be chosen large enough so that this bias is no longer reflected in the samples. The samples should also be indepedendent of each other which is not given with this method as each $\boldsymbol{\theta}^{[n]}$ is dependent on $\boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}$ which in turn is dependent on $\boldsymbol{\theta}^{[n-1]}$. As such, measures must be taken to reduce the correlation between samples as much as possible. One approach to do this is thinning where only every $n_d$-th sample is used and the other samples are discarded. By increasing this parameter, the samples become more uncorrelated but there will also be a larger amount of samples created which leads to inefficiency.
+
+\begin{algorithm}
+	\caption{Scenario generation}\label{alg:PGibbs}
+	\hspace*{\algorithmicindent} \textbf{Input}: Dataset $\mathbb{D}$, parametric model $\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}}, \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}\}$, \\
+	\hspace*{\algorithmicindent} \hspace*{\algorithmicindent} priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$, $N, H, T$ \\
+	\hspace*{\algorithmicindent} \textbf{Output}: Scenarios $ \boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
+	\begin{algorithmic}[1]
+		\For{$n = 1, \dots , N$}
+			\State Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using a PG sampler
+			\For{$t = \text{-}1, \dots , H$}
+				\State Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$
+				\State Sample $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$
+			\EndFor
+			\State $\boldsymbol{x}_0^{[n]} \gets \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+The samples $\{\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\}^{[1:N]}$ can be used to generate so-called scenarios $\boldsymbol{\delta}^{[1:N]}$, which are samples from the distribution $p(\boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H} \mid \mathbb{D})$ and represent possible future system behavior depending on $\boldsymbol{u}_{0:H}$. The generation of these scenarios is outlined in Algorithm \ref{alg:PGibbs}. The parameters $\boldsymbol{\theta}^{[n]}$ are obtained via PMCMC and through it we also know the system dynamics and noise distributions which can be used to draw samples of both the processing noise $\boldsymbol{v}_{0:H}$ and measurement noise $\boldsymbol{w}_{0:H}$, which can be seen in the lines 4 and 5 of the Algorithm. Those samples can then be combined with the $\boldsymbol{x}_{\text{-}T:\text{-}1}$, or more precisely $\boldsymbol{x}_{\text{-}1}$ to find the initial state $\boldsymbol{x}_{0}$ to complete the scenario $\boldsymbol{\delta} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}$. How these scenarios can be used to find an optimal input $\boldsymbol{u}_{0:H}$ is described in the next section.
+
+
+\section{Scenario Approach} \label{Scenario Approach}
+
+
+

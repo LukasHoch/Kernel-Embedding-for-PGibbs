@@ -129,12 +129,12 @@ sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuni
 
 
 
-K_opt = 100;
+K_opt = 80;
 if K_opt > K
     K_opt = K;
 end
 
-N_S = 50;
+N_S = 10;
 
 y_true_scenario = zeros(N_S, H);
 y_true_kernel = zeros(N_S, H, length(alpha));
@@ -145,6 +145,7 @@ cost_kernel = zeros(N_S, length(alpha));
 Accuracy_scenario  = zeros(N_S, 1);
 Accuracy_kernel = zeros(N_S, length(alpha));
 
+path_safe = zeros(length(alpha) + 1, 1);
 
 for n_s = 1:N_S
     n_s
@@ -194,6 +195,7 @@ for n_s = 1:N_S
     
     if anynan(U_scenario)
         [U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min2, y_max2);
+        path_safe(1) = path_safe(1) + 1;
     end
     
     cost_scenario(n_s) = sum(U_scenario.^2);
@@ -221,6 +223,7 @@ for n_s = 1:N_S
         
         if anynan(U_maxConstr)
             [U_maxConstr, X_maxConstr, Y_maxConstr] = Solve_OCP_Kernel_maxConstraint(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min2, y_max2, alpha(i), sigma_mult);
+            path_safe(i+1) = path_safe(i+1) + 1;
         end
         
         cost_kernel(n_s, i) = sum(U_maxConstr.^2);

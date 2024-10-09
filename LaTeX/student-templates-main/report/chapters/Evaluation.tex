@@ -309,7 +309,7 @@ As the number of scenarios used in the optimization keeps increasing, first sign
 
 In section \ref{performance guarantees} it has been shown that the kernel approach can be used to control allows us to control the risk factor $\alpha$, leading to a higher percentage of cases violating the constraints. The benefit of this becomes apparent when looking at the cost function $J_H$. Allowing a higher risk relaxes the constraints which allows us to choose a solution with a lower cost associated with it to satisfy the constraints. While this can be shown for the example used in section \ref{optimal control} and \ref{performance guarantees}, the potential of this approach becomes more clear by looking at an example where the possible solutions are seperated into two paths, one with a low costs and hard to satisfy constraints and one with low costs and easy to satisfy constraints.
 
-In this example, we consider the same system as described in section \ref{Setup} and \ref{optimal control} where the horizon has been reduced to $H = 20$ and the output $y$ has to either satisfy $-5 \leq y_t \leq -2.5$ or $y_t \leq \sqrt{25- (t - 10)^2} - 5$ for $t \in [5, 15]$. We use 2000 scenarios that were generated via Particle Gibbs and randomly select $N = 100$ scenarios to formulate and solve an optimal control problem to see. The resulting output can then be applied to the true system to obtain a true output which can be analyzed regarding which path it takes and whether or not it satisfies the constraints. This process was repeated 50 times for a different set of randomly chosen scenarios for both the scenario and kernel approach for the risk values $\alpha = 0.1$, $0.2$ and $0.3$.
+In this example, we consider the same system as described in section \ref{Setup} and \ref{optimal control} where the horizon has been reduced to $H = 20$ and the output $y$ has to either satisfy $-5 \leq y_t \leq -2.5$ or $y_t \leq -5 - \sqrt{25- (t - 10)^2}$ for $t \in [5, 15]$. We use 2000 scenarios that were generated via Particle Gibbs and randomly select $N = 100$ scenarios to formulate and solve an optimal control problem to see. The resulting output can then be applied to the true system to obtain a true output which can be analyzed regarding which path it takes and whether or not it satisfies the constraints. This process was repeated 50 times for a different set of randomly chosen scenarios for both the scenario and kernel approach for the risk values $\alpha = 0.1$, $0.2$ and $0.3$.
 
 
 \begin{figure}[htb]
@@ -464,9 +464,9 @@ In this example, we consider the same system as described in section \ref{Setup}
 \label{ScenarioKernelComparisonCorridor}
 \end{figure}
 
-In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for the 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs that violated at least one constraint have been colored red. Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in table \ref{tab:results_corridor} where the average cost of the 50 runs is shown. In contrast, we can look at the kernel approach for $\alpha = 0.3$ where not a single run takes the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. However, this cost reduction also comes with a higher percentage of failed runs for the kernel approach which can be seen in the bottom row of table \ref{tab:results_corridor}.
+In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for these 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs, i.e. the runs where the true output violated at least one constraint, have been colored red. Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in table \ref{tab:results_corridor} where the average cost of 50 runs is shown.  In contrast, we can look at the kernel approach for $\alpha = 0.3$ where only a very small portion of the runs take the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. Here, the cost is directly proportional to the percentage of runs that take the safe path. This cost reduction is however also tied with a higher percentage of failed runs for the kernel approach which can be seen in the bottom row of table \ref{tab:results_corridor}.
 
- The results for $\alpha = 0.1$ and $\alpha = 0.2$ are also interesting as they show a middle ground between the two extremes. We can see that as $\alpha$ is increased, the number of runs that goes through the risky corridor increases which leads to a lower average cost and a higher number of failed runs. 
+The results for $\alpha = 0.1$ and $\alpha = 0.2$ are also interesting as they show a middle ground between the two extremes. We can see that as $\alpha$ is increased, the number of runs that goes through the risky corridor increases which leads to a lower average cost and a higher number of failed runs. 
 
 
 \begin{table}
@@ -475,11 +475,18 @@ In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for the 50 runs 
 \hline
 Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 0.1$ & $\alpha = 0.2$ & $\alpha = 0.3$ \\
 \hline
-$J_H$ & & & & \\
+$J_H$ (mean) & $338.4$ & $255.9$ & $129.5$ & $69.9$\\
 \hline
-MC & & & & \\
+Risky Runs & $8$\% & $40$\% & $78$\% & $98$\% \\
+\hline
+Failed Runs & $94$\% & $94$\% & $96$\% & $94$\% \\
 \hline
 \end{tabular}
-\caption{Results of the 50 runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$ and $0.3$. The table shows the average cost of the 50 runs and the percentage of failed Monte Carlo (MC) runs, i.e. runs where the true output violated at least one constraint.}
+\caption{Results of the 250 examplary runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$ and $0.3$. The table shows the average cost of the 250 runs and the percentage of failed Monte Carlo runs, i.e. runs where the true output violated at least one constraint.}
 \label{tab:results_corridor}
 \end{table} 
+
+%Data 250 Runs
+% J_H   317.2   265.4   117.4   65.6
+%Risky Runs 16.4% 36.8% 17.2% 99.2%
+%Failed Runs  0.8960    0.9200    0.9440    0.9120

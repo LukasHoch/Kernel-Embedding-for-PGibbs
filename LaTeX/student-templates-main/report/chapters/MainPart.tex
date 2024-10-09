@@ -1,47 +1,23 @@
-\chapter{Technical Approach} \label{Technical Approach}
+\chapter{Chance-Constraint Optimization with Kernel Approximation} \label{Technical Approach}
 
-In this chapter, an approach is outlined that allows us to effectively solve the chance-constraint problem defined in section \ref{Problem Statement}. In section \ref{PGibbs sampling} we explain how to draw samples from unknown system and use them to generate scenarios. These scenarios are then used in \ref{Sec:CCOKernel} to reformulate and solve the OCP.
+In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in section \ref{Problem Statement} using the samples generated using the method described in chapter \ref{Technical Background}.
 
-\section{Particle Markov Chain Monte Carlo Methods} \label{PGibbs sampling}
+In section \ref{Scenario Approach} a method was presented that allows us to reformulate the chance-constraints as a determinstic OCP. However, the final problem no longer contains the risk factor $\alpha$ which is why in this section a alternative approach is presented that allows us to has been lo, a method that enables us to generate a finite number of scenarios $\boldsymbol{\delta}^{[1:N]}$ was presented. These scenarios can be used to formulate an OCP to find an optimal $\boldsymbol{u}$ or a control law $\boldsymbol{\pi}$. In this section, a method to use maximum mean discrepancy (MMD) ambiguity sets and kernel approximation to reformulate the OCP is proposed.
 
-For practical applications, the known priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$ and the observations $\mathbb{D}$ must be used to infer the posterior $p(\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\mid \mathbb{D})$. This is necessary since the repeated propagation of $p(\boldsymbol{x}_{\text{-}T})$ would otherwise cause an excessively large variance in $p(\boldsymbol{x}_{\text{-}1})$ making stochastic OCP infeasible. We utilize PMCMC methods to draw samples from this distribution. These methods were introduced in \cite{Andrieu_10} and will be summarized in this section.
-
-We use Particle Gibbs (PG) to bypass the issue of an analytically intractable $p(\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\mid \mathbb{D})$ by iteratively drawing samples from $p(\boldsymbol{\theta} \mid \boldsymbol{x}_{\text{-}T:\text{-}1}, \mathbb{D})$ and $p(\boldsymbol{x}_{\text{-}T:\text{-}1}\mid \boldsymbol{\theta}, \mathbb{D})$. We continually update the distributions with the previously drawn set, i.e. $\boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}$ is drawn from $p(\boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}\mid \boldsymbol{\theta}^{[n]}, \mathbb{D})$ and $\boldsymbol{\theta}^{[n+1]}$ is then drawn from $p(\boldsymbol{\theta}^{[n+1]}\mid \boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}, \mathbb{D})$. This is repeated until the desired number of samples has been achieved.
-
-To ensure that the samples drawn through this method are an accurate representation of the distribution  $p(\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1})$, additional steps are taken. For one, the first $N_p$ samples must be discarded as they are heavily reliant on the initialization and as such might show a strong bias. This burn in period should be chosen large enough so that this bias is no longer reflected in the samples. The samples should also be indepedendent of each other which is not given with this method as each $\boldsymbol{\theta}^{[n]}$ is dependent on $\boldsymbol{x}_{\text{-}T:\text{-}1}^{[n]}$ which in turn is dependent on $\boldsymbol{\theta}^{[n-1]}$. As such, measures must be taken to reduce the correlation between samples as much as possible. One approach to do this is thinning where only every $n_d$-th sample is used and the other samples are discarded. By increasing this parameter, the samples become more uncorrelated but there will also be a larger amount of samples created which leads to inefficiency.
-
-\begin{algorithm}
-	\caption{Scenario generation}\label{alg:PGibbs}
-	\hspace*{\algorithmicindent} \textbf{Input}: Dataset $\mathbb{D}$, parametric model $\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}}, \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}\}$, \\
-	\hspace*{\algorithmicindent} \hspace*{\algorithmicindent} priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$, $N, H, T$ \\
-	\hspace*{\algorithmicindent} \textbf{Output}: Scenarios $ \boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
-	\begin{algorithmic}[1]
-		\For{$n = 1, \dots , N$}
-			\State Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using a PG sampler
-			\For{$t = \text{-}1, \dots , H$}
-				\State Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$
-				\State Sample $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$
-			\EndFor
-			\State $\boldsymbol{x}_0^{[n]} \gets \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
-		\EndFor
-	\end{algorithmic}
-\end{algorithm}
-
-The samples $\{\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\}^{[1:N]}$ can be used to generate so-called scenarios $\boldsymbol{\delta}^{[1:N]}$, which are samples from the distribution $p(\boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H} \mid \mathbb{D})$ and represent possible future system behavior depending on $\boldsymbol{u}_{0:H}$. The generation of these scenarios is outlined in Algorithm \ref{alg:PGibbs}. The parameters $\boldsymbol{\theta}^{[n]}$ are obtained via PMCMC and through it we also know the system dynamics and noise distributions which can be used to draw samples of both the processing noise $\boldsymbol{v}_{0:H}$ and measurement noise $\boldsymbol{w}_{0:H}$, which can be seen in the lines 4 and 5 of the Algorithm. Those samples can then be combined with the $\boldsymbol{x}_{\text{-}T:\text{-}1}$, or more precisely $\boldsymbol{x}_{\text{-}1}$ to find the initial state $\boldsymbol{x}_{0}$ to complete the scenario $\boldsymbol{\delta} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}$. How these scenarios can be used to find an optimal input $\boldsymbol{u}_{0:H}$ is described in the next section.
-
-
-\section{Chance-Constraint Optimization with Kernel Approximation} \label{Sec:CCOKernel}
-
-In the previous section, a method that enables us to generate a finite number of scenarios $\boldsymbol{\delta}^{[1:N]}$ was presented. These scenarios can be used to formulate an OCP to find an optimal $\boldsymbol{u}$ or a control law $\boldsymbol{\pi}$. In this section, a method to use maximum mean discrepancy (MMD) ambiguity sets and kernel approximation to reformulate the OCP is proposed.
-
-
-\subsection{MMD ambiguity sets} \label{SubSec:MMD}
+\section{MMD ambiguity sets} \label{SubSec:MMD}
 
 As the underlying data distribution $P$ in the constraints \eqref{constraints} is unknown, we first expand the them to their distributionally robust counterpart in order to allow for the use of scenarios as an approximation of the distribution. For this, we consider $P$ as the worst case distribution within a set $\mathcal{P}$ of plausible distributions, the so-called ambiguity set. This gives us the new constraints
 
 \begin{equation} \label{wc constraints}
-\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha.
 \end{equation}
+
+\begin{figure}
+\centering
+\includegraphics[width= .4\textwidth]{AmbiguitySetDrawing}
+\caption{Ambiguity Set $\mathcal{P}$}
+\label{AmbiguityPic}
+\end{figure}
 
 To construct the set $\mathcal{P}$, a similarity measure is needed to provide a concrete comparison between various distributions $\tilde{P}$. Maximum mean discrepancy (MMD) \cite{Arthur_12} is able to do that by using the norm of the difference between the kernel mean embeddings (KME) $|| \mu_Q - \mu_{Q'} ||^2_{\mathcal{H}}$ of two distributions $Q$ and $Q'$ as a metric between two distributions. The KME are given as $\mu_Q = \int k(x, \cdot) \text{d}x$ with $k(x, \cdot) \in \mathcal{H}$ being the feature map of the kernel function $k$. The metric can then be rewritten as 
 
@@ -83,37 +59,37 @@ with $\tilde{\boldsymbol{\delta}}^{[n]}, n = 1,...,N$, denoting a bootstrap samp
 	\end{algorithmic}
 \end{algorithm}
 
-\subsection{Constraint Reformulation} \label{Constraint Reformulation}
+\section{Constraint Reformulation} \label{Constraint Reformulation}
 
 With a given MMD ambiguity set $\mathcal{P}$, the feasible set of each constraint \ref{risk constraints} is given as
 
 \begin{equation} \label{feasible set}
-	Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in \mathcal{P}}P \left[ \tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}.
+	Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in \mathcal{P}}P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}.
 \end{equation}
 
-with $\tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) =  h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})$.
+with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) =  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}))$.
 
 We can now use the ambiguity set $\mathcal{P}$ defined in Sec. \ref{SubSec:MMD} with the radius $\varepsilon$ and the kernel matrix $\boldsymbol{K}$ to reformulate the feasible set. The matrix $\boldsymbol{K}$ contains the kernels of all possible combinations of samples. By following the steps described in \cite{Yassine_22}, we can obtain the new reformulated feasible set as
 
 \begin{subequations}
   \begin{empheq}[right = \empheqrbrace, left= Z_i \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align}
     & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t \alpha \\
-    & [\tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t]_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
+    & [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t]_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
     & g_0 \in \mathbb{R}, \boldsymbol{\gamma} \in \mathbb{R}^N, t \in \mathbb{R}
   \end{empheq}
 \end{subequations}
 
 where $[\cdot]_+ = \text{max}(0, \cdot)$ denotes the max operator. The new set also contains new variables that have to be taken into account when solving the OCP. The variables $g_0$, $\gamma$ and $t$ are additional degrees of freedom can be incorperated into the OCP. The former are parameters of the RKHS function that was used to transform the problem into a kernel machine learning problem while $t$ has been introduced as a way to relax the risk factor $\alpha$.
 
-This approximation can then be repeated for all other constraints $\boldsymbol{h(\cdot)}$ to obtrain the feasible sets $Z_i, i = 1,...,n_c.$ We can then use those constraints to formulate the OCP as
+We can then use this feasible set to formulate the OCP as
 
 \begin{subequations}
 \begin{align}
 \begin{split}
-\min\limits_{\boldsymbol{u}_{0:H}, \{ \boldsymbol{\gamma}, g_0, t' \}^{[1:n_c]} }  J_H(\boldsymbol{u}_{0:H})
+\min\limits_{\boldsymbol{u}_{0:H},\boldsymbol{\gamma}, g_0, t' }  J_H(\boldsymbol{u}_{0:H})
 \end{split}\\
 \begin{split}
-\text{s.t.}\; &\forall n = 1,...,N, \;  \forall t = 0,1,...,H,\; \forall i = 1,...,n_c
+\text{s.t.}\; &\forall n = 1,...,N, \;  \forall t = 0,1,...,H
 \end{split}\\
 \begin{split}\label{systemc1}
 &\boldsymbol{x}_{t+1}^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]} , \boldsymbol{u}_t \right) + \boldsymbol{v}_{t}^{[n]}
@@ -121,14 +97,14 @@ This approximation can then be repeated for all other constraints $\boldsymbol{h
 \begin{split}\label{systemc2}
 &\boldsymbol{y}_{t} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + \boldsymbol{w}_{t}^{[n]}
 \end{split}\\
-\begin{split}
- &\boldsymbol{u}_{0:H} \in Z_i(\boldsymbol{\gamma}^{[i]}, g_0^{[i]}, t'^{[i]})
+\begin{split}\label{systemc3}
+ &\boldsymbol{u}_{0:H} \in Z(\boldsymbol{\gamma}, g_0, t')
 \end{split}
 \end{align}
 \label{OCP_final}
 \end{subequations}
 
-As described in Sec. \ref{Problem Statement}, we are minimizing a cost function $J_H$. The system dynamics are included through the constraints \eqref{systemc1} and \eqref{systemc2} and must be fulfilled for all scenarios as well. Lastly, the input $u_{0:H}$ is restricted to the feasible sets $Z_i$, i.e. $u_{0:H}$ must be an element of all $Z_i, i = 1,...,n_c$.
+As described in Sec. \ref{Problem Statement}, we are minimizing a cost function $J_H$. The system dynamics are included through the constraints \eqref{systemc1} and \eqref{systemc2} and must be fulfilled for all scenarios as well. Lastly, the input $u_{0:H}$ is restricted to the feasible set $Z$ in \eqref{systemc3} which is defined by the optimization variables $\boldsymbol{\gamma}$, $g_0$ and $t'$.
 
 The optimization problem \eqref{OCP_final} is deterministic and can be solved with well known methods. 
 
