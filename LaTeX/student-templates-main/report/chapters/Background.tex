@@ -1,6 +1,6 @@
 \chapter{Technical Background} \label{Technical Background}
 
-In this chapter, an approach is outlined that allows us to effectively solve the chance-constraint problem defined in section \ref{Problem Statement}. In section \ref{PGibbs sampling} we explain how to draw samples from unknown system and use them to generate scenarios. These scenarios are then used in \ref{Scenario Approach} to reformulate and solve the OCP.
+In this chapter, an approach is outlined that allows us to effectively draw samples from the unknown distribution defined in section \ref{Problem Statement} using PMCMC methods. In section \ref{PGibbs sampling} we explain how to draw samples from unknown system and use them to generate scenarios. A method to use these scenarios is then described in section \ref{Scenario Approach} and the disadvantage of this approach is highlighted.
 
 \section{Particle Markov Chain Monte Carlo Methods} \label{PGibbs sampling}
 
@@ -32,5 +32,11 @@ The samples $\{\boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1}\}^{[1:N
 
 \section{Scenario Approach} \label{Scenario Approach}
 
+In the previous section, we have generated the scenarios $ \boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$. Each scenario can be used to describe a possible future based on the the input $\boldsymbol{u}_{0:H}$. As such, they can be used to reformulate the chance constraints to ensure a robust solution. We do this by ensuring that the constraints $\boldsymbol{h}(\cdot)$ are satisfied for all scenarios, i.e. every possible known future satisfies the constraints \cite{Garatti_22}. As such, the constraints can be written as
 
+\begin{equation}
+	 \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]})) \leq 0, \; \forall n = 1, ..., N .
+\end{equation}
+
+This approach is effective at finding a robust solution. However, the constraints no longer contain the risk factor $\alpha$ which means that determining performance guarantees requires further calculations. It is also impossible to control the risk factor without decreasing or increasing the number of scenarios used in the optimization and for certain applications the problem might become infeasible. As such, there is a need for alternative approaches. 
 

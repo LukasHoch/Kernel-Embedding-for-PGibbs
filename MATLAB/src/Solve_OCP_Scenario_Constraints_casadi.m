@@ -1,4 +1,4 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, u_init)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max)
 
 optimization_timer = tic;
 
@@ -16,7 +16,7 @@ U = opti.variable(n_u, H);
 X = opti.variable(n_x*K, H+1);
 Y = opti.variable(n_y*K, H);
 
-opti.set_initial(U, u_init);
+%opti.set_initial(U, u_init);
 
 X_init = reshape(x_vec_0, [size(x_vec_0, 3) * n_x, 1]);
 

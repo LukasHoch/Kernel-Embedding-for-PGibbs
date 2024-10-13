@@ -29,6 +29,7 @@
 \input{./include/customize.tex} % add custom commands etc in this file 
 %\input{./include/gloss.tex}		% add your glossary in this file 
 
+%\usepackage[bb=boondox]{mathalfa}
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -113,9 +114,9 @@
 \pagenumbering{arabic}
 \phantom{u}
 \begin{abstract}
- As control engineering methods are applied to increasingly complex systems, data-driven approaches for system identification appear as a promising alternative to physics-based modeling.  These approaches, such as particle Markov chain Monte Carlo (PMCMC) methods allow for the joint estimation of uncertain dynamics and latent states in systems where neither is certain or directly measureble. Combining PMCMC methods with scenario theory enables the computation of optimal input trajectories for unknown linear systems with latent states. However, deriving guarantees for these input trajectories is difficult and requires a computationally intentive process.
+As control engineering methods are applied to increasingly complex systems, data-driven approaches for system identification appear as a promising alternative to physics-based modeling.  As many applications run into issues with uncertainty as well as unknown dynamics and states that cannot be measured, approaches such as particle Markov chain Monte Carlo (PMCMC) methods provide ways for the joint estimation of the uncertain dynamics and latent states. Combining PMCMC methods with scenario theory enables the computation of optimal input trajectories for unknown systems with latent states. However, deriving guarantees for these input trajectories is difficult and requires a computationally intentive process.
 
-This paper proposes the use of particle Gibbs sampling in combination with maximum mean discrepancy ambiguity sets as an alternative to scenario theory. This allows for the inclusion of the failure tolerance in the optimization process. The effectiveness of this approach is demonstrated in a numerical simulation.
+This paper proposes a novel method that combines PMCMC sampling in combination with maximum mean discrepancy ambiguity sets as an alternative to scenario theory. By using ambiguity sets, it is possible to optimize the problem over a known set of distributions given by the samples rather than an unknown distribution. This allows for the tuning of the robustness level in the optimization process which can provide several advantages such as a cost reduction or allowing the solver to choose a risky path. The effectiveness of this approach is demonstrated in a numerical simulation. Due to some problems with the solver, the simulations are so far only on a linear system.
 %% German abstract (optional)
 %\begin{center}	
 %\normalsize \textbf{Zusammenfassung}\\
