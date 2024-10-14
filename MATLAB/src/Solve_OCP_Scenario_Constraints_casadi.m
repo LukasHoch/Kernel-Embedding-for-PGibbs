@@ -1,4 +1,4 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, solver_opts, casadi_opts)
 
 optimization_timer = tic;
 
@@ -7,8 +7,8 @@ h_scenario = @(u, x, y) bounded_output(u, x, y, y_min, y_max);
 x_vec_0 = x_vec_0(:,:,1:K);
 v_vec = v_vec(:,:,1:K);
 
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 5000, 'hessian_approximation', 'limited-memory', 'print_level', 0);
-casadi_opts = struct('expand', 1);
+% solver_opts = struct('linear_solver', 'ma57', 'max_iter', 5000, 'hessian_approximation', 'limited-memory', 'print_level', 0);
+% casadi_opts = struct('expand', 1);
 
 
 opti = casadi.Opti();

@@ -1,4 +1,4 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, u_init)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, u_init, solver_opts, casadi_opts)
 
 optimization_timer = tic;
 
@@ -32,13 +32,13 @@ K_chol = chol(Kernel + 1e-2 * eye(K));
 
 epsilon = BootstrapAmbiguity(Kernel, 10000, 0.95);
 
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory','print_level', 0);
-
-%solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
-    %'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
-    %'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
-
-casadi_opts = struct('expand', 1);
+% solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory','print_level', 0);
+% 
+% %solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
+%     %'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
+%     %'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
+% 
+% casadi_opts = struct('expand', 1);
 
 
 opti = casadi.Opti();

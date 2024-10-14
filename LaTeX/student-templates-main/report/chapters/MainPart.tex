@@ -1,6 +1,6 @@
 \chapter{Chance-Constraint Optimization with Kernel Approximation} \label{Technical Approach}
 
-In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in section \ref{Problem Statement} using the samples generated using the method described in chapter \ref{Technical Background}. In section \label{SubSec:MMD}, a method to use maximum mean discrepancy (MMD) ambiguity sets and kernel approximation to reformulate the OCP is proposed and in section \ref{Constraint Reformulation} the ambiguity sets are used to reformulate the chance-constraints. Finally, in section \ref{Problem Formulation} the results are used to define a new OCP.
+In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in section \ref{Problem Statement} using the samples generated using the method described in chapter \ref{Technical Background}. In section \ref{SubSec:MMD}, a method to use maximum mean discrepancy (MMD) ambiguity sets and kernel approximation to reformulate the OCP is proposed and in section \ref{Constraint Reformulation} the ambiguity sets are used to reformulate the chance-constraints. Finally, in section \ref{Problem Formulation} the results are used to define a new OCP.
 
 \section{MMD ambiguity sets} \label{SubSec:MMD}
 
@@ -59,7 +59,7 @@ with $\tilde{\boldsymbol{\delta}}^{[n]}, n = 1,...,N$, denoting a bootstrap samp
 
 \section{Constraint Reformulation} \label{Constraint Reformulation}
 
-With a given MMD ambiguity set $\mathcal{P}$, the feasible set of each constraint \ref{risk constraints} is given as
+With a given MMD ambiguity set $\mathcal{P}$, the feasible set of the constraint \eqref{risk constraints} is given as
 
 \begin{equation} \label{feasible set}
 	Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in \mathcal{P}}P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}.
@@ -67,7 +67,7 @@ With a given MMD ambiguity set $\mathcal{P}$, the feasible set of each constrain
 
 with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) =  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}))$.
 
-We can now use the ambiguity set $\mathcal{P}$ defined in section. \ref{SubSec:MMD} with the radius $\varepsilon$ to reformulate the feasible set. We are able to reformulate this set using the strong duality proven in \cite{Zhu_20} to get the feasible region
+We can now use the ambiguity set $\mathcal{P}$ defined in section \ref{SubSec:MMD} with the radius $\varepsilon$ to reformulate the feasible set. We are able to reformulate this set using the strong duality proven in \cite{Zhu_20} to get the feasible region
 
 \begin{subequations} \label{feasible region}
   \begin{empheq}[right = \empheqrbrace, left= Z \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align}
@@ -77,7 +77,7 @@ We can now use the ambiguity set $\mathcal{P}$ defined in section. \ref{SubSec:M
   \end{empheq}
 \end{subequations}
 
-with reproducing kernel hilbert space function $g \in \mathcal{H}$ and $1(\cdot)$ denoting the indicator function. Using this set feasible region exactly is gnerally intractable in practice. As such, we further approximate the set based on CVaR. For this, we first define the Value-at-Risk which is given as 
+with reproducing kernel hilbert space function $g \in \mathcal{H}$ and $1(\cdot)$ denoting the indicator function. Using this set feasible region exactly is generally intractable in practice. As such, we further approximate the set based on CVaR. For this, we first define the Value-at-Risk which is given as 
 
 \begin{equation} \label{VaR definition}
 	\text{VaR}_{1-\alpha}^{P} :=  \inf \left\{ t' \in \mathbb{R} : P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq t \right] \geq 1 - \alpha \right\}.
@@ -118,9 +118,11 @@ Applying this to the feasible region defined in \eqref{feasible region}, we arri
 
 with $g$ being expressed as the product of the kernel Gram matrix $\boldsymbol{K}$ with the elements $\left[ \boldsymbol{K} \right]_{i, j} = k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]})$ and a finite dimensional vector $\boldsymbol{\gamma} \in \mathcal{R}^N$. 
 
-\section{Problem Formulation}
+\section{Problem Formulation} \label{Problem Formulation}
 
-In the previous section, the chance constraints have been reformulated into a feasible region $\hat{Z}$. We now want to use this to reformulate the chance-constraint OCP defined in section \ref{Problem Statement}. For this purpose, we can use the variables $\boldsymbol{\gamma}$, $g_0$ and $t'$ that span the feasible region as optimization parameters while making sure that $\boldsymbol{u}_0:H$ is an element of the feasible region.
+In the previous section, the chance constraints have been reformulated into a feasible region $\hat{Z}$. We now want to use this to reformulate the chance-constraint OCP defined in section \ref{Problem Statement}. 
+
+For this purpose, we can use the variables $\boldsymbol{\gamma}$, $g_0$ and $t'$ that span the feasible region as optimization parameters while making sure that $\boldsymbol{u}_{0:H}$ is an element of the feasible region.
 
 This way, we can formulate the OCP as
 

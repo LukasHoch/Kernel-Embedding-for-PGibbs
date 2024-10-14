@@ -111,17 +111,6 @@ PG_samples = PG_samples.PG_samples;
 
 %PG_samples = PG_samples(randperm(K));
 
-
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory','print_level', 0);
-
-%solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
-    %'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
-    %'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
-
-casadi_opts = struct('expand', 1);
-
-rand_noise = true;
-
 s = 1;
 
 
@@ -176,7 +165,7 @@ end
 
 
 R = 0.1;
-alpha = 0.5;
+alpha = 0.9;
 
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
 %sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
@@ -207,11 +196,8 @@ v_vec_0 = mvnrnd(zeros(1, n_x), Q_true, H)';
 
 for k = 1:K
     Q = PG_samples{k}.Q;
-    if rand_noise
-        v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
-    else
-        v_vec(:, :, k) = v_vec_0;
-    end
+    %v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
+    v_vec(:, :, k) = v_vec_0;
 end
 
 % Sample measurement noise array e_vec if not provided.
@@ -219,11 +205,8 @@ e_vec = zeros(n_y, H, K);
 e_vec_0 = mvnrnd(zeros(1, n_y), R, H)';
 
 for k = 1:K
-    if rand_noise
-        e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
-    else
-        e_vec(:, :, k) = e_vec_0;
-    end
+    e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
+    %e_vec(:, :, k) = e_vec_0;
 end
 
 v_true = zeros(n_x, H);
@@ -236,7 +219,7 @@ end
 
 
 
-[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, solver_opts, casadi_opts);
+[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);
@@ -252,7 +235,7 @@ plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'p
 
 
 
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, U_scenario, solver_opts, casadi_opts);
+[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, U_scenario);
 
 x_true = zeros(n_x, H + 1);
 y_true = zeros(n_y, H);

@@ -42,7 +42,7 @@ We use gaussian kernels $k(x,y) = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||
 K_{ij} = k_{\sigma_A}(\boldsymbol{A}^{[i]}, \boldsymbol{A}^{[j]})  k_{\sigma_\mathcal{X}}(\boldsymbol{x}_0^{[i]}, \boldsymbol{x}_0^{[j]})    k_{\sigma_\mathcal{V}}(\boldsymbol{v}_{0:H}^{[i]}, \boldsymbol{v}_{0:H}^{[j]})  k_{\sigma_\mathcal{W}}(\boldsymbol{w}_{0:H}^{[i]}, \boldsymbol{w}_{0:H}^{[j]}).
 \end{equation}
 
-The individual elements of $\boldsymbol{\sigma} = [\sigma_A, \sigma_\mathcal{X}, \sigma_\mathcal{V}, \sigma_\mathcal{W}]$ are initialized via the median heuristic \cite{Damien_18} and then scaled to maximize the average probability of a set of $N_\text{test}$ test samples, i.e. find the $\boldsymbol{\sigma}$ that maximizes
+The individual elements of $\boldsymbol{\sigma} = [\sigma_A, \sigma_\mathcal{X}, \sigma_\mathcal{V}, \sigma_\mathcal{W}]$ are initialized via the median heuristic \cite{Damien_18} and then scaled to maximize the average probability of a set of $N_\text{test} = 2000$ test samples, i.e. find the $\boldsymbol{\sigma}$ that maximizes
 
  \begin{equation} \label{Average Probability}
 \max\limits_{\sigma} \frac{1}{N_\text{test}}  \sum_{n= 1}^{N_\text{test}} \text{P}_{\boldsymbol{\sigma}} ( \boldsymbol{\delta_\text{test}}^{[n]} )
@@ -54,7 +54,7 @@ with the probability function being the product of the four Gaussian probability
 \text{P}_{\boldsymbol{\sigma}} ( \boldsymbol{\delta_\text{test}}^{[n]} ) = \prod_{\sigma_i \in \boldsymbol{\sigma}} \frac{1}{N_\text{train}} \sum_{m = 1}^{N_\text{train}} \frac{1}{\sqrt{2 \pi \sigma_i^2}} k_{\sigma_i}(\boldsymbol{\delta_\text{train}}^{[m]} ,\boldsymbol{\delta_\text{test}}^{[n]})
 \end{equation}
 
-over a set of $N_\text{train}$ training samples that are independent of the set $N_\text{test}$.
+over a set of $N_\text{train} = 300$ training samples that are independent of the set $N_\text{test}$.
 
 
 \section{Optimal Control with Constrained Output} \label{optimal control}
@@ -69,7 +69,7 @@ The OCP can then be formulated as described in section \ref{Constraint Reformula
 
 \begin{figure}[htb]
 \centering
-\subfigure[Scenario Approach]{
+\subfigure[Scenario Approach ($\tilde{\alpha} = 0.16$)]{    %\alpha = 16.05%
 \pgfplotsset{width=.47\textwidth, compat = 1.18, 
 			height = .4\textwidth, grid= major, 
 			legend cell align = left, ticklabel style = {font=\scriptsize},
@@ -236,18 +236,18 @@ The OCP can then be formulated as described in section \ref{Constraint Reformula
 
 
 
-The results of an exemplary run is shown in Fig. \ref{ScenarioKernelComparison}. The figure includes the four plots for the scenario and kernel approach for each $\alpha$ and shows the output $y$ of their respective OCPs. The graphs shows the spread of the $N = 200$ trajectories that are generated when the input $\boldsymbol{u}_{0:H}$ is applied to the scenarios that were used to find the optimal input. On top that, it also shows of the mean of these trajectories and true output. Where the two graphs differ however is to what extend the solutions fulfill the constraints. By its definition, the scenario approach requires all scenarios to fulfill the constraints which can be seen in the solution. While the gray area touches the lower and upper bounds during several timesteps, it never violates the constraints. The kernel approach on the other hand has a risk factor $\alpha$ built in which allows for a number of scenarios to violate the constraints as long a sufficient number satisfies them. This can be seen in the constraint still being met by the majority of the scenarios and only the trajectory of a small number of scenarios actively overlapping with the marked area. This is especially apparent in the plots with larger $\alpha$ values. In contrast, the graph where $\alpha$ is chosen as $0.01$ is almost identical to the scenario approach. These results show that the kernel approach allows us to find solutions outside the feasible region of the scenario approach and potentially find a solution with a lower cost. This is done in exchange for an increased risk of the true output violating one or more of the constraints which can be seen by the blue line being closer to the constraints. A particularly close example can be seen at $t = 40$ being where the true output comes very close to the constraints for $\alpha = 0.5$ but stays further away for the scenario approach or $\alpha = 0.01$.
+The results of an exemplary run is shown in Figure \ref{ScenarioKernelComparison}. The figure includes the four plots for the scenario and kernel approach for each $\alpha$ and shows the output $y$ of their respective OCPs. The graphs shows the spread of the $N = 200$ trajectories that are generated when the input $\boldsymbol{u}_{0:H}$ is applied to the scenarios that were used to find the optimal input. On top that, it also shows of the mean of these trajectories and true output. Where the graphs differ however is to what extend the solutions fulfill the constraints. By its definition, the scenario approach requires all scenarios to fulfill the constraints which can be seen in the solution. While the gray area touches the lower and upper bounds during several timesteps, it never violates the constraints. The kernel approach on the other hand has a risk factor $\alpha$ built in which allows for a number of scenarios to violate the constraints as long a sufficient number satisfies them. This can be seen by the gray area following a similar trajectory to the scenario approach while a small portion of the area actively overlaps with the marked area. This is especially apparent in the plots with larger $\alpha$ values. In contrast, the graph where $\alpha$ is chosen as $0.01$ is almost identical to the scenario approach. These results show that the kernel approach allows us to find solutions outside the feasible region of the scenario approach and potentially find a solution with a lower cost. This is done in exchange for an increased risk of the true output violating one or more of the constraints which can be seen by the blue line being closer to the constraints. A particularly close example can be seen at the end of the plot at $t = 40$ where the true output comes very close to the constraints for $\alpha = 0.5$ but stays further away for the scenario approach or $\alpha = 0.01$.
 
 
 
 
 \section{Robustness} \label{performance guarantees}
 
-The biggest advantage that this kernel approximation has shown compared to the scenario approach is the adjustable risk factor. As described in Sec. \ref{Sec:CCOKernel}, this method includes a parameter $\alpha \in [0, 1]$ which can be chosen depending on how successful the final solution is supposed to be when it comes to satisfying the constraints in future scenarios. 
+The biggest advantage that this kernel approximation has shown compared to the scenario approach is the adjustable risk factor. This parameter $\alpha \in [0, 1]$ can be chosen depending on how successful the final solution is supposed to be when it comes to satisfying the constraints in future scenarios. 
 
-In this section, this parameter is tested by running the same problem setup as was used in Sec. \ref{optimal control} for different values of $\alpha$ as well as increasing and lowering the number of samples $N$ and testing how well the solution holds up for other scenarios that are independent of the ones used in the optimization.
+In this section, this parameter is tested by running the same problem setup as was used in section \ref{optimal control} for different values of $\alpha$ as well as increasing and lowering the number of samples $N$ and testing how well the solution holds up for other scenarios that are independent of the ones used in the optimization.
 
-Similar to section \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of scenarios, a small subset is then taken and used to formulate several OCPs as was already described in Sec. \ref{optimal control}. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is applied to $N = 2000$ more independent scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10, 25 and 50 samples and then increased with a step size of 50 until $N = 300$ samples are used in the optimization.
+Similar to section \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of scenarios, a small subset is then taken and used to formulate several OCPs as was already described in the previous section. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is applied to $N = 2000$ more independent scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10, 25 and 50 samples and then increased with a step size of 50 until $N = 300$ samples are used in the optimization.
 
 \begin{figure}[t]
 		\pgfplotsset{width=13cm, compat = 1.18, 
@@ -262,9 +262,9 @@ Similar to section \ref{optimal control}, a number of scenarios are generated wi
 		\begin{tikzpicture}
 		\begin{axis}[
 		grid=both,
-		xmin=1, xmax=200,
+		xmin=1, xmax=300,
 		ymin=0, ymax=100,
-		xtick={0, 50, 100, 150, 200, 250},
+		xtick={0, 50, 100, 150, 200, 250, 300},
 		ytick={0, 20, 40, 60, 80, 100},
 		ylabel={Constraints Satisfied [\%]}, xlabel=$N$,
 		set layers=standard,
@@ -295,9 +295,9 @@ Similar to section \ref{optimal control}, a number of scenarios are generated wi
 \end{figure}
 
 
-In Fig. \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 300. The various $\alpha$ values are shown as separate lines. Initially, all five plots show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution. As the number of scenarios is increased, the approximation of the distribution becomes better leading to a higher percentage of scenarios where the constraints are satisfied.
+In Figure \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 300. The various $\alpha$ values are shown as separate lines. Initially, all five plots show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution. As the number of scenarios is increased, the approximation of the distribution becomes better leading to a higher percentage of scenarios where the constraints are satisfied.
 
-After around 25 scenarios, the plots start diverging for the first time. While the scenario approach and the plots with smaller $\alpha$ values are very similar, the lines that represent larger $\alpha$ values are starting to display a slightly different percentage of cases that satisfy the constraints. It can be seen that the kernel approach achieves a more robust solution for $\alpha = 0.3$ and $N = 50$ but since this effect is only present for this one timestep, it can be inferred that this is most likely just due to random chance.
+After around 25 scenarios, the plots start diverging for the first time. While the scenario approach and the plots with smaller $\alpha$ values are very similar, the lines that represent larger $\alpha$ values are starting to display a slightly different percentage of cases that satisfy the constraints. It can be seen that the kernel approach achieves a more robust solution for $\alpha = 0.3$ and $N = 50$ but since this effect is only present for this one instance, it can be inferred that this is most likely just due to random chance.
 
 For $N \geq 100$ scenarios, a trend starts to become apparent in the different lines as all of them start to slowly converge with the risk factor $\alpha$ determining to what percentage each line converges. An interesting oddity that can be seen here is that the 3 lines for $\alpha = 0.2, 0.3$ and $0.3$ all display the same pattern of their percentage increasing slighly above the rest of the curves before they drop below the rest. After that, the lines converge to various values that are dependent on the value $\alpha$ that's associated with each line.
 
@@ -464,7 +464,11 @@ In this example, we consider the same system as described in section \ref{Setup}
 \label{ScenarioKernelComparisonCorridor}
 \end{figure}
 
-In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for these 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs, i.e. the runs where the true output violated at least one constraint, have been colored red. Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in table \ref{tab:results_corridor} where the average cost of 50 runs is shown.  In contrast, we can look at the kernel approach for $\alpha = 0.3$ where only a very small portion of the runs take the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. Here, the cost is directly proportional to the percentage of runs that take the safe path. This cost reduction is however also tied with a higher percentage of failed runs for the kernel approach which can be seen in the bottom row of table \ref{tab:results_corridor}.
+In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for these 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs, i.e. the runs where the true output violated at least one constraint, have been colored red. 
+
+Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in table \ref{tab:results_corridor} where the average cost of 50 runs is shown.  In contrast, we can look at the kernel approach for $\alpha = 0.3$ where only a very small portion of the runs take the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. Here, the cost is directly proportional to the percentage of runs that take the safe path. The table also shows the percentage of runs where the true output violated a constraint at least once. 
+
+%This cost reduction is however also tied with a higher percentage of failed runs for the kernel approach which can be seen in the bottom row of table \ref{tab:results_corridor}.
 
 The results for $\alpha = 0.1$ and $\alpha = 0.2$ are also interesting as they show a middle ground between the two extremes. We can see that as $\alpha$ is increased, the number of runs that goes through the risky corridor increases which leads to a lower average cost and a higher number of failed runs. 
 
@@ -479,7 +483,7 @@ $J_H$ (mean) & $338.4$ & $255.9$ & $129.5$ & $69.9$\\
 \hline
 Risky Runs & $8$\% & $40$\% & $78$\% & $98$\% \\
 \hline
-Failed Runs & $94$\% & $94$\% & $96$\% & $94$\% \\
+Failed Runs & $6$\% & $6$\% & $4$\% & $6$\% \\
 \hline
 \end{tabular}
 \caption{Results of the 250 examplary runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$ and $0.3$. The table shows the average cost of the 250 runs and the percentage of failed Monte Carlo runs, i.e. runs where the true output violated at least one constraint.}
