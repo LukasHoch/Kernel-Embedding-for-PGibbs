@@ -163,6 +163,7 @@ alpha = 0.5;
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
 %sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
 sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
+%sigma_mult = [0.5648 1.4214 1.5660 0.2824];    %Sigma4 Generated using SigmaTuning3 (Potentially the same as SigmaTuning2, just more converged)
 
 K_opt = 200;
 if K_opt > K

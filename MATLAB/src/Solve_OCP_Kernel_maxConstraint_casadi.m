@@ -1,4 +1,4 @@
-function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, u_init, solver_opts, casadi_opts)
+function [U_opt, X_opt, Y_opt] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K, phi, g, n_x, n_y, n_u, y_min, y_max, alpha, sigma_mult, u_init, solver_opts, casadi_opts, u_max)
 
 optimization_timer = tic;
 
@@ -86,8 +86,8 @@ end
 
 
 % Add constraints for the input.
-opti.subject_to(U <= 10);
-opti.subject_to(U >= -10);
+opti.subject_to(U <= u_max);
+opti.subject_to(U >= -u_max);
 
 
 % Set numerical backend.

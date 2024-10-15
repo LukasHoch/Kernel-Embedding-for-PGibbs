@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 200; % number of PG samples
-k_d = 50; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 1000; % length of burn-in period
+K = 2300; % number of PG samples
+k_d = 70; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 2000; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -25,9 +25,9 @@ n_y = 1; % number of outputs
 % Define basis functions - assumed to be known in this example.
 % Make sure that phi(x,u) is defined in vectorized form, i.e., phi(zeros(n_x,N), zeros(n_u, N)) should return a matrix of dimension (n_phi, N).
 % Scaling the basis functions facilitates the exploration of the posterior distribution and reduces the required thinning parameter k_d.
-n_phi = 5; % number of basis functions
-phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); 0.01 * cos(3*x(1, :)) .* x(2, :); 0.1 * sin(2*x(2, :)) .* u(1, :)]; % basis functions
-%phi = @(x, u) [0.5 * x(1, :); 0.5 * x(2, :); cos(x(1, :)); 0.5 * u(1, :)]; % basis functions
+n_phi = 3; % number of basis functions
+%phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); 0.01 * cos(3*x(1, :)) .* x(2, :); 0.1 * sin(2*x(2, :)) .* u(1, :)]; % basis functions
+phi = @(x, u) [0.5 * x(1, :); 0.5 * x(2, :); 0.5 * u(1, :)]; % basis functions
 %phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); x(1, :) .* x(2, :); x(1, :) .* u(1, :)]; % basis functions
 
 % Prior for Q - inverse Wishart distribution
@@ -63,9 +63,9 @@ T_all = T + T_test;
 % y_t = g_true(x_t, u_t) + N(0, R_true).
 
 % Unknown system
-f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) + 0.1 * cos(3*x(1, :)) * x(2, :); 0.4 * x(1, :) + 0.5 * x(2, :) + (1 + 0.3 * sin(2*x(2, :))) * u(1, :)]; % true state transition function
+%f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) + 0.1 * cos(3*x(1, :)) * x(2, :); 0.4 * x(1, :) + 0.5 * x(2, :) + (1 + 0.3 * sin(2*x(2, :))) * u(1, :)]; % true state transition function
 %f_true = @(x, u) [x(1, :) + 0.5 * x(2, :) + 0.125 * u(1, :); 0.8 * x(2, :) + 0.5 * u(1, :)]; % true state transition function
-%f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) + sum(0.5 * cos(x(1, :))); 0.4 * x(1, :) + 0.5 * x(2, :) + u(1, :)]; % true state transition function
+f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) ; 0.4 * x(1, :) + 0.5 * x(2, :) + u(1, :)]; % true state transition function
 Q_true = [0.03, -0.004; -0.004, 0.01]; % true process noise variance
 g_true = g; % true measurement function
 R_true = R; % true measurement noise variance
@@ -97,37 +97,23 @@ y_test = y(:, T+1:end);
 % Result: K models of the type
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
-
 % PG_samples = load("PGibbs_Samples.mat");
 % PG_samples = PG_samples.PG_samples;
 
-% PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
-% PG_samples = PG_samples.PG_samples;
-
-PG_samples = load("PGibbs_Samples_K200_nonlinear2.mat");
+PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
+PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
 
-
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory','print_level', 0);
-
-%solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
-    %'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
-    %'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
-
-casadi_opts = struct('expand', 1);
-
-rand_noise = true;
-
-s = 10;
+s = 1;
 
 
 if s == 1
     H = 11;
-    y_min = [-inf * ones(1, 7) 0 -inf * ones(1, 3)];
+    y_min = [-inf * ones(1, 7) 10 -inf * ones(1, 3)];
     y_max = inf * ones(1, 11); 
 
 elseif s == 2
@@ -164,29 +150,9 @@ elseif s == 8
     H = 101;
     y_min = [-inf * ones(1, 20), -10:0.25:5, -inf * ones(1, 20)];
     y_max = [inf * ones(1, 20), -5:0.25:10, inf * ones(1, 20)];
-elseif s == 9
-    H = 11;
-    y_min = [-inf * ones(1, 7) 10 * ones(1, 2) -inf * ones(1, 2)];
-    y_max = inf * ones(1, 11); 
-elseif s == 10
-    H = 41;
-    y_min = [-inf * ones(1, 20) 2 * ones(1, 6)  -inf * ones(1, 15)];
-    y_max = inf * ones(1, 41); 
+
 end
 
-
-R = 0.1;
-alpha = 0.2;
-
-%sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
-%sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
-sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
-%sigma_mult = [0.5648 1.4214 1.5660 0.2824];    %Sigma4 Generated using SigmaTuning3 (Potentially the same as SigmaTuning2, just more converged)
-
-K_opt = 200;
-if K_opt > K
-    K_opt = K;
-end
 
 x_vec_0 = zeros(n_x, 1, K);
 for k = 1:K
@@ -205,14 +171,10 @@ end
 
 v_vec = zeros(n_x, H, K);
 v_vec_0 = mvnrnd(zeros(1, n_x), Q_true, H)';
-
 for k = 1:K
     Q = PG_samples{k}.Q;
-    if rand_noise
-        v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
-    else
-        v_vec(:, :, k) = v_vec_0;
-    end
+    v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
+    %v_vec(:, :, k) = v_vec_0;
 end
 
 % Sample measurement noise array e_vec if not provided.
@@ -220,11 +182,8 @@ e_vec = zeros(n_y, H, K);
 e_vec_0 = mvnrnd(zeros(1, n_y), R, H)';
 
 for k = 1:K
-    if rand_noise
-        e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
-    else
-        e_vec(:, :, k) = e_vec_0;
-    end
+    e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
+    %e_vec(:, :, k) = e_vec_0;
 end
 
 v_true = zeros(n_x, H);
@@ -235,63 +194,82 @@ for t = 1:H
     v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
 end
 
+X_stacked = reshape(x_vec_0, [], K);
+V_stacked = reshape(v_vec, [], K);
+W_stacked = reshape(e_vec, [], K);
 
 
-[U_scenario, X_scenario, Y_scenario] = Solve_OCP_Scenario_Constraints_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, solver_opts, casadi_opts, 5);
 
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_scenario(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_scenario(t)) + e_true(:,t);
+K2 = size(PG_samples{1}.A, 1) * size(PG_samples{1}.A, 2);
+A_stacked = zeros(K2, K);
+for n = 1:K
+    A_stacked(:,n) = reshape(PG_samples{n}.A, K2, 1);
 end
 
-plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Scenario Approach) - casadi')
 
+iter_max = 15;
+sigma_cnt = 51;
 
+%sigma_init = [1.5 5 5 1];
+%sigma_init =  [0.716 1.4062 1.4062 0.4109];
+sigma_init = ones(1,4);
 
+K_train = 300;
+K_test = K - K_train;
 
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.2, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
+sigma = zeros(iter_max * 4 + 1, 4);
+sigma(1,:) = sigma_init;
 
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
+sigma_range = zeros(sigma_cnt, 4, iter_max * 4 + 1);
+sigma_range(:,:,1) = repmat(sigma_init, sigma_cnt, 1);
 
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
+kernel_mean = zeros(K_test, sigma_cnt, iter_max * 4 + 1);
+kernel_mean_mean = zeros(iter_max * 4 + 1, sigma_cnt);
+
+cnts = 1;
+
+for iter = 1:iter_max
+    %iter
+    for ts = 1:4
+        sigma_range(:,ts,cnts) = linspace(0.9* sigma(cnts, ts), 1.1* sigma(cnts, ts), sigma_cnt)';
+        for sigma_iter = 1:sigma_cnt
+            for k_test = 1:K_test
+                for k_train = 1:K_train
+                    if ts == 1
+                        X_diff = norm(X_stacked(:,k_train) - X_stacked(:,k_test))^2;
+                        kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,1,cnts)) * exp(-X_diff/(2*sigma_range(sigma_iter,1,cnts)^2));
+                    elseif ts == 2
+                        V_diff = norm(V_stacked(:,k_train) - V_stacked(:,k_test))^2;
+                        kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,2,cnts)) * exp(-V_diff/(2*sigma_range(sigma_iter,2,cnts)^2));
+                    elseif ts == 3 
+                        W_diff = norm(W_stacked(:,k_train) - W_stacked(:,k_test))^2;
+                        kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,3,cnts)) * exp(-W_diff/(2*sigma_range(sigma_iter,3,cnts)^2));
+                    else
+                        A_diff = norm(A_stacked(:,k_train) - A_stacked(:,k_test))^2;
+                        kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,4,cnts)) * exp(-A_diff/(2*sigma_range(sigma_iter,4,cnts)^2));
+                    end
+    
+                    kernel_mean(k_test, sigma_iter, cnts) = kernel_mean(k_test, sigma_iter, cnts) + kernel_tmp;
+                end
+    
+                kernel_mean(:, sigma_iter, cnts) = kernel_mean(:, sigma_iter, cnts) / K_train;
+                kernel_mean_mean(cnts, sigma_iter) = sum(kernel_mean(:, sigma_iter, cnts)) / K_test;
+            end
+        end
+        [~, sigma_opt_idx] = max(kernel_mean_mean(cnts, :));
+    
+        minIdx = find(kernel_mean_mean == kernel_mean_mean(sigma_opt_idx));
+    
+        [~, minIdx_idx] = min((minIdx - ceil(sigma_cnt/2)).^2);
+    
+        sigma_opt_idx = minIdx(minIdx_idx);
+    
+        sigma_range(:,:,cnts+1) = repmat(sigma_range(sigma_opt_idx, :, cnts), sigma_cnt, 1);
+    
+        sigma(cnts+1, :) = sigma_range(sigma_opt_idx, :, cnts);
+    
+        cnts = cnts + 1;
+    end
 end
 
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.2) - casadi')
-
-
-
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.4, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.4) - casadi')
-
-
-
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.6, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.6) - casadi')
+sigma(cnts, :)

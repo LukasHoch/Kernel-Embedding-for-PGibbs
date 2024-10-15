@@ -6,7 +6,7 @@ In this section, the effectiveness of the proposed optimal control approach is t
 
 We consider a system with the state transition function
 
-\begin{equation}
+\begin{equation} \label{linear system}
 \boldsymbol{f}(\boldsymbol{x}, u) = 
 \begin{bmatrix}
 0.8  x_1 - 0.5 x_2 \\
@@ -63,7 +63,7 @@ In the following, we show how well the proposed optimal control approach works w
 
 For this simulation, we are using scenarios that have been generated using the PG sampler. To this end, $16130$ samples were created and the first $N_p = 2000$ were discarded as training samples and the remaining samples were once again thinned with $n_d = 70$. The remaining $N = 200$ samples are then used as scenarios for the OCPs.
 
-For the cost function, we consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 10$ as well as the temporarily active output-constraints $y_{10:20} \leq \text{-} 10$ and $10 \leq y_{30:40}$. $\varepsilon$ is chosen through Algorithm \ref{alg:Bootstrap} with a number of bootstrap samples $B = 1000$ and a confidence level $\beta = 0.95$. In this experiment, we look at the results for the risk level $\alpha$ being chosen as $0.01$, $0.2$ and $0.5$ to determine how much of an influence this parameter has on the solution.
+For the cost function, we consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 10$ as well as the temporarily active output-constraints $y_{10:20} \leq \text{-} 10$ and $10 \leq y_{30:40}$.  The ambiguity set radius $\varepsilon$ is chosen through Algorithm \ref{alg:Bootstrap} with a number of bootstrap samples $B = 1000$ and a confidence level $\beta = 0.95$. In this experiment, we look at the results for the risk level $\alpha$ being chosen as $0.01$, $0.2$ and $0.5$ to determine how much of an influence this parameter has on the solution.
 
 The OCP can then be formulated as described in section \ref{Constraint Reformulation}. Since the problem has been chosen as convex in this example, a solution for both the scenario and kernel approach can be found easily by using a convex solver.
 
@@ -334,7 +334,7 @@ In this example, we consider the same system as described in section \ref{Setup}
 		ylabel=$y$, xlabel=$t$,
 		set layers=standard,
 		reverse legend,
-		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
 		ylabel shift = -6 pt]
 		
 		%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
@@ -370,7 +370,7 @@ In this example, we consider the same system as described in section \ref{Setup}
 		ylabel=$y$, xlabel=$t$,
 		set layers=standard,
 		reverse legend,
-		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
 		ylabel shift = -6 pt]
 		
 		%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
@@ -406,7 +406,7 @@ In this example, we consider the same system as described in section \ref{Setup}
 		ylabel=$y$, xlabel=$t$,
 		set layers=standard,
 		reverse legend,
-		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
 		ylabel shift = -6 pt]
 		
 		%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
@@ -443,7 +443,7 @@ In this example, we consider the same system as described in section \ref{Setup}
 		ylabel=$y$, xlabel=$t$,
 		set layers=standard,
 		reverse legend,
-		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
 		ylabel shift = -6 pt]
 		
 		%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
@@ -477,7 +477,7 @@ The results for $\alpha = 0.1$ and $\alpha = 0.2$ are also interesting as they s
 \centering
 \begin{tabular}{|c| c| c| c| c|}
 \hline
-Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 0.1$ & $\alpha = 0.2$ & $\alpha = 0.3$ \\
+Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 10$\% & $\alpha = 20$\% & $\alpha = 30$\% \\
 \hline
 $J_H$ (mean) & $338.4$ & $255.9$ & $129.5$ & $69.9$\\
 \hline
@@ -486,7 +486,7 @@ Risky Runs & $8$\% & $40$\% & $78$\% & $98$\% \\
 Failed Runs & $6$\% & $6$\% & $4$\% & $6$\% \\
 \hline
 \end{tabular}
-\caption{Results of the 250 examplary runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$ and $0.3$. The table shows the average cost of the 250 runs and the percentage of failed Monte Carlo runs, i.e. runs where the true output violated at least one constraint.}
+\caption{Results of the 50 examplary runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$ and $0.3$. The table shows the average cost of the 50 runs and the percentage of failed Monte Carlo runs, i.e. runs where the true output violated at least one constraint.}
 \label{tab:results_corridor}
 \end{table} 
 
@@ -494,3 +494,209 @@ Failed Runs & $6$\% & $6$\% & $4$\% & $6$\% \\
 % J_H   317.2   265.4   117.4   65.6
 %Risky Runs 16.4% 36.8% 17.2% 99.2%
 %Failed Runs  0.8960    0.9200    0.9440    0.9120
+
+\section{Nonlinear system} \label{Nonlinear system}
+
+In the previous sections, we have looked at how the kernel approach behaves for the linear system \eqref{linear system}. However, we have chosen the kernel approach over alternative methods such as Wasserstein for its applicability for general non-linear functions. As such, in this section we are looking at a nonlinear system and compare how the system behaves for both the scenario and kernel approach for various risk factors $\alpha$.
+
+We consider with the state transition function being chosen
+
+\begin{equation} \label{nonlinear system}
+\boldsymbol{f}(\boldsymbol{x}, u) = 
+\begin{bmatrix}
+0.8  x_1 - 0.5 x_2 + 0.1 \text{cos} ( 3 x_1) x_2 \\
+0.4 x_1 + 0.5 x_2 + (1 + 0.3 \text{sin} (2 x_2)) u
+\end{bmatrix}
+\end{equation}
+
+with the rest of the system being chosen as described in section \ref{Setup}. Naturally, as this function is no longer linear, the size of the matrix $\boldsymbol{A}$ has to be adjusted to work with the new basis functions $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[ x_1,  x_2,  u, \text{cos} ( 3 x_1) x_2, \text{sin} (2 x_2) u \right]^\text{T}$. With that, we can draw samples as described in section \ref{Setup} and use them to generate $N = 200$ scenarios. We use a burn in period of $N_p = 1000$ and thin the samples with $n_d = 50$.
+
+For the cost function, we once again consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 5$ as well as the temporarily active output-constraints $y_{20:25} \geq 2$. The ambiguity set radius $\varepsilon$ is chosen through Algorithm \ref{alg:Bootstrap} with a number of bootstrap samples $B = 1000$ and a confidence level $\beta = 0.95$ and we look at the kernel approach for the risk factors $\alpha = 0.2$, $0.4$ and $0.6$ to see what influence this parameter has on the output.
+
+\begin{figure}[htb]
+\centering
+\subfigure[Scenario Approach]{ 
+\pgfplotsset{width=.47\textwidth, compat = 1.18, 
+			height = .4\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/Scenario_K200_nonlinear.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=none,
+		xmin=0, xmax=40,
+		ymin=-7, ymax=10,
+		xtick={0, 10, 20, 30, 40},
+		ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+		ylabel=$y$, xlabel=$t$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+		\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+		\tikzfillbetween[of=A and B]{opacity=0.2};
+		\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+		
+		\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+		\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+		
+		\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+		\addlegendentry{$y_{0:H}$}
+		
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+		\end{axis}
+		\end{tikzpicture}
+ }
+%\quad % puts next subfigure right next to the previous subfigure
+\subfigure[Kernel Approach ($\alpha = 0.2$)]{
+\pgfplotsset{width=.47\textwidth, compat = 1.18, 
+			height = .4\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/Kernel_alpha02_K200_S10_nonlinear.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=none,
+		xmin=0, xmax=40,
+		ymin=-7, ymax=10,
+		xtick={0, 10, 20, 30, 40},
+		ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+		%ylabel=$y$, 
+		xlabel=$t$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+		\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+		\tikzfillbetween[of=A and B]{opacity=0.2};
+		\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+		
+		\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+		\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+		
+		\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+		\addlegendentry{$y_{0:H}$}
+		
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+		\end{axis}
+		\end{tikzpicture}
+ } 
+
+\subfigure[Kernel Approach ($\alpha = 0.4$)]{
+\pgfplotsset{width=.47\textwidth, compat = 1.18, 
+			height = .4\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/Kernel_alpha04_K200_S10_nonlinear.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=none,
+		xmin=0, xmax=40,
+		ymin=-7, ymax=10,
+		xtick={0, 10, 20, 30, 40},
+		ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+		ylabel=$y$, xlabel=$t$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+		\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+		\tikzfillbetween[of=A and B]{opacity=0.2};
+		\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+		
+		\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+		\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+		
+		\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+		\addlegendentry{$y_{0:H}$}
+		
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+		\end{axis}
+		\end{tikzpicture}
+ }
+%\quad % puts next subfigure right next to the previous subfigure
+\subfigure[Kernel Approach ($\alpha = 0.6$)]{
+\pgfplotsset{width=.47\textwidth, compat = 1.18, 
+			height = .4\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+        }
+		\def\file{data/Kernel_alpha06_K200_S10_nonlinear.txt}
+		
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		grid=none,
+		xmin=0, xmax=40,
+		ymin=-7, ymax=10,
+		xtick={0, 10, 20, 30, 40},
+		ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+		%ylabel=$y$, 
+		xlabel=$t$,
+		set layers=standard,
+		reverse legend,
+		legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+		ylabel shift = -6 pt]
+		
+		\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+		\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+		\tikzfillbetween[of=A and B]{opacity=0.2};
+		\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+		
+		\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+		\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+		
+		\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+		\addlegendentry{$y_{0:H}$}
+		
+		\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+		\end{axis}
+		\end{tikzpicture}
+ } 
+\caption{Example of the optimal control with known nonlinear basis functions for scenario approach (top left) and kernel approach for various values of $\alpha$. The red areas show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the green line being the average. The blue line is one realization of the true output.}
+\label{ScenarioKernelComparisonNonLinear}
+\end{figure}
+
+in Figure \ref{ScenarioKernelComparisonNonLinear}, the results of an exemplary run have been plotted. Similar to the results in section \ref{optimal control}, the output for the scenario approach satisfy the constraints for every single scenario while the kernel approach includes a few scenarios that violate at least one constraint to increasingly stronger degrees as the risk factor $\alpha$ is increased. This shows that despite the system being nonlinear for this example, the kernel approach still works properly and allows for an optimization that allows for some of the output constraints to be violated.
+
+However, in contrast to the linear case, there have been several technical difficulties with the solver. While a convex solver was able to find a solution for the linear case, the non convex solver that has been used for this example was unable to solve the reformulated problem directly. While it worked on the scenario approach without issue, the kernel approach provided several challenges for the solver. In order to overcome this, several approximations had to be made before the solver was able to find a feasible solution for the OCP. For one, the max operator had to be approximated with the function
+
+\begin{equation} \label{max function}
+[z]_+ \approx \frac{z + sqrt(z^2 + 0.01)}{2}
+\end{equation}
+
+and the kernel gram matrix had to be changed by adding $0.01$ to all diagonal elements. This as well as a few other small approximations were required to produce the results that can be seen in Figure \ref{ScenarioKernelComparisonNonLinear}. However, these changes were only sufficient to run the solver for relatively simple problems and only for certain parameters. As can be seen in table \ref{tab:computation times}, the computation time of this simulation increasing very quickly for smaller values of the risk factor $\alpha$. As such this simulation could only be run for relatively high values of $\alpha$ which severly limits the range of problems this solver can be used for. On top of that, the solver also struggles with problems with a higher number of constraints which is why this simulation has significantly less constraints compared to the simulation in section \ref{optimal control}. This too limits the type of problems this approach can be used for. Lastly, tests have also shown that the solver struggles with finding a solution for the OCP when a low number of scenarios is being used. While this is less of an issue for practical applications, as the results of section \ref{performance guarantees} have shown, it nonetheless is another limiting factor for using this approach as an alternative for the scenario approach which displayed none of these issues for the nonlinear systems. As such, there is a need for further analysis of the solver and what can be done to avoid these issues.
+
+
+
+\begin{table}
+\centering
+\begin{tabular}{|c| c| c| c| c|}
+\hline
+Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 20$\% & $\alpha = 40$\% & $\alpha = 60$\% \\
+\hline
+Computation time & $32.8$s & $176.1$s & $50.9$s & $41.0$s\\
+\hline
+\end{tabular}
+\caption{Computation time for scenario and kernel approach for exemplary run with system with nonlinear basis functions.}
+\label{tab:computation times}
+\end{table} 
