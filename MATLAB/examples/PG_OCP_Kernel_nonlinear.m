@@ -49,7 +49,7 @@ x_init_var = 1 * ones(n_x, 1); % variance
 % Define measurement model - assumed to be known (without loss of generality).
 % Make sure that g(x,u) is defined in vectorized form, i.e., g(zeros(n_x,N), zeros(n_u, N)) should return a matrix of dimension (n_y, N).
 g = @(x, u) [1, 0] * x; % observation function
-R = 0.1; % variance of zero-mean Gaussian measurement noise
+R = 1; % variance of zero-mean Gaussian measurement noise
 
 %% Parameters for data generation
 T = 2000; % number of steps for training
@@ -98,13 +98,13 @@ y_test = y(:, T+1:end);
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
 
-% PG_samples = load("PGibbs_Samples.mat");
+% PG_samples = load("PGibbs_Samples_K200_nonlinear2.mat");
 % PG_samples = PG_samples.PG_samples;
 
-% PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
+% PG_samples = load('PGibbs_Samples_K200_R05.mat');
 % PG_samples = PG_samples.PG_samples;
 
-PG_samples = load("PGibbs_Samples_K200_nonlinear2.mat");
+PG_samples = load('PGibbs_Samples_K200_R1.mat');
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
@@ -120,7 +120,7 @@ solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approx
 
 casadi_opts = struct('expand', 1);
 
-rand_noise = true;
+rand_noise = false;
 
 s = 10;
 
@@ -211,7 +211,7 @@ for k = 1:K
     if rand_noise
         v_vec(:, :, k) = mvnrnd(zeros(1, n_x), Q, H)';
     else
-        v_vec(:, :, k) = v_vec_0;
+        v_vec(:, :, k) = zeros(n_x, H);
     end
 end
 
@@ -223,16 +223,18 @@ for k = 1:K
     if rand_noise
         e_vec(:, :, k) = mvnrnd(zeros(1, n_y), R, H)';
     else
-        e_vec(:, :, k) = e_vec_0;
+        e_vec(:, :, k) = zeros(1, H);
     end
 end
 
 v_true = zeros(n_x, H);
 e_true = zeros(n_y, H);
 
-for t = 1:H
-    v_true(:,t) = mvnrnd(zeros(n_x, 1), Q_true)';
-    v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
+if rand_noise
+    for t = 1:H
+        v_true(:,t) = mvnrnd(zeros(n_x, 1), Q_true)';
+        v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
+    end
 end
 
 
@@ -253,36 +255,36 @@ plot_predictions(Y_scenario, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'p
 
 
 
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.2, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.2) - casadi')
-
-
-
-[U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.4, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
-
-x_true = zeros(n_x, H + 1);
-y_true = zeros(n_y, H);
-
-x_true(:, 1) = x_training(:, end);
-for t = 1:H
-    x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
-    y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
-end
-
-plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.4) - casadi')
-
-
-
+% [U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.2, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
+% 
+% x_true = zeros(n_x, H + 1);
+% y_true = zeros(n_y, H);
+% 
+% x_true(:, 1) = x_training(:, end);
+% for t = 1:H
+%     x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
+%     y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
+% end
+% 
+% plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.2) - casadi')
+% 
+% 
+% 
+% [U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.4, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
+% 
+% x_true = zeros(n_x, H + 1);
+% y_true = zeros(n_y, H);
+% 
+% x_true(:, 1) = x_training(:, end);
+% for t = 1:H
+%     x_true(:, t+1) = f_true(x_true(:, t), U_casadi(t)) + v_true(:,t);
+%     y_true(:, t) = g_true(x_true(:, t), U_casadi(t)) + e_true(:,t);
+% end
+% 
+% plot_predictions(Y_casadi, y_true, 'y_max', y_max, 'y_min', y_min, 'title', 'predicted output vs. true output (Kernel Approach with alpha = 0.4) - casadi')
+% 
+% 
+% 
 [U_casadi, X_casadi, Y_casadi] = Solve_OCP_Kernel_maxConstraint_casadi(PG_samples, x_vec_0, v_vec, e_vec, H, K_opt, phi, g, n_x, n_y, n_u, y_min, y_max, 0.6, sigma_mult, U_scenario, solver_opts, casadi_opts, 5);
 
 x_true = zeros(n_x, H + 1);

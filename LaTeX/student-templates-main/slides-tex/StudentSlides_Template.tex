@@ -101,7 +101,7 @@
 		\end{equation*}
 		subject to: 
 		\begin{equation*}
-		P \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
+		P \left[  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha
 		\end{equation*}
 	\end{block}	
 	\textbf{Problem:} Underlying data distribution $P$ is unknown
@@ -135,7 +135,7 @@ Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsym
 
 \begin{block}{Chance Constraints}
 	\begin{equation*}
-		P \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha, \; \forall i = 1,...,n_c
+		P \left[  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha
 	\end{equation*}
 \end{block}	
 
@@ -143,7 +143,7 @@ Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsym
 
 \begin{block}{Scenario Approach (used in \cite{Robert_24})}
 	\begin{equation*}
-		 h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N, \; \forall i = 1, ..., n_c
+		 \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]})) \leq 0, \; \forall n = 1, ..., N
 	\end{equation*}
 \end{block}
 
@@ -175,9 +175,12 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 
 \begin{block}{Expanded Chance-Constraints}
 \begin{equation*}
-\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h_i(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha.
 \end{equation*}
 \end{block}
+
+with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta})  =  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}))$.
+
 \end{column}
 \begin{column}{.3\textwidth}
 \vspace{.5cm}
@@ -193,16 +196,16 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{block}{Feasible Region of chance constraint}
 \begin{equation*}
-Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
+Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
 \end{equation*}
 \end{block}	
 
 \makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
 \begin{block}{Reformulated Feasible Region \cite{Yassine_22}}
-\begin{empheq}[right = \empheqrbrace, left= Z_i \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
+\begin{empheq}[right = \empheqrbrace, left= \hat{Z} \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
     & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t' \alpha \\
-    & [\tilde{h}_i(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t']_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
+    & [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t']_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
     & g_0 \in \mathbb{R}, \boldsymbol{\gamma} \in \mathbb{R}^N, t' \in \mathbb{R}
   \end{empheq}
 \end{block}
@@ -213,15 +216,15 @@ Z_i :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde
 	\frametitle{Problem Formulation}
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{align*} 
- &\min\limits_{\boldsymbol{u}_{0:H}, \{g_0, \boldsymbol{\gamma}, t'\}^{[1:n_c]}} J_H(\boldsymbol{u}_{0:H}) \\
-\text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0, \; \forall i \in \mathbb{N}_{\leq n_c}  \\
+ &\min\limits_{\boldsymbol{u}_{0:H}, g_0, \boldsymbol{\gamma}, t'} J_H(\boldsymbol{u}_{0:H}) \\
+\text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0, \\
 &\left. 
 \begin {aligned}
 \boldsymbol{x}_{t+1}^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]} , \boldsymbol{u}_t \right) + & \boldsymbol{v}_{t}^{[n]}\\
 \boldsymbol{y}_{t}^{[n]} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + & \boldsymbol{w}_{t}^{[n]} 
 \end{aligned}
  \;\;  \right\} \; \text{Dynamic Constraints} \\
-&\;\;\;\; \boldsymbol{u}_{0:H} \in Z_i(g_0^{[i]}, \boldsymbol{\gamma}^{[i]}, t'^{[i]}) \;\;\;\;\;\; \;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
+&\;\;\;\; \boldsymbol{u}_{0:H} \in Z(g_0, \boldsymbol{\gamma}, t') \;\;\;\;\;\; \;\;\;  \;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
 \end{align*}
 
 
@@ -311,7 +314,7 @@ Number of scenarios used for optimization: $N = 200$
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -319,7 +322,7 @@ Number of scenarios used for optimization: $N = 200$
 			every axis label/.append style={font=\scriptsize},
 			legend style = {font=\scriptsize},
 	        }
-			\def\file{data/Kernel_K200_Alpha01_S2.txt}
+			\def\file{data/Kernel_K200_Alpha02_S2.txt}
 			
 			\centering
 			\begin{tikzpicture}
@@ -395,7 +398,7 @@ Number of scenarios used for optimization: $N = 200$
 			\end{tikzpicture}
 			\end{figure}}
 
-			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.3$)
+			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.5$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -403,7 +406,7 @@ Number of scenarios used for optimization: $N = 200$
 			every axis label/.append style={font=\scriptsize},
 			legend style = {font=\scriptsize},
 	        }
-			\def\file{data/Kernel_K200_Alpha03_S2.txt}
+			\def\file{data/Kernel_K200_Alpha05_S2.txt}
 			
 			\centering
 			\begin{tikzpicture}
@@ -450,15 +453,15 @@ Number of scenarios used for optimization: $N = 200$
 			every axis label/.append style={font=\scriptsize},
 			legend style = {font=\scriptsize},
         }
-		\def\file{data/AlphaTest_K250_MultipleConstraints_S2_Alpha02.txt}
+		\def\file{data/AlphaTest_K300_MaxConstraint_S2.txt}
 		
 		\centering
 		\begin{tikzpicture}
 		\begin{axis}[
 		grid=both,
-		xmin=1, xmax=250,
+		xmin=1, xmax=300,
 		ymin=0, ymax=100,
-		xtick={0, 50, 100, 150, 200, 250},
+		xtick={0, 50, 100, 150, 200, 250, 300},
 		ytick={0, 20, 40, 60, 80, 100},
 		ylabel={Constraints Satisfied [\%]}, xlabel=$N$,
 		set layers=standard,
@@ -466,25 +469,397 @@ Number of scenarios used for optimization: $N = 200$
 		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
 		ylabel shift = -6 pt]
 		
-		\addplot[ultra thick,black!20!red] table[x=K,y=Kernel02]{\file};
+		\addplot[thick,black!20!red] table[x=K,y=Kernel04]{\file};
 		\addlegendentry{Kernel ($\alpha = 0.2$)}
 		
-		\addplot[ultra thick,black!20!orange] table[x=K,y=Kernel015]{\file};
+		\addplot[thick,black!20!orange] table[x=K,y=Kernel03]{\file};
 		\addlegendentry{Kernel ($\alpha = 0.15$)}
 
-		\addplot[ultra thick,black!20!yellow] table[x=K,y=Kernel01]{\file};
+		\addplot[thick,black!20!yellow] table[x=K,y=Kernel02]{\file};
 		\addlegendentry{Kernel ($\alpha = 0.1$)}
 
-		\addplot[ultra thick,black!20!green] table[x=K,y=Kernel005]{\file};
+		\addplot[thick,black!20!green] table[x=K,y=Kernel01]{\file};
 		\addlegendentry{Kernel ($\alpha = 0.05$)}
 
-		\addplot[ultra thick,black!20!blue] table[x=K,y=Scenario]{\file};
+		\addplot[thick,black!20!blue] table[x=K,y=Scenario]{\file};
 		\addlegendentry{Scenario}
 		\end{axis}
 		\end{tikzpicture}
 		\label{fig:robustness_plot}
 \end{figure}
 \end{frame}	
+
+\begin{frame}{Corridor Test}
+	Number of scenarios used for optimization: $N = 200$
+\vspace{.3cm}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\;\; Scenario Approach
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Scenario_K100_N50.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				ylabel=$y$, xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}
+			%\includegraphics[width= .9\textwidth]{Scenario_plot}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha01.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				%ylabel=$y$, 
+				xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}}
+
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha02.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				%ylabel=$y$, 
+				xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,48}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,2}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}}
+
+			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.3$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha03.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				%ylabel=$y$, 
+				xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}
+
+
+\begin{frame}{Nonlinear System}
+
+\begin{block}{Linear System (used in previous simulations)}
+\begin{equation*}
+\boldsymbol{f}(\boldsymbol{x}, u) = 
+\begin{bmatrix}
+0.8  x_1 - 0.5 x_2 \\
+0.4 x_1 + 0.5 x_2 + u
+\end{bmatrix}
+\end{equation*}
+\end{block}	
+
+\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
+
+\begin{block}{Nonlinear System}
+\begin{equation*}
+\boldsymbol{f}(\boldsymbol{x}, u) = 
+\begin{bmatrix}
+0.8  x_1 - 0.5 x_2 + 0.1 \text{cos}(3 x_1) x_2\\
+0.4 x_1 + 0.5 x_2 + (1 + 0.3 \text{sin} (2 x_2 )) u
+\end{bmatrix}
+\end{equation*}
+\end{block}
+\end{frame}	
+
+
+\begin{frame}{Optimal Control of Nonlinear Systems}
+
+Number of scenarios used for optimization: $N = 200$
+\vspace{.3cm}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\;\; Scenario Approach
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+	        }
+			\def\file{data/Scenario_K200_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+			ylabel=$y$, xlabel=$t$,
+			set layers=standard]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			%\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			%\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			%\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}
+			%\includegraphics[width= .9\textwidth]{Scenario_plot}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Kernel_alpha02_K200_S10_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+			%ylabel=$y$, 
+			xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.4$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Kernel_alpha04_K200_S10_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+			%ylabel=$y$, 
+			xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+
+			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.6$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Kernel_alpha06_K200_S10_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},			%ylabel=$y$, 
+			xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}	
+
+\begin{frame}{Problems}
+	Solver unreliable for kernel approach with non linear systems
+
+	Impossible to solve OCPs with ...
+	\begin{itemize}
+	\item Low number of samples $N$
+	\item Low Risk Factor $\alpha$
+	\item High number of constraints
+	\end{itemize}
+\end{frame}
 
 \section{Conclusion}
 
@@ -552,97 +927,6 @@ For $n = 1,...,N$:
 \end{block}
 $B = 1000, \beta = 0.95$
 \end{frame}
-
-
-
-\begin{frame}{Max Constraint}
-
-\begin{block}{Chance Constraint}
-	\begin{equation*}
-		P \left[ \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha
-	\end{equation*}
-\end{block}
-			\only<1>{\;\; Constrained Output ($\alpha = 0.5$)
-			\begin{figure}
-			\pgfplotsset{width=.6\textwidth, compat = 1.18, 
-			height = .4\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-	        }
-			\def\file{data/Kernel_K300_Alpha05_S2_MaxConstraint.txt}
-			
-			\centering
-			\begin{tikzpicture}
-			\begin{axis}[
-			grid=none,
-			xmin=0, xmax=40,
-			ymin=-14, ymax=14,
-			xtick={0, 10, 20, 30, 40},
-			ytick={-10, -5, 0, 5, 10},
-			ylabel=$y$, xlabel=$t$,
-			set layers=standard,
-			reverse legend,
-			legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
-			ylabel shift = -6 pt]
-			
-			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
-			\tikzfillbetween[of=A and B]{opacity=0.2};
-			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
-			
-			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
-			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
-			
-			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
-			\addlegendentry{$y_{0:H}$}
-			
-			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (10,15) rectangle (20,-10); 
-			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
-			\end{axis}
-			\end{tikzpicture}
-			\end{figure}}
-
-			\only<2>{\begin{figure}[t]
-			\pgfplotsset{width=.75\textwidth, compat = 1.18, 
-			height = .41\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-        }
-		\def\file{data/AlphaTest_K300_MaxConstraints_S2_Alpha04.txt}
-		
-		\centering
-		\begin{tikzpicture}
-		\begin{axis}[
-		grid=both,
-		xmin=1, xmax=250,
-		ymin=0, ymax=100,
-		xtick={0, 50, 100, 150, 200, 250},
-		ytick={0, 20, 40, 60, 80, 100},
-		ylabel={Constraints Satisfied [\%]}, xlabel=$N$,
-		set layers=standard,
-		reverse legend,
-		legend style={font=\scriptsize, at={(1,0)},anchor=south east, row sep=2pt},
-		ylabel shift = -6 pt]
-		
-		\addplot[ultra thick,black!20!red] table[x=K,y=Kernel04]{\file};
-		\addlegendentry{Kernel ($\alpha = 0.4$)}
-		
-		\addplot[ultra thick,black!20!orange] table[x=K,y=Kernel03]{\file};
-		\addlegendentry{Kernel ($\alpha = 0.3$)}
-
-		\addplot[ultra thick,black!20!yellow] table[x=K,y=Kernel02]{\file};
-		\addlegendentry{Kernel ($\alpha = 0.2$)}
-
-
-		\addplot[ultra thick,black!20!blue] table[x=K,y=Scenario]{\file};
-		\addlegendentry{Scenario}
-		\end{axis}
-		\end{tikzpicture}
-		\label{fig:robustness_plot}
-\end{figure}}
-\end{frame}	
 
 \begin{frame}{Maximum Mean Discrepancy (MMD)}
 \begin{block}{Maximum Mean Discrepancy}

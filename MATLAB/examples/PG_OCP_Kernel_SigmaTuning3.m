@@ -100,7 +100,10 @@ y_test = y(:, T+1:end);
 % PG_samples = load("PGibbs_Samples.mat");
 % PG_samples = PG_samples.PG_samples;
 
-PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
+%PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
+%PG_samples = PG_samples.PG_samples;
+
+PG_samples = load('PGibbs_Samples_K200_R1.mat');
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
@@ -211,8 +214,8 @@ iter_max = 15;
 sigma_cnt = 51;
 
 %sigma_init = [1.5 5 5 1];
-%sigma_init =  [0.716 1.4062 1.4062 0.4109];
-sigma_init = ones(1,4);
+sigma_init =  [0.716 1.4062 1.4062 0.4109];
+%sigma_init = ones(1,4);
 
 K_train = 300;
 K_test = K - K_train;
@@ -230,7 +233,7 @@ cnts = 1;
 
 for iter = 1:iter_max
     %iter
-    for ts = 1:4
+    for ts = [1 4]
         sigma_range(:,ts,cnts) = linspace(0.9* sigma(cnts, ts), 1.1* sigma(cnts, ts), sigma_cnt)';
         for sigma_iter = 1:sigma_cnt
             for k_test = 1:K_test

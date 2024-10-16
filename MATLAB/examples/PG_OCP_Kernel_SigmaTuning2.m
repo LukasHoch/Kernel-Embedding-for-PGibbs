@@ -207,13 +207,14 @@ for n = 1:K
 end
 
 
-iter_max = 6;
-sigma_cnt = 15;
+iter_max = 5;
+sigma_cnt = 51;
 
-%sigma_init = [1.5 5 5 1];
-sigma_init =  [0.5716 1.4062 1.4062 0.4109];
+sigma_init = [0.5637 1.4231 1.5639 0.2653];
+%sigma_init = [0.5716 1.4062 1.4062 0.2109];
+%sigma_init = ones(1,4);
 
-K_train = 300;
+K_train = 200;
 K_test = K - K_train;
 
 sigma = zeros(iter_max * 4 + 1, 4);
@@ -228,7 +229,7 @@ kernel_mean_mean = zeros(iter_max * 4 + 1, sigma_cnt);
 cnts = 1;
 
 for iter = 1:iter_max
-    iter
+    %iter
     for ts = 1:4
         sigma_range(:,ts,cnts) = linspace(0.9* sigma(cnts, ts), 1.1* sigma(cnts, ts), sigma_cnt)';
         for sigma_iter = 1:sigma_cnt
@@ -266,3 +267,5 @@ for iter = 1:iter_max
         cnts = cnts + 1;
     end
 end
+
+sigma(cnts, :)
