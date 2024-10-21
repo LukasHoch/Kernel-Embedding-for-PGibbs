@@ -2,8 +2,9 @@
 \chapter{Introduction}
 \label{sec:introduction}
 
-Reliable mathmatical models are a fundamental component of any model-based control application. However, finding such a model is often very difficult as there are many considerations that go into creating or estimating it, with even small deviations sometimes leading to big differences. Oftentimes, it is impossible to create such a model only based on the general knowledge of the system, such as the physics of the application. Because of this, data-driven modeling approaches that allow for derive such models based on previously collected data are gaining attention and their usefulness for optimal control applications is being explored.
+In the realm of model-based control, the development of reliable and accurate mathematical models is crucial to ensuring the success of any control application. However, finding such a model is often very difficult as there are many considerations that go into creating or estimating it, with even small deviations sometimes leading to big differences. It is often impossible to create such a model only based on the general knowledge of the system, such as the physics of the application. Because of this, data-driven modeling approaches that allow for derive such models based on previously collected data are gaining attention and their usefulness for optimal control applications is being explored. To this end, there are already numerous methods, such as a combination of state-space models and Gaussian processes \cite{Williams_06} or similar Bayesian approaches, that allow for a reliable quantifications of uncertain models. These uncertainties can result from basing your model only on a limited set of training data (epistemic uncertainty) and the measurement noise that makes the training data less reliable (aleatory uncertainty). 
 
+These approaches do however strongly rely on state measurements of the unknown system in order to quantify model uncertainties. These measurements are not always available, however, as in many applications it is either unknown which variables directly effect the system or some states are not measureable. While methods such as \cite{Maiworm_21} exist that do not require the state space representation, they come with disadvantages of losing much information about the system such as being able to distinguish between the noise that only affects the states internally (process noise) and the noise that only affects the measurements (measurement noise). This means in the case of latent states, it is advantagous to work with the state-space representation by jointly estimating the unknown dynamics and the latent states to create a reliable model for the system.
 
 In this chapter, the problem is introduced in Sec. \ref{Problem Statement} and various works that are connected to this topic are shown and summarized in \ref{Related Work}.
 
@@ -26,7 +27,7 @@ In our setting, only the output $\boldsymbol{y}_t$ is observable and the state t
 
 We assume that a dataset $\mathbb{D} = \left\{\boldsymbol{u}_{t}, \boldsymbol{y}_{t}\right\}_{t = \text{-}T:\text{-}1}$ containing the last $T \in \mathbb{N}$ measurements of the input $\boldsymbol{u}_t$ and output $\boldsymbol{y}_t$ is available.
 
-We further assume that the structure of the model $\left\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}}, \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}\right\}$ is known, for example through the underlying physics of the applications, and is dependent on a finite number of unknown parameters $\boldsymbol{\theta}$. In addition to that, the priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$ are available as well.
+We further assume that the structure of the model $\left\{\boldsymbol{f}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{g}_{\boldsymbol{\theta}}(\cdot), \boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}}, \boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}}\right\}$ is known, for example from a physical insight into the system, and is dependent on a finite number of unknown parameters $\boldsymbol{\theta}$. In addition to that, the priors $p(\boldsymbol{\theta})$ and $p(\boldsymbol{x}_{\text{-}T})$ are available as well.
 
 The objective is to minimize a given cost function 
 
@@ -40,21 +41,21 @@ over the horizon $H$ while satisfying the constraints
 \boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq \boldsymbol{0}
 \end{equation}
 
-with $\boldsymbol{h} \in \mathbb{R}^{n_c}$ being a vector of arbitrary deterministic function. As the states $\boldsymbol{x}_{0:H}$ are unknown to us and there are several uncertain factors in our system, the constraints are transformed into chance-constraints and since it is possible that $\boldsymbol{h}$ is impossible to satisfy for every possible $\boldsymbol{x}_{0:H}$, we also introduce a risk factor $\alpha \in [0, 1]$ that relaxes these constraints, turning them into
+with $\boldsymbol{h} \in \mathbb{R}^{n_c}$ being a vector of arbitrary deterministic function. As the states $\boldsymbol{x}_{0:H}$ are unknown to us and there are several uncertain factors in our system, i.e., the process and measurement noise and the unknown parameter $\boldsymbol{\theta}$ that characterizes the system, the constraints are transformed into chance-constraints and since it is possible that $\boldsymbol{h}$ is impossible to satisfy for every possible $\boldsymbol{x}_{0:H}$, we also introduce a risk factor $\alpha \in [0, 1]$ that relaxes these constraints, turning them into
 
 \begin{equation} \label{risk constraints}
 P \left[ \text{max} (\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha
 \end{equation}
 
-with $P$ being generally unknown.
+with the underlying distribution of the data being generally unknown.
 
 \section{Related Work} \label{Related Work}
 
 %From Robert's \emph{Learning-Based Optimal Control with Performance Guarantees for Unknown Systems with Latent States}\cite{Robert2024}:
 
-The problem presented in Sec. \ref{Problem Statement} provides several challenges as the information we have available is very limited. While many methods to solve chance constrained problems exist, they often rely on samples from a distribution which is generally unknown in our problem. While we do have priors for the uncertain elements, samples drawn from this distributions are generally make the optimization problem infeasible. As such, the priors must be updated based on the input-output measurements $\mathbb{D}$ which generally results in an analytically intractable posterior distribution.
+The problem presented in Sec. \ref{Problem Statement} provides several challenges as the information we have available is very limited. While many methods to solve chance constrained problems exist, they often rely on samples from a distribution which is generally unknown in our problem. While we do have priors for the uncertain elements, we only have access to the prior for $\boldsymbol{x}_{\text{-}T}$ and the forward propagation over $T$ timesteps will generally to the optimization problem becoming infeasible. As such, the priors must be updated based on the input-output measurements $\mathbb{D}$, i.e., the posterior distribution must be inferred, but this distribution is analytically intractable.
 
-To draw samples from this distribution, particle Markov chain Monte Carlo (PMCMC) methods \cite{Andrieu_10} are used. This has recently been exploited for optimal control in \cite{Robert_24} , utilizing such a sampler to generate scenarios for the system. These scenarios are then used to formulate a deterministic optimal control problem by reformulating the chance-constraints. However, the usage of the scenarios in this paper comes with the drawback that the risk factor cannot be specified for the final optimal control problem (OCP) and the process of estimating it retroactively is quite ressource intensive.
+To draw samples from this distribution, particle Markov chain Monte Carlo (PMCMC) methods \cite{Andrieu_10} were proposed. This has recently been exploited for optimal control in \cite{Robert_24} , utilizing such a sampler to generate scenarios that describe possible future trajectories of the unknown system. These scenarios are then used to formulate a deterministic optimal control problem by reformulating the chance-constraints. However, the usage of the scenarios in this paper comes with the drawback that the risk factor cannot be specified for the final optimal control problem (OCP) and the process of estimating it retroactively is ressource intensive.
 
 As such, there is a need to find other methods that allow us to utilize the samples generated by PMCMC sampler to reformulate the chance-constraints to find a distributionally robust solution without losing the risk factor in the process. 
 
@@ -64,7 +65,7 @@ Another workaround that has been proposed is the use of ambiguity sets. Here, am
 
 Another metric is proposed in \cite{Yassine_22} allows for an efficient construction of an ambiguity set using a maximum mean discrepancy (MMD) metric combined with kernel approximation. In contrast to Wasserstein ambiguity sets, this approach can be applied to general non-linear and non-convex constraints.
 
-The remainder of this paper is structured as follows. In chapter \ref{Technical Background}, we review the methods used to create a PMCMC sampler and how the OCP is reformulated with scenario theory. Following that, we describe the alternative approach using ambiguity sets in chapter \ref{Technical Approach}. These methods are then tested and evaluated in chapter \ref{Evaluation} and further discussed in chapter \ref{Discussion}. Finally, the results are summarized and some concluding remarks are given in chapter \ref{Conclusion}.
+The remainder of this paper is structured as follows. In Chapter \ref{Technical Background}, we review the methods used to create a PMCMC sampler and how the OCP is reformulated with scenario theory. Following that, we describe the alternative approach using ambiguity sets in Chapter \ref{Technical Approach}. These methods are then tested and evaluated in Chapter \ref{Evaluation}. Finally, the results are summarized and some concluding remarks are given in Chapter \ref{Conclusion}.
 
 
 

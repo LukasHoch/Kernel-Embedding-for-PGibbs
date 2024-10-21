@@ -12,9 +12,9 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 200; % number of PG samples
-k_d = 50; % number of samples to be skipped to decrease correlation (thinning)
-K_b = 1000; % length of burn-in period
+K = 2200; % number of PG samples
+k_d = 40; % number of samples to be skipped to decrease correlation (thinning)
+K_b = 2000; % length of burn-in period
 N = 30; % number of particles of the particle filter
 
 n_x = 2; % number of states
@@ -104,7 +104,7 @@ y_test = y(:, T+1:end);
 % PG_samples = load('PGibbs_Samples_K200_R05.mat');
 % PG_samples = PG_samples.PG_samples;
 
-PG_samples = load('PGibbs_Samples_K200_R1.mat');
+PG_samples = load('PGibbs_Samples_K2200_R1.mat');
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
@@ -122,8 +122,8 @@ casadi_opts = struct('expand', 1);
 
 rand_noise = false;
 
-s = 10;
-
+K = 200;
+s = 2;
 
 if s == 1
     H = 11;
@@ -132,8 +132,8 @@ if s == 1
 
 elseif s == 2
     H = 41;
-    y_min = [-inf * ones(1, 30), 10 * ones(1, 11)];
-    y_max = [inf * ones(1, 10), -10* ones(1, 11), inf * ones(1, 20)];
+    y_min = [-inf * ones(1, 30), 2 * ones(1, 11)];
+    y_max = [inf * ones(1, 10), -2* ones(1, 11), inf * ones(1, 20)];
 
 elseif s == 3  
     H = 41;
@@ -176,12 +176,14 @@ end
 
 
 R = 0.1;
-alpha = 0.2;
+alpha = 0.5;
 
 %sigma_mult = [1.5 5 5 1];                      %Sigma1 Used for previous examples
 %sigma_mult = [1.6875 0.6250 1.6406 1.6875];    %Sigma2 Generated using SigmaTuning
-sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
-%sigma_mult = [0.5648 1.4214 1.5660 0.2824];    %Sigma4 Generated using SigmaTuning3 (Potentially the same as SigmaTuning2, just more converged)
+%sigma_mult = [0.5716 1.4062 1.4062 0.2109];    %Sigma3 Generated using SigmaTuning2   
+sigma_mult = [0.5591 1.4062 1.4062 0.4258];    %Sigma4 Generated using SigmaTuning3 (Potentially the same as SigmaTuning2, just more converged)
+
+
 
 K_opt = 200;
 if K_opt > K
@@ -233,7 +235,7 @@ e_true = zeros(n_y, H);
 if rand_noise
     for t = 1:H
         v_true(:,t) = mvnrnd(zeros(n_x, 1), Q_true)';
-        v_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
+        e_true(:,t) = mvnrnd(zeros(n_y, 1), R_true);
     end
 end
 

@@ -80,7 +80,7 @@ We can now use the ambiguity set $\mathcal{P}$ defined in section \ref{SubSec:MM
 with reproducing kernel hilbert space function $g \in \mathcal{H}$ and $1(\cdot)$ denoting the indicator function. Using this set feasible region exactly is generally intractable in practice. As such, we further approximate the set based on CVaR. For this, we first define the Value-at-Risk which is given as 
 
 \begin{equation} \label{VaR definition}
-	\text{VaR}_{1-\alpha}^{P} :=  \inf \left\{ t' \in \mathbb{R} : P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq t \right] \geq 1 - \alpha \right\}.
+	\text{VaR}_{1-\alpha}^{P} :=  \inf \left\{ t' \in \mathbb{R} : P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq t' \right] \geq 1 - \alpha \right\}.
 \end{equation}
 
 where it can be easily shown that
@@ -109,7 +109,7 @@ Applying this to the feasible region defined in \eqref{feasible region}, we arri
 
 \begin{subequations}
   \begin{empheq}[right = \empheqrbrace, left= \hat{Z} \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align}
-    & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t' \alpha \\
+    & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t' \alpha \label{feasible region Constr1} \\
     & [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t']_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
     & g_0 \in \mathbb{R}, \boldsymbol{\gamma} \in \mathbb{R}^N, t' \in \mathbb{R}
   \end{empheq}

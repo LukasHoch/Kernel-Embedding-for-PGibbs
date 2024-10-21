@@ -1,6 +1,6 @@
 \chapter{Evaluation} \label{Evaluation}
 
-In this section, the effectiveness of the proposed optimal control approach is tested in a simulation and compared it to previously used scenario theory. The simulation setup is described in section \ref{Setup}. The results of the OCP are shown in section \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in section \ref{performance guarantees} by looking at the robustness of the solution and compare it to the commonly used scenario approach and finally we show the potential of this approach in section \ref{corridor}.
+In this section, the effectiveness of the proposed optimal control approach is tested in a simulation and compared it to previously used scenario theory. The simulation setup is described in Section \ref{Setup}. The results of the OCP are shown in Section \ref{optimal control}. Afterwards, we analyse the results and performance in more detail in Section \ref{performance guarantees} by looking at the robustness of the solution and compare it to the commonly used scenario approach and finally we show the potential of this approach in Section \ref{corridor}.
 
 \section{Simulation Setup} \label{Setup}
 
@@ -25,7 +25,7 @@ and the process noise distribution
 \right).
 \end{equation}
 
-Both the state transition function and the process noise distribution are unknown to the user. Meanwhile, the observation function $g(\boldsymbol{x}, u) = x_1$ and measurement noise $w_t \sim \mathcal{N} (0, 0.1)$ is assumed to be known. This assumption can be made without a loss of genrality since an unknown observation model can be combined with the unknown transition model into a expanded model with $n_x + n_y$ states \cite{Frigola_15}.
+Both the state transition function and the process noise distribution are unknown to the user. Meanwhile, the observation function $g(\boldsymbol{x}, u) = x_1$ and measurement noise $w_t \sim \mathcal{N} (0, 0.1)$ is assumed to be known. This assumption is made without a loss of genrality since an unknown observation model can be combined with the unknown transition model into a expanded model with $n_x + n_y$ states \cite{Frigola_15}.
 
 
 For the scenario generation, we consider a set containing $T = 2000$ input and output measurements of the true system for our dataset $\mathbb{D}$. These measurements are obtained with a random input trajectory $u \sim \mathcal{N} (0, 3)$ while starting from a random initial state $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$. To infer the state model parameters, the approach from \cite{Svensson_17} is used. It is assumed that $\boldsymbol{f}(\cdot)$ is a linear combination of $n_a$ basis functions $\boldsymbol{\varphi}(\boldsymbol{x}_t, u_t)$ and the process noise is normally distributed. As such, the state transition can be rewritten as
@@ -34,7 +34,7 @@ For the scenario generation, we consider a set containing $T = 2000$ input and o
 \boldsymbol{x}_{t+1} = \boldsymbol{A} \boldsymbol{\varphi}(\boldsymbol{x}_t, u_t) + \boldsymbol{v}_{t}
 \end{equation}
 
-with the basis functions $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[ x_1,  x_2,  u \right]^\text{T}$, the process noise $\boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ and the unknown parameters $\boldsymbol{\theta}$ consisting of $\boldsymbol{A}$ and $\boldsymbol{Q}$. An inverse Wishart  prior with $l$ degrees of freedom and positive definite scale matrix $\Lambda$ is assumed for the matrix $\boldsymbol{Q}$. For the matrix $\boldsymbol{A}$ matrix normal prior with mean matrix $\boldsymbol{M} = \boldsymbol{0}$, right covariance $\boldsymbol{U} = \boldsymbol{Q}$ and left covariance matrix $\boldsymbol{V} \in \mathbb{R}^{n_a \times n_a}.$ For the estimation of the posterior disdribution with the PG sampler, we scale the basisvector with the weights $\left[ 0.1,  0.1,  1 \right]^\text{T}$ and for the prior the weights are chosen as $\boldsymbol{V} = 10 \boldsymbol{I}_5$.
+with the basis functions $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[ x_1,  x_2,  u \right]^\text{T}$, the process noise $\boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ and the unknown parameters $\boldsymbol{\theta}$ consisting of $\boldsymbol{A}$ and $\boldsymbol{Q}$. An inverse Wishart  prior with $l$ degrees of freedom and positive definite scale matrix $\Lambda$ is assumed for the matrix $\boldsymbol{Q}$. For the matrix $\boldsymbol{A}$ matrix normal prior with mean matrix $\boldsymbol{M} = \boldsymbol{0}$, right covariance $\boldsymbol{U} = \boldsymbol{Q}$ and left covariance matrix $\boldsymbol{V} \in \mathbb{R}^{n_a \times n_a}.$ For the estimation of the posterior disdribution with the PG sampler, we scale the basisvector with the weights $\left[ 0.1,  0.1,  1 \right]^\text{T}$ and for the prior the weights are chosen as $\boldsymbol{V} = 10 \boldsymbol{I}_3$.
 
 We use gaussian kernels $k(x,y) = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||x - y||_2^2 \right)$ with the bandwidth $\sigma$ set individually for all random parameters $\left\{\boldsymbol{x}_0^{[k]}, \boldsymbol{v}_{0:H}^{[k]}, w_{0:H}^{[k]},  \boldsymbol{A}^{[k]}\right\}$. As such, the elements of the Gram matrix $\boldsymbol{K} \in \mathbb{R}^{N \times N }$ are defined as
 
@@ -59,15 +59,15 @@ over a set of $N_\text{train} = 300$ training samples that are independent of th
 
 \section{Optimal Control with Constrained Output} \label{optimal control}
 
-In the following, we show how well the proposed optimal control approach works when applied to a OCP with constrained output by putting it side by side with the solution of the same problem where we have used the scenario approach which implements the chance-constraints by ensuring that the constraints are satisfied for every scenario $n \in \mathbb{N}_{\leq N}$ \cite{Garatti_22}. 
+In the following, we show how well the proposed optimal control approach works when applied to a OCP with constrained output. We illustrate this by putting the solution side by side with the solution of the same problem where the scenario approach that was described in Section \ref{Scenario Approach} was used. 
 
 For this simulation, we are using scenarios that have been generated using the PG sampler. To this end, $16130$ samples were created and the first $N_p = 2000$ were discarded as training samples and the remaining samples were once again thinned with $n_d = 70$. The remaining $N = 200$ samples are then used as scenarios for the OCPs.
 
 For the cost function, we consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 10$ as well as the temporarily active output-constraints $y_{10:20} \leq \text{-} 10$ and $10 \leq y_{30:40}$.  The ambiguity set radius $\varepsilon$ is chosen through Algorithm \ref{alg:Bootstrap} with a number of bootstrap samples $B = 1000$ and a confidence level $\beta = 0.95$. In this experiment, we look at the results for the risk level $\alpha$ being chosen as $0.01$, $0.2$ and $0.5$ to determine how much of an influence this parameter has on the solution.
 
-The OCP can then be formulated as described in section \ref{Constraint Reformulation}. Since the problem has been chosen as convex in this example, a solution for both the scenario and kernel approach can be found easily by using a convex solver.
+The OCP can then be formulated as described in Section \ref{Constraint Reformulation}. Since the system and constraints have been chosen as linear in this example, the resulting problems for both the scenario and kernel approach are convex and a solution can be found easily by using a convex solver.
 
-\begin{figure}[htb]
+\begin{figure}[t!]
 \centering
 \subfigure[Scenario Approach ($\tilde{\alpha} = 0.16$)]{    %\alpha = 16.05%
 \pgfplotsset{width=.47\textwidth, compat = 1.18, 
@@ -230,7 +230,7 @@ The OCP can then be formulated as described in section \ref{Constraint Reformula
 		\end{axis}
 		\end{tikzpicture}
  } 
-\caption{Example of the optimal control with known basis functions for scenario approach (top left) and kernel approach for various values of $\alpha$. The red areas show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the green line being the average. The blue line is one realization of the true output.}
+\caption{Example of the optimal control for scenario approach (top left) and kernel approach for various values of $\alpha$. The red areas show the output constraints. The gray area encompasses the 200 scenarios that were used in the optimization with the green line being the average. The blue line is one realization of the true output.}
 \label{ScenarioKernelComparison}
 \end{figure}
 
@@ -245,11 +245,11 @@ The results of an exemplary run is shown in Figure \ref{ScenarioKernelComparison
 
 The biggest advantage that this kernel approximation has shown compared to the scenario approach is the adjustable risk factor. This parameter $\alpha \in [0, 1]$ can be chosen depending on how successful the final solution is supposed to be when it comes to satisfying the constraints in future scenarios. 
 
-In this section, this parameter is tested by running the same problem setup as was used in section \ref{optimal control} for different values of $\alpha$ as well as increasing and lowering the number of samples $N$ and testing how well the solution holds up for other scenarios that are independent of the ones used in the optimization.
+In this section, this parameter is tested by running the same problem setup as was used in Section \ref{optimal control} for different values of $\alpha$ as well as increasing and lowering the number of samples $N$ and testing how well the solution holds up for other scenarios that are independent of the ones used in the optimization.
 
-Similar to section \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of scenarios, a small subset is then taken and used to formulate several OCPs as was already described in the previous section. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is applied to $N = 2000$ more independent scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10, 25 and 50 samples and then increased with a step size of 50 until $N = 300$ samples are used in the optimization.
+Similar to Section \ref{optimal control}, a number of scenarios are generated with Algorithm \ref{alg:PGibbs}. From this set of scenarios, a small subset is then taken and used to formulate several OCPs as was already described in the previous section. The OCPs are then solved and the resulting optimal input $\boldsymbol{u}_{0:H}$ is applied to $N = 2000$ more independent scenarios from the same system to test how well this solution holds up. For each of the 2000 scenarios, the output is calculated and compared to the constraints that were used in the OCP to check whether or not they are fulfilled. This process is then repeated for various numbers of scenarios. It is done for 1, 5, 10, 25 and 50 samples and then increased with a step size of 50 until $N = 300$ samples are used in the optimization.
 
-\begin{figure}[t]
+\begin{figure}[t!]
 		\pgfplotsset{width=13cm, compat = 1.18, 
 			height = 9cm, grid= major, 
 			legend cell align = left, ticklabel style = {font=\scriptsize},
@@ -295,7 +295,7 @@ Similar to section \ref{optimal control}, a number of scenarios are generated wi
 \end{figure}
 
 
-In Figure \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 300. The various $\alpha$ values are shown as separate lines. Initially, all five plots show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution. As the number of scenarios is increased, the approximation of the distribution becomes better leading to a higher percentage of scenarios where the constraints are satisfied.
+In Figure \ref{fig:robustness_plot} the results of this simulation are shown. The percentage of scenarios that fulfill the constraints is plotted over the number of samples used in the initial optimization which range from $N = 1$ to 300. The various $\alpha$ values are shown as separate lines. Initially, all five lines show very similar results. This can be explained by the fact that at such a low number of scenarios cannot accurately represent the distribution. As the number of scenarios is increased, the approximation of the distribution becomes better leading to a higher percentage of scenarios where the constraints are satisfied.
 
 After around 25 scenarios, the plots start diverging for the first time. While the scenario approach and the plots with smaller $\alpha$ values are very similar, the lines that represent larger $\alpha$ values are starting to display a slightly different percentage of cases that satisfy the constraints. It can be seen that the kernel approach achieves a more robust solution for $\alpha = 0.3$ and $N = 50$ but since this effect is only present for this one instance, it can be inferred that this is most likely just due to random chance.
 
@@ -303,16 +303,16 @@ For $N \geq 100$ scenarios, a trend starts to become apparent in the different l
 
 Meanwhile, the scenario approach is displaying a similar behavior with the percentage of scenarios that satisfy the constraints improving as the number of scenarios used for the optimization is increased. Something that stands out here is that, at least within the observed range of samples used in the optimization, the kernel approach seemingly provides a more reliable solution $\boldsymbol{u}_{0:H}$ than the scenario approach. This shows clearly, that even if the kernel approach begins with the goal to allow for portion of the scenarios to not satisfy the constraints, it can still lead to a more reliable solution than the scenario approach which by its definition tries to satisfy the constraints of as many scenarios as possible.
 
-As the number of scenarios used in the optimization keeps increasing, first signs of their behavior for $N \to \infty$ become visible. While we require more samples to be sure of the exact percentages the approaches are converging to, it is already clear that they are not converging towards $(1 - \alpha)$ as we has hoped. For example, for $\alpha = 0.4$ it seems to converge to somewhere between 85\% and 90\%, while the same example converges towards somewhere around 95\% for $\alpha = 0.1$.
+As the number of scenarios used in the optimization keeps increasing, first signs of their behavior for $N \to \infty$ become visible. While we require more samples to be sure of the exact percentages the approaches are converging to, it is already clear that they are not converging towards $(1 - \alpha)$. For example, for $\alpha = 0.4$ it seems to converge to somewhere between 85\% and 90\%, while the same example converges towards somewhere around 95\% for $\alpha = 0.1$.
  
 \section{Corridor Test} \label{corridor}
 
-In section \ref{performance guarantees} it has been shown that the kernel approach can be used to control allows us to control the risk factor $\alpha$, leading to a higher percentage of cases violating the constraints. The benefit of this becomes apparent when looking at the cost function $J_H$. Allowing a higher risk relaxes the constraints which allows us to choose a solution with a lower cost associated with it to satisfy the constraints. While this can be shown for the example used in section \ref{optimal control} and \ref{performance guarantees}, the potential of this approach becomes more clear by looking at an example where the possible solutions are seperated into two paths, one with a low costs and hard to satisfy constraints and one with low costs and easy to satisfy constraints.
+In Section \ref{performance guarantees} it has been shown that the kernel approach can be used to control allows us to control the risk factor $\alpha$, leading to a higher percentage of cases violating the constraints. The benefit of this becomes apparent when looking at the cost function $J_H$. Allowing a higher risk relaxes the constraints which allows us to choose a solution with a lower cost associated with it to satisfy the constraints. While this can be shown for the example used in Section \ref{optimal control} and \ref{performance guarantees}, the potential of this approach becomes more clear by looking at an example where the possible solutions are seperated into two paths, one with a low costs and hard to satisfy constraints and one with low costs and easy to satisfy constraints.
 
-In this example, we consider the same system as described in section \ref{Setup} and \ref{optimal control} where the horizon has been reduced to $H = 20$ and the output $y$ has to either satisfy $-5 \leq y_t \leq -2.5$ or $y_t \leq -5 - \sqrt{25- (t - 10)^2}$ for $t \in [5, 15]$. We use 2000 scenarios that were generated via Particle Gibbs and randomly select $N = 100$ scenarios to formulate and solve an optimal control problem to see. The resulting output can then be applied to the true system to obtain a true output which can be analyzed regarding which path it takes and whether or not it satisfies the constraints. This process was repeated 50 times for a different set of randomly chosen scenarios for both the scenario and kernel approach for the risk values $\alpha = 0.1$, $0.2$ and $0.3$.
+In this example, we consider the same system as described in Section \ref{Setup} and Section \ref{optimal control} where the horizon has been reduced to $H = 20$ and the output $y$ has to either satisfy $-5 \leq y_t \leq -2.5$ or $y_t \leq -5 - \sqrt{25- (t - 10)^2}$ for $t \in [5, 15]$. We use 2000 scenarios that were generated via Particle Gibbs and randomly select $N = 100$ scenarios to formulate and solve an optimal control problem to see. The resulting output can then be applied to the true system to obtain a true output which can be analyzed regarding which path it takes and whether or not it satisfies the constraints. This process was repeated 50 times for a different set of randomly chosen scenarios for both the scenario and kernel approach for the risk values $\alpha = 0.1$, $0.2$ and $0.3$.
 
 
-\begin{figure}[htb]
+\begin{figure}[t!]
 \centering
 \subfigure[Scenario Approach]{
 \pgfplotsset{width=.47\textwidth, compat = 1.18, 
@@ -464,9 +464,9 @@ In this example, we consider the same system as described in section \ref{Setup}
 \label{ScenarioKernelComparisonCorridor}
 \end{figure}
 
-In Fig. \ref{ScenarioKernelComparisonCorridor} the true outputs for these 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs, i.e. the runs where the true output violated at least one constraint, have been colored red. 
+In Figure \ref{ScenarioKernelComparisonCorridor} the true outputs for these 50 runs have been plotted as well as the constraints. The runs that arrive at a feasible solution have been colored blue and the failed runs, i.e. the runs where the true output violated at least one constraint, have been colored red. 
 
-Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in table \ref{tab:results_corridor} where the average cost of 50 runs is shown.  In contrast, we can look at the kernel approach for $\alpha = 0.3$ where only a very small portion of the runs take the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. Here, the cost is directly proportional to the percentage of runs that take the safe path. The table also shows the percentage of runs where the true output violated a constraint at least once. 
+Looking at the scenario approach, it can be seen that almost all of the runs end up choosing the less risky path that comes with a higher cost as can be seen in Table \ref{tab:results_corridor} where the average cost of 50 runs is shown.  In contrast, we can look at the kernel approach for $\alpha = 0.3$ where only a very small portion of the runs take the less risky path despite the same scenarios being used for both approaches. This is also reflected in the average cost which is significantly lower for the kernel approach. Here, the cost is directly proportional to the percentage of runs that take the safe path. The table also shows the percentage of runs where the true output violated a constraint at least once. 
 
 %This cost reduction is however also tied with a higher percentage of failed runs for the kernel approach which can be seen in the bottom row of table \ref{tab:results_corridor}.
 
@@ -497,9 +497,9 @@ Failed Runs & $6$\% & $6$\% & $4$\% & $6$\% \\
 
 \section{Nonlinear system} \label{Nonlinear system}
 
-In the previous sections, we have looked at how the kernel approach behaves for the linear system \eqref{linear system}. However, we have chosen the kernel approach over alternative methods such as Wasserstein for its applicability for general non-linear functions. As such, in this section we are looking at a nonlinear system and compare how the system behaves for both the scenario and kernel approach for various risk factors $\alpha$.
+In the previous sections, we have looked at how the kernel approach behaves for the linear system \eqref{linear system}. However, we have chosen the kernel approach over alternative methods such as Wasserstein for its applicability for general nonlinear functions. As such, in this section we are looking at a nonlinear system and compare how the system behaves for both the scenario and kernel approach for various risk factors $\alpha$.
 
-We consider with the state transition function being chosen
+We consider the state transition function
 
 \begin{equation} \label{nonlinear system}
 \boldsymbol{f}(\boldsymbol{x}, u) = 
@@ -509,7 +509,7 @@ We consider with the state transition function being chosen
 \end{bmatrix}
 \end{equation}
 
-with the rest of the system being chosen as described in section \ref{Setup}. Naturally, as this function is no longer linear, the size of the matrix $\boldsymbol{A}$ has to be adjusted to work with the new basis functions $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[ x_1,  x_2,  u, \text{cos} ( 3 x_1) x_2, \text{sin} (2 x_2) u \right]^\text{T}$. With that, we can draw samples as described in section \ref{Setup} and use them to generate $N = 200$ scenarios. We use a burn in period of $N_p = 1000$ and thin the samples with $n_d = 50$.
+with the rest of the system being chosen as described in Section \ref{Setup}. The new basis functions are chosen as $\boldsymbol{\varphi} (\boldsymbol{x}, u) = \left[0.1 x_1,  0.1 x_2,  u, 0.01 \text{cos} ( 3 x_1) x_2, 0.1 \text{sin} (2 x_2) u \right]^\text{T}$. With that, we can draw samples as described in Section \ref{Setup} and use them to generate $N = 200$ scenarios. We use a burn in period of $N_p = 1000$ and thin the samples with $n_d = 50$.
 
 For the cost function, we once again consider a simple quadratic cost $J_H = \sum_{t = 0}^H u_t^2$ over the horizon $H = 40$. For constraints, we consider the input-constraint $\left| u \right| \leq 5$ as well as the temporarily active output-constraints $y_{20:25} \geq 2$. The ambiguity set radius $\varepsilon$ is chosen through Algorithm \ref{alg:Bootstrap} with a number of bootstrap samples $B = 1000$ and a confidence level $\beta = 0.95$ and we look at the kernel approach for the risk factors $\alpha = 0.2$, $0.4$ and $0.6$ to see what influence this parameter has on the output.
 
@@ -676,16 +676,23 @@ For the cost function, we once again consider a simple quadratic cost $J_H = \su
 \label{ScenarioKernelComparisonNonLinear}
 \end{figure}
 
-in Figure \ref{ScenarioKernelComparisonNonLinear}, the results of an exemplary run have been plotted. Similar to the results in section \ref{optimal control}, the output for the scenario approach satisfy the constraints for every single scenario while the kernel approach includes a few scenarios that violate at least one constraint to increasingly stronger degrees as the risk factor $\alpha$ is increased. This shows that despite the system being nonlinear for this example, the kernel approach still works properly and allows for an optimization that allows for some of the output constraints to be violated.
+in Figure \ref{ScenarioKernelComparisonNonLinear}, the results of an exemplary run have been plotted. Similar to the results in Section \ref{optimal control}, the output for the scenario approach satisfy the constraints for every single scenario while the kernel approach includes a few scenarios that violate at least one constraint to increasingly stronger degrees as the risk factor $\alpha$ is increased. This shows that despite the system being nonlinear for this example, the kernel approach still works properly and allows for an optimization that allows for some of the output constraints to be violated.
 
-However, in contrast to the linear case, there have been several technical difficulties with the solver. While a convex solver was able to find a solution for the linear case, the non convex solver that has been used for this example was unable to solve the reformulated problem directly. While it worked on the scenario approach without issue, the kernel approach provided several challenges for the solver. In order to overcome this, several approximations had to be made before the solver was able to find a feasible solution for the OCP. For one, the max operator had to be approximated with the function
+However, in contrast to the linear case, there have been several technical difficulties with the solver. While a convex solver was able to find a solution for the linear case, the nonconvex solver that has been used for this example was unable to solve the reformulated problem directly. While it worked on the scenario approach without issue, the kernel approach provided several challenges for the solver. In order to overcome this, several approximations had to be made before the solver was able to find a feasible solution for the OCP. For one, the max operator had to be approximated with the function
 
 \begin{equation} \label{max function}
-[z]_+ \approx \frac{z + sqrt(z^2 + 0.01)}{2}
+[z]_+ \approx \frac{z + \sqrt{z^2 + 0.01}}{2}
 \end{equation}
 
-and the kernel gram matrix had to be changed by adding $0.01$ to all diagonal elements. This as well as a few other small approximations were required to produce the results that can be seen in Figure \ref{ScenarioKernelComparisonNonLinear}. However, these changes were only sufficient to run the solver for relatively simple problems and only for certain parameters. As can be seen in table \ref{tab:computation times}, the computation time of this simulation increasing very quickly for smaller values of the risk factor $\alpha$. As such this simulation could only be run for relatively high values of $\alpha$ which severly limits the range of problems this solver can be used for. On top of that, the solver also struggles with problems with a higher number of constraints which is why this simulation has significantly less constraints compared to the simulation in section \ref{optimal control}. This too limits the type of problems this approach can be used for. Lastly, tests have also shown that the solver struggles with finding a solution for the OCP when a low number of scenarios is being used. While this is less of an issue for practical applications, as the results of section \ref{performance guarantees} have shown, it nonetheless is another limiting factor for using this approach as an alternative for the scenario approach which displayed none of these issues for the nonlinear systems. As such, there is a need for further analysis of the solver and what can be done to avoid these issues.
+and the kernel gram matrix had to be changed by adding $0.01$ to all diagonal elements. This is necessary as we use the Cholesky decomposition, i.e., $\boldsymbol{K} = \boldsymbol{L} \boldsymbol{L}^\text{T}$ with $\boldsymbol{L}$ being a lower triangle matrix with postitive diagonal elements, to rewrite the square root in the constraint \eqref{feasible region Constr1} as
 
+\begin{equation} \label{square root}
+\sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} = ||\boldsymbol{L}^\text{T} \boldsymbol{\gamma}||_2.
+\end{equation}
+
+This was also done in the simulations for the linear system with a regularisation parameter of $10^{\text{-}6}$, but in the case of the nonlinear dynamics a parameter of $10^{\text{-}2}$ was used.
+
+With these approximation, the results that can be seen in Figure \ref{ScenarioKernelComparisonNonLinear} were generated. However, these changes were only sufficient to run the solver for relatively simple problems and only for certain parameters. As can be seen in Table \ref{tab:computation times}, the computation time of this simulation increasing very quickly for smaller values of the risk factor $\alpha$. As such this simulation could only be run for relatively high values of $\alpha$ which limits the range of problems this solver can be used for. On top of that, the solver also struggles with problems with a higher number of constraints which is why this simulation has significantly less constraints compared to the simulation in Section \ref{optimal control}. This too limits the type of problems this approach can be used for. Lastly, tests have also shown that the solver struggles with finding a solution for the OCP when a low number of scenarios is being used. While this is less of an issue for practical applications, as the results of Section \ref{performance guarantees} have shown, it nonetheless is another limiting factor for using this approach as an alternative for the scenario approach which displayed none of these issues for the nonlinear systems. As such, there is a need for further analysis of the solver and what can be done to avoid these issues.
 
 
 \begin{table}

@@ -12,7 +12,7 @@ addpath('..\src')
 addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
 import casadi.*
 
-K = 2300; % number of PG samples
+%K = 2300; % number of PG samples
 k_d = 70; % number of samples to be skipped to decrease correlation (thinning)
 K_b = 2000; % length of burn-in period
 N = 30; % number of particles of the particle filter
@@ -25,10 +25,9 @@ n_y = 1; % number of outputs
 % Define basis functions - assumed to be known in this example.
 % Make sure that phi(x,u) is defined in vectorized form, i.e., phi(zeros(n_x,N), zeros(n_u, N)) should return a matrix of dimension (n_phi, N).
 % Scaling the basis functions facilitates the exploration of the posterior distribution and reduces the required thinning parameter k_d.
-n_phi = 3; % number of basis functions
-%phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); 0.01 * cos(3*x(1, :)) .* x(2, :); 0.1 * sin(2*x(2, :)) .* u(1, :)]; % basis functions
-phi = @(x, u) [0.5 * x(1, :); 0.5 * x(2, :); 0.5 * u(1, :)]; % basis functions
-%phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); x(1, :) .* x(2, :); x(1, :) .* u(1, :)]; % basis functions
+n_phi = 5; % number of basis functions
+phi = @(x, u) [0.1 * x(1, :); 0.1 * x(2, :); u(1, :); 0.01 * cos(3*x(1, :)) .* x(2, :); 0.1 * sin(2*x(2, :)) .* u(1, :)]; % basis functions
+%phi = @(x, u) [0.5 * x(1, :); 0.5 * x(2, :); 0.5 * u(1, :)]; % basis functions
 
 % Prior for Q - inverse Wishart distribution
 ell_Q = 10; % degrees of freedom
@@ -63,9 +62,8 @@ T_all = T + T_test;
 % y_t = g_true(x_t, u_t) + N(0, R_true).
 
 % Unknown system
-%f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) + 0.1 * cos(3*x(1, :)) * x(2, :); 0.4 * x(1, :) + 0.5 * x(2, :) + (1 + 0.3 * sin(2*x(2, :))) * u(1, :)]; % true state transition function
-%f_true = @(x, u) [x(1, :) + 0.5 * x(2, :) + 0.125 * u(1, :); 0.8 * x(2, :) + 0.5 * u(1, :)]; % true state transition function
-f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) ; 0.4 * x(1, :) + 0.5 * x(2, :) + u(1, :)]; % true state transition function
+f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) + 0.1 * cos(3*x(1, :)) * x(2, :); 0.4 * x(1, :) + 0.5 * x(2, :) + (1 + 0.3 * sin(2*x(2, :))) * u(1, :)]; % true state transition function
+%f_true = @(x, u) [0.8 * x(1, :) - 0.5 * x(2, :) ; 0.4 * x(1, :) + 0.5 * x(2, :) + u(1, :)]; % true state transition function
 Q_true = [0.03, -0.004; -0.004, 0.01]; % true process noise variance
 g_true = g; % true measurement function
 R_true = R; % true measurement noise variance
@@ -103,13 +101,17 @@ y_test = y(:, T+1:end);
 %PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
 %PG_samples = PG_samples.PG_samples;
 
-PG_samples = load('PGibbs_Samples_K200_R1.mat');
+PG_samples = load('PGibbs_Samples_K2200_R1.mat');
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
 
+K = length(PG_samples);
+
 PG_samples = PG_samples(randperm(K));
 %PG_samples = PG_samples(randperm(K));
+
+
 
 s = 1;
 
@@ -217,7 +219,7 @@ sigma_cnt = 51;
 sigma_init =  [0.716 1.4062 1.4062 0.4109];
 %sigma_init = ones(1,4);
 
-K_train = 300;
+K_train = 200;
 K_test = K - K_train;
 
 sigma = zeros(iter_max * 4 + 1, 4);
@@ -239,16 +241,16 @@ for iter = 1:iter_max
             for k_test = 1:K_test
                 for k_train = 1:K_train
                     if ts == 1
-                        X_diff = norm(X_stacked(:,k_train) - X_stacked(:,k_test))^2;
+                        X_diff = norm(X_stacked(:,k_train) - X_stacked(:,k_test + K_train))^2;
                         kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,1,cnts)) * exp(-X_diff/(2*sigma_range(sigma_iter,1,cnts)^2));
                     elseif ts == 2
-                        V_diff = norm(V_stacked(:,k_train) - V_stacked(:,k_test))^2;
+                        V_diff = norm(V_stacked(:,k_train) - V_stacked(:,k_test + K_train))^2;
                         kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,2,cnts)) * exp(-V_diff/(2*sigma_range(sigma_iter,2,cnts)^2));
                     elseif ts == 3 
-                        W_diff = norm(W_stacked(:,k_train) - W_stacked(:,k_test))^2;
+                        W_diff = norm(W_stacked(:,k_train) - W_stacked(:,k_test + K_train))^2;
                         kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,3,cnts)) * exp(-W_diff/(2*sigma_range(sigma_iter,3,cnts)^2));
                     else
-                        A_diff = norm(A_stacked(:,k_train) - A_stacked(:,k_test))^2;
+                        A_diff = norm(A_stacked(:,k_train) - A_stacked(:,k_test + K_train))^2;
                         kernel_tmp = 1/(sqrt(2 * pi) * sigma_range(sigma_iter,4,cnts)) * exp(-A_diff/(2*sigma_range(sigma_iter,4,cnts)^2));
                     end
     
