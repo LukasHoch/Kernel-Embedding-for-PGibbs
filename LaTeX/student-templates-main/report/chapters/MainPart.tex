@@ -1,16 +1,16 @@
 \chapter{Chance-Constraint Optimization with Kernel Approximation} \label{Technical Approach}
 
-In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in section \ref{Problem Statement} using the samples generated using the method described in chapter \ref{Technical Background}. In section \ref{SubSec:MMD}, a method to use maximum mean discrepancy (MMD) ambiguity sets and kernel approximation to reformulate the OCP is proposed and in section \ref{Constraint Reformulation} the ambiguity sets are used to reformulate the chance-constraints. Finally, in section \ref{Problem Formulation} the results are used to define a new OCP.
+In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in Section \ref{Problem Statement} using the samples generated using the method described in Chapter \ref{Technical Background}. In Section \ref{SubSec:MMD}, a method to construct a maximum mean discrepancy (MMD) ambiguity sets with kernel approximation is proposed and in Section \ref{Constraint Reformulation} the ambiguity set is used to reformulate the chance-constraints from Section \ref{Problem Statement}. Finally, in Section \ref{Problem Formulation} the results are used to define a new OCP.
 
 \section{MMD ambiguity sets} \label{SubSec:MMD}
 
-As the underlying data distribution $P$ in the constraints \eqref{constraints} is unknown, we first expand the them to their distributionally robust counterpart in order to allow for the use of scenarios as an approximation of the distribution. For this, we consider $\tilde{P}$ as the worst case distribution within a set $\mathcal{P}$ of plausible distributions, the so-called ambiguity set. This gives us the new constraints
+As the underlying distribution of the data in the constraints \eqref{constraints} is unknown, we first expand the them to their distributionally robust counterpart in order to allow for the use of scenarios as an approximation of the distribution. For this, we consider $\tilde{P}$ as the worst case distribution within a set $\mathcal{P}$ of plausible distributions, the so-called ambiguity set. This gives us the new constraints
 
 \begin{equation} \label{wc constraints}
 \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha.
 \end{equation}
 
-To construct the set $\mathcal{P}$, a similarity measure is needed to provide a concrete comparison between various distributions $\tilde{P}$. Wasserstein has been tried for this purpose in the past, but as most works, such as \cite{Hota_19}, limit the class of constraints to affine functions, this approach is not suitable for our general non-linear constraints. In constrast, maximum mean discrepancy (MMD) \cite{Arthur_12} is able to be applied to non-linear and non-convex constraints. It does that by using the norm of the difference between the kernel mean embeddings (KME) $|| \mu_Q - \mu_{Q'} ||^2_{\mathcal{H}}$ of two distributions $Q$ and $Q'$ as a metric between two distributions. The KME are given as $\mu_Q = \int k(x, \cdot) \text{d}x$ with $k(x, \cdot) \in \mathcal{H}$ being the feature map of the kernel function $k$. The metric can then be rewritten as 
+To construct the set $\mathcal{P}$, a similarity measure is needed to provide a concrete comparison between various distributions $\tilde{P}$. The Wasserstein metric, a common distance function between probability distributions, has been tried for this purpose in the past. However, most of these works, such as \cite{Hota_19}, limit the class of constraints to affine functions. As such, this approach is not suitable for our general non-linear constraints. In constrast, maximum mean discrepancy (MMD) \cite{Arthur_12} is able to be applied to non-linear and non-convex constraints. It does that by using the norm of the difference between the kernel mean embeddings (KME) $|| \mu_Q - \mu_{Q'} ||^2_{\mathcal{H}}$ of two distributions $Q$ and $Q'$ as a metric between two distributions. The KME are given as $\mu_Q = \int k(x, \cdot) \text{d}x$ with $k(x, \cdot) \in \mathcal{H}$ being the feature map of the kernel function $k$. The metric can then be rewritten as 
 
 \begin{equation} \label{MMD Kernel}
 \text{MMD}(Q, Q') = \text{E}_{z,z' \sim Q}[k(z,z')] + \text{E}_{z,z' \sim Q'}[k(z,z')] - 2\text{E}_{z\sim Q, z' \sim Q'}[k(z,z')]
@@ -22,7 +22,17 @@ The MMD-based ambiguity set $\mathcal{P}$ is then constructed as the set of dist
 \mathcal{P} =  \left\{ P : \text{MMD} (P, P_N) \leq \varepsilon \right\}.
 \end{equation}
 
-\begin{figure}
+with the empirical distribution being defined as
+
+\begin{equation} \label{empirical distribution}
+P_N = \frac{1}{N}\sum_{n = 1}^N d_{\boldsymbol{\delta}^{[n]}}
+\end{equation}
+
+with $d_{\boldsymbol{\delta}}$ being the a dirac impulse at the point of the sample $\boldsymbol{\delta}$
+
+
+
+\begin{figure}[t]
 \centering
 \includegraphics[width= .4\textwidth]{AmbiguitySetDrawing}
 \caption{Ambiguity Set $\mathcal{P}$}
@@ -35,10 +45,10 @@ As illustrated in Figure \ref{AmbiguityPic}, this allows us to build a set near 
 \widehat{\text{MMD}} (\tilde{P}, P_N) = \sum_{i,j = 1}^N k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]}) + k(\tilde{\boldsymbol{\delta}}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]}) - 2 k(\boldsymbol{\delta}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]})
 \end{equation}
 
-with $\tilde{\boldsymbol{\delta}}^{[n]}, n = 1,...,N$, denoting a bootstrap sample of $P_N$ where samples are drawn with replacement from $\boldsymbol{\delta}^{[1:N]}$. Finally, $\widehat{\text{MMD}} (\tilde{P}, P_N)$ is calculated for all $B$ bootstrap samples, the results are saved in list and $\varepsilon$ is chosen as the $\textit{ceil}(B \beta)$-th element of the sorted list. 
+with $\tilde{\boldsymbol{\delta}}^{[n]}, n = 1,...,N$, denoting a bootstrap sample of $P_N$ where samples are drawn with replacement from $\boldsymbol{\delta}^{[1:N]}$. This is done to give us an idea what the empirical distribution might look like with a different set of samples. This can give us insight into how precise our estimate $P_N$ is and what kind of radius $\varepsilon$ should be included in the ambiguity set. We do this by calculating $\widehat{\text{MMD}} (\tilde{P}, P_N)$ for all $B$ bootstrap samples. The results are saved in list and $\varepsilon$ is chosen as the $\textit{ceil}(B \beta)$-th element of the sorted list. This means we construct the ambiguity set in a way that $B \beta$ of our bootstrap samples are included while the rest are either outside or on the edge of the ambiguity set.
 
 
-\begin{algorithm}
+\begin{algorithm}[t]
 	\caption{Bootstrap MMD ambiguity set}
 	\label{alg:Bootstrap}
 	\hspace*{\algorithmicindent} \textbf{Input}: Scenarios $ \boldsymbol{\delta}^{[1:N]} $, Number of bootstrap samples $B$, Confidence level $\beta$ \\
@@ -77,31 +87,37 @@ We can now use the ambiguity set $\mathcal{P}$ defined in section \ref{SubSec:MM
   \end{empheq}
 \end{subequations}
 
-with reproducing kernel hilbert space function $g \in \mathcal{H}$ and $1(\cdot)$ denoting the indicator function. Using this set feasible region exactly is generally intractable in practice. As such, we further approximate the set based on CVaR. For this, we first define the Value-at-Risk which is given as 
+with reproducing kernel hilbert space function $g \in \mathcal{H}$ and $1(\cdot)$ denoting the indicator function. Using this set feasible region exactly is generally intractable in practice. As such, we further approximate the set based on conditional Value-at-Risk (CVaR). For this, we first define the Value-at-Risk (VaR) which is given as 
 
 \begin{equation} \label{VaR definition}
 	\text{VaR}_{1-\alpha}^{P} :=  \inf \left\{ t' \in \mathbb{R} : P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq t' \right] \geq 1 - \alpha \right\}.
 \end{equation}
 
-where it can be easily shown that
+It can be easily shown that
 
 \begin{equation} \label{VaR t0}
 	\text{VaR}_{1-\alpha}^{P} \leq 0 \iff  P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha.
 \end{equation}
 
-While the VaR constraint is generally non-convex, we can use the tightest conservative convex approximation is given by the conditional convex approximation which has been shown in \cite{Arkadi_07} to be given by the conditional Value-at-Risk (CVaR) which is defined as 
+With this, we have an alternative expression of the chance constraints in terms of the VaR. While the VaR constraint is generally nonconvex, we can use the tightest conservative convex approximation given by the conditional convex approximation which has been shown in \cite{Arkadi_07} to be given by CVaR which is defined as 
 
 
 \begin{equation} \label{CVaR definition}
-	\text{CVaR}_{1-\alpha}^{P} :=  \inf\limits_{t \in \mathbb{R}} \text{E}_P \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right].
+	\text{CVaR}_{1-\alpha}^{P} :=  \inf\limits_{t \in \mathbb{R}} \text{E}_P \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right]
 \end{equation}
 
-with $[\cdot]_+ = \text{max}(0, \cdot)$ denoting the max operaton. Using this, our constraint can be rewritten as 
+with $[\cdot]_+ = \text{max}(0, \cdot)$ denoting the max operator. The constraints can the be expressed as 
+
+\begin{equation} \label{CVaR constr}
+\text{CVaR}_{1-\alpha}^{P} \leq 0.
+\end{equation}
+
+However, as this constraint is dependent on the unknown distribution $P$, we use the ambiguity set defined in Section \ref{SubSec:MMD} to relax it. As such, our constraint can be rewritten as 
 
 \begin{subequations}
   \begin{empheq}{align}
-	\sup\limits_{\tilde{P} \in \mathcal{P}} \text{CVaR}_{1-\alpha}^{P} &= \sup\limits_{\tilde{P} \in \mathcal{P}}  \inf\limits_{t \in \mathbb{R}} \text{E}_P \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right]. \\
-    &= \inf\limits_{t \in \mathbb{R}} \sup\limits_{\tilde{P} \in \mathcal{P}} \text{E}_P \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right].
+	\sup\limits_{\tilde{P} \in \mathcal{P}} \text{CVaR}_{1-\alpha}^{\tilde{P}} &= \sup\limits_{\tilde{P} \in \mathcal{P}}  \inf\limits_{t \in \mathbb{R}} \text{E}_{\tilde{P}} \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right] \\
+    &= \inf\limits_{t \in \mathbb{R}} \sup\limits_{\tilde{P} \in \mathcal{P}} \text{E}_{\tilde{P}} \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right] \leq 0.
   \end{empheq}
 \end{subequations}
 
@@ -149,7 +165,7 @@ This way, we can formulate the OCP as
 
 As described in Sec. \ref{Problem Statement}, we are minimizing a cost function $J_H$. The system dynamics are included through the constraints \eqref{systemc1} and \eqref{systemc2} and must be fulfilled for all scenarios as well. Lastly, the input $u_{0:H}$ is restricted to the feasible set $\hat{Z}$ in \eqref{systemc3} which is defined by the optimization variables $\boldsymbol{\gamma}$, $g_0$ and $t'$.
 
-The optimization problem \eqref{OCP_final} is deterministic and can be solved with well known methods. 
+The optimization problem \eqref{OCP_final} is deterministic and can be solved with well known methods \cite{Nocedal_06}.
 
 
 
