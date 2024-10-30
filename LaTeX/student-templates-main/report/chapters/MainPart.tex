@@ -1,6 +1,9 @@
 \chapter{Chance-Constraint Optimization with Kernel Approximation} \label{Technical Approach}
 
-In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in Section \ref{Problem Statement} using the samples generated using the method described in Chapter \ref{Technical Background}. In Section \ref{SubSec:MMD}, a method to construct a maximum mean discrepancy (MMD) ambiguity sets with kernel approximation is proposed, and in Section \ref{Constraint Reformulation}, the ambiguity set is used to reformulate the chance constraints from Section \ref{Problem Statement}. Finally, in Section \ref{Problem Formulation}, the results are used to define a new OCP.
+In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in Section \ref{Problem Statement} using the samples generated using the method described in Chapter \ref{Technical Background}. In Section \ref{SubSec:MMD}, a method to construct a maximum mean discrepancy (MMD) ambiguity sets with kernel approximation is proposed, and in Section \ref{Constraint Reformulation}, the ambiguity set is used to reformulate the chance constraints from Section \ref{Problem Statement}. A method for optimizing the hyperparameters for this approximation is explained in Section \ref{Kernel Approximation}. Finally, in Section \ref{Problem Formulation}, the results are used to define a new OCP.
+
+\section{Reproducing Kernel Hilbert Spaces} \label{SubSec:RKHS}
+
 
 \section{MMD ambiguity sets} \label{SubSec:MMD}
 
@@ -10,10 +13,14 @@ As the underlying distribution of the data in the constraints \eqref{constraints
 \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha.
 \end{equation}
 
-To construct the set $\mathcal{P}$, a similarity measure is needed to provide a concrete comparison between various distributions $\tilde{P}$. The Wasserstein metric, a common distance function between probability distributions, has been tried for this purpose in the past. However, most of these works, such as \cite{Hota_19}, limit the class of constraints to affine functions. As such, this approach is not suitable for our general non-linear constraints. In constrast, maximum mean discrepancy \cite{Arthur_12} is able to be applied to non-linear and non-convex constraints. It does that by using the norm of the difference between the kernel mean embeddings (KME) $|| \mu_Q - \mu_{Q'} ||^2_{\mathcal{H}}$ of two distributions $Q$ and $Q'$ as a metric between two distributions. The KME are given as $\mu_Q = \int k(x, \cdot) \text{d}x$ with $k(x, \cdot) \in \mathcal{H}$ being the feature map of the kernel function $k$. The metric can then be rewritten as 
+To construct the set $\mathcal{P}$, a similarity measure is needed to provide a concrete comparison between various distributions $\tilde{P}$. The Wasserstein metric, a common distance function between probability distributions, has been tried for this purpose in the past. However, most of these works, such as \cite{Hota_19}, limit the class of constraints to affine functions. As such, this approach is not suitable for our general nonlinear constraints. In contrast, maximum mean discrepancy \cite{Arthur_12} is able to be applied to nonlinear and non-convex constraints.
+
+We define the positive definite kernel as a symmetric function $k : \mathcal{Z} \times \mathcal{Z} \rightarrow \mathbb{R}$ where $\sum_{i,j = 1}^n a_i a_j  k(z_i, z_j) \geq 0$ for any $n \in \mathbb{N}$, $\{z_i\}_{i=1}^n \subset \mathcal{Z}$ and $\{a_i\}_{i=1}^n \subset \mathbb{R}$. For every positive definite kernel, there also exists a feature map $\phi : \mathcal{Z} \rightarrow \mathcal{H}$ such that $k(z, z') = \langle \phi (z),   \phi (z') \rangle_{\mathcal{H}}$ with $ \langle \cdot, \cdot \rangle_{\mathcal{H}}$ denoting the inner product of a reproducing kernel Hilbert space $\mathcal{H}$. This inner product can be used to define a norm as $|| f ||_{\mathcal{H}} = \sqrt{\langle f, f \rangle_{\mathcal{H}}}$ \cite{Muandet_17}.
+
+With this, we use the norm of the difference between the kernel mean embeddings (KME) $|| \mu_Q - \mu_{Q'} ||^2_{\mathcal{H}}$ of two distributions $Q$ and $Q'$ as a metric between two distributions with the KME being defined as $\mu_Q = \int \phi(z) \text{d}z$ \cite{Arthur_12}. Utilizing the reproducing property of an RKHS, the metric can then be rewritten as 
 
 \begin{equation} \label{MMD Kernel}
-\text{MMD}(Q, Q') = \text{E}_{z,z' \sim Q}[k(z,z')] + \text{E}_{z,z' \sim Q'}[k(z,z')] - 2\text{E}_{z\sim Q, z' \sim Q'}[k(z,z')]
+\text{MMD}(Q, Q') = \text{E}_{z,z' \sim Q}[k(z,z')] + \text{E}_{z,z' \sim Q'}[k(z,z')] - 2\text{E}_{z\sim Q, z' \sim Q'}[k(z,z')].
 \end{equation}
 
 The MMD-based ambiguity set $\mathcal{P}$ is then constructed as the set of distributions $\tilde{P}$ in an $\varepsilon$ radius centered around the empirical distribution $P_N$ which is given through the scenarios $\boldsymbol{\delta}^{[1:N]}$. This gives us the set
@@ -28,7 +35,7 @@ with the empirical distribution being defined as
 P_N = \frac{1}{N}\sum_{n = 1}^N d_{\boldsymbol{\delta}^{[n]}}
 \end{equation}
 
-with $d_{\boldsymbol{\delta}}$ being a dirac impulse at the point of the sample $\boldsymbol{\delta}$
+with $d_{\boldsymbol{\delta}}$ being a dirac impulse at the point of the sample $\boldsymbol{\delta}$.
 
 
 
@@ -77,7 +84,7 @@ With a given MMD ambiguity set $\mathcal{P}$, the feasible set of the constraint
 
 with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) =  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}))$.
 
-We can now use the ambiguity set $\mathcal{P}$ defined in section \ref{SubSec:MMD} with the radius $\varepsilon$ to reformulate the feasible set. We are able to reformulate this set using the strong duality proven in \cite{Zhu_20} to get the feasible region
+We can now use the ambiguity set $\mathcal{P}$ defined in Section \ref{SubSec:MMD} with the radius $\varepsilon$ to reformulate the feasible set. We are able to reformulate this set using the strong duality proven in \cite{Zhu_20} to get the feasible region
 
 \begin{subequations} \label{feasible region}
   \begin{empheq}[right = \empheqrbrace, left= Z \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align}
@@ -161,7 +168,7 @@ over a set of $N_\text{train}$ training samples that are independent of the $N_\
 
 \section{Problem Formulation} \label{Problem Formulation}
 
-In the previous sections, the chance constraints have been reformulated into a feasible region $\hat{Z}$. We now want to use this to reformulate the chance-constraint OCP defined in section \ref{Problem Statement}. 
+In the previous sections, the chance constraints have been reformulated into a feasible region $\hat{Z}$. We now want to use this to reformulate the chance-constraint OCP defined in Section \ref{Problem Statement}. 
 
 For this purpose, we can use the variables $\boldsymbol{\gamma}$, $g_0$ and $t'$ that span the feasible region as optimization parameters while making sure that $\boldsymbol{u}_{0:H}$ is an element of the feasible region.
 
