@@ -24,7 +24,7 @@
 \presenter{L. Hochschwarzer}
 
 \supervisor{R. Lefringhausen}
-\typeofpres{Intermediate Report Master‘s Thesis}
+\typeofpres{Report Master‘s Thesis}
 
 \usepackage[bigfiles]{media9} %option bigfiles not needed for xelatex, runs without problems on ubuntu14
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -191,6 +191,9 @@ with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta})  =  \text{max}(\bold
 
 \end{frame}
 
+
+
+
 \begin{frame}
 	\frametitle{Constraint Reformulation}
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
@@ -212,6 +215,11 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 \end{frame}
 
 
+\begin{frame}{Kernel Approximation}
+
+\end{frame}
+
+
 \begin{frame}
 	\frametitle{Problem Formulation}
 \textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
@@ -224,7 +232,7 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 \boldsymbol{y}_{t}^{[n]} = \boldsymbol{g}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{t}^{[n]}, \boldsymbol{u}_t \right) + & \boldsymbol{w}_{t}^{[n]} 
 \end{aligned}
  \;\;  \right\} \; \text{Dynamic Constraints} \\
-&\;\;\;\; \boldsymbol{u}_{0:H} \in Z(g_0, \boldsymbol{\gamma}, t') \;\;\;\;\;\; \;\;\;  \;\;\;  \Bigl\} \; \text{Reformulated Chance Constraints}
+&\;\;\;\; \boldsymbol{u}_{0:H} \in \hat{Z}(g_0, \boldsymbol{\gamma}, t') \;\;\;\;\;\; \;\;\;  \;\;\; \;\;\;\; \Bigl\} \; \text{Reformulated Chance Constraints}
 \end{align*}
 
 
@@ -268,6 +276,503 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \item Ambiguity set radius $\varepsilon$ set via bootstrap construction \cite{Yassine_22}.
 \end{itemize}
 \end{frame}	
+
+\begin{frame}{Corridor Test}
+	Number of scenarios used for optimization: $N = 200$
+\vspace{.3cm}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\;\; Scenario Approach
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Scenario_K100_N50.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				ylabel=$y$, xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}
+			%\includegraphics[width= .9\textwidth]{Scenario_plot}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha01.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				%ylabel=$y$, 
+				xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}}
+
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha02.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				%ylabel=$y$, 
+				xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,48}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,2}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}}
+
+			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.3$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha03.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				xtick={0, 5, 10, 15, 20},
+				ytick={-12, -8, -4, 0, 4},
+				%ylabel=$y$, 
+				xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}
+
+\begin{frame}{Corridor Test}
+\begin{table}
+\centering
+\begin{tabular}{|c| c| c| c| c|}
+\hline
+Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 10$\% & $\alpha = 20$\% & $\alpha = 30$\% \\
+\hline
+$J_H$ (mean) & $338.4$ & $255.9$ & $129.5$ & $69.9$\\
+\hline
+Risky Runs & $8$\% & $40$\% & $78$\% & $98$\% \\
+\hline
+Failed Runs & $6$\% & $6$\% & $4$\% & $6$\% \\
+\hline
+\end{tabular}
+%\caption{Results of the 50 exemplary runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$, and $0.3$. The table shows the average cost of the 50 runs and the percentage of failed Monte Carlo runs, i.e. runs where the true output violated at least one constraint.}
+\label{tab:results_corridor}
+\end{table} 
+\end{frame}
+
+
+
+\begin{frame}{Nonlinear System}
+
+\begin{block}{Linear System (used in previous simulations)}
+\begin{equation*}
+\boldsymbol{f}(\boldsymbol{x}, u) = 
+\begin{bmatrix}
+0.8  x_1 - 0.5 x_2 \\
+0.4 x_1 + 0.5 x_2 + u
+\end{bmatrix}
+\end{equation*}
+\end{block}	
+
+\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
+
+\begin{block}{Nonlinear System}
+\begin{equation*}
+\boldsymbol{f}(\boldsymbol{x}, u) = 
+\begin{bmatrix}
+0.8  x_1 - 0.5 x_2 + 0.1 \text{cos}(3 x_1) x_2\\
+0.4 x_1 + 0.5 x_2 + (1 + 0.3 \text{sin} (2 x_2 )) u
+\end{bmatrix}
+\end{equation*}
+\end{block}
+
+\begin{itemize}
+\item \makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[x_1, x_2, u, \text{cos} ( 3 x_1) x_2, \text{sin} (2 x_2) u \right]^\text{T} + \boldsymbol{v}_{t}$
+\item Input constraints $\left| u \right| \leq 5$
+\end{itemize}
+
+\end{frame}	
+
+
+\begin{frame}{Optimal Control of Nonlinear Systems}
+
+Number of scenarios used for optimization: $N = 200$
+\vspace{.3cm}
+\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\;\; Scenario Approach
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+	        }
+			\def\file{data/Scenario_K200_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+			ylabel=$y$, xlabel=$t$,
+			set layers=standard]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			%\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			%\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			%\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}
+			%\includegraphics[width= .9\textwidth]{Scenario_plot}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Kernel_alpha02_K200_S10_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+			%ylabel=$y$, 
+			xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+
+			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.4$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Kernel_alpha04_K200_S10_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
+			%ylabel=$y$, 
+			xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+
+			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.6$)
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Kernel_alpha06_K200_S10_nonlinear.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			xmin=0, xmax=40,
+			ymin=-7, ymax=10,
+			xtick={0, 10, 20, 30, 40},
+			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},			%ylabel=$y$, 
+			xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
+			\tikzfillbetween[of=A and B]{opacity=0.2};
+			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
+			
+			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
+			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
+			
+			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
+			\addlegendentry{$y_{0:H}$}
+			
+			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}	
+
+\begin{frame}{Limitations}
+	Solver unreliable for kernel approach with nonlinear systems
+
+	Impossible to solve OCPs with ...
+	\begin{itemize}
+	\item Low number of samples $N$
+	\item Low Risk Factor $\alpha$
+	\item High number of constraints
+	\end{itemize}
+
+\begin{table}
+\centering
+\begin{tabular}{|c| c| c| c| c|}
+\hline
+Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 20$\% & $\alpha = 40$\% & $\alpha = 60$\% \\
+\hline
+Computation time & $32.8$s & $176.1$s & $50.9$s & $41.0$s\\
+\hline
+\end{tabular}
+%\caption{Computation time for scenario and kernel approach for an exemplary run with a system with nonlinear basis functions.}
+\label{tab:computation times}
+\end{table} 
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+	\textbf{Summary:}
+	Kernel Embeddings allow for ...
+	\begin{itemize}
+		\item solving chance-constrained OCPs
+		\item Choosing risk factor $\alpha$
+	\end{itemize}
+	\vspace{.5cm}
+	
+	\textbf{Future Plans:}
+	\begin{itemize}
+		\item Use kernel embeddings on non-linear systems
+		\item Parameter tuning of $\sigma$
+		\item Alternative approach of reformulating chance constraints
+	\end{itemize}
+\end{frame}
+
+	\appendix
+	% This slide serves 3 purposes:
+	% 	1. a simple example how to create figures in tikz using beamer
+	%	2. testing if you actually checked the content of this template
+	% 	3. subtly preventing you from adding a "Thank you..." slide at the end of your presentation
+	% If this slide is still in your final presentation... well, congratulation!
+
+
+%\nocite{buss11}
+%\nocite{bauer09}
+\begin{frame}{\LSRITRRefTitle}
+	\printbibliography
+\end{frame}
+
+\begin{frame}{Timeline}
+\includegraphics[width= .9\textwidth]{Timeline_pic}
+\end{frame}
+
+\begin{frame}{Scenario Generation}
+\textbf{Goal:} Generate scenarios $\boldsymbol{\delta}^{[1:N]}$ using the observations $\mathbb{D}$\\
+\begin{block}{Algorithm: Scenario Generation}
+For $n = 1,...,N$:
+\begin{enumerate}
+  \item Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using PMCMC \cite{Robert_24}.
+  \item Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$ and  $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$ for $t = \text{-}1, ..., H$
+  \item Set $\boldsymbol{x}_0^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
+\end{enumerate}
+\textbf{Output:} Scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
+\end{block}
+\end{frame}
+
+\begin{frame}{Bootstrap Construction}
+\begin{block}{Algorithm: Bootstrap MMD ambiguity set}
+\begin{enumerate}
+\item $\boldsymbol{K} \leftarrow \textit{kernel}(\boldsymbol{\delta}, \boldsymbol{\delta})$
+\item \textbf{For} $m = 1,...,B$
+\item \;\; $I \leftarrow N$ numbers from $\{1, \dots N \}$ with replacement
+\item \;\; $K_x \leftarrow \sum_{i,j = 1}^N K_{ij}, \;K_y \leftarrow \sum_{i,j \in I} K_{ij}, \;K_{xy} \leftarrow \sum_{j \in I} \sum_{i = 1}^N K_{ij}$
+\item \;\; MMD$[m] \leftarrow \frac{1}{N^2} \left( K_x + K_y - 2 K_{xy} \right) $
+\item \textbf{End For} 
+\item MMD $ \leftarrow$ \textit{sort}(MMD)
+\item $\varepsilon \gets$ MMD$\left[ \textit{ceil} (B \beta) \right]$
+\end{enumerate}
+\textbf{Output:} Gram matrix $\boldsymbol{K}$, Radius of MMD ambiguity set $\varepsilon$
+\end{block}
+$B = 1000, \beta = 0.95$
+\end{frame}
+
+\begin{frame}{Maximum Mean Discrepancy (MMD)}
+\begin{block}{Maximum Mean Discrepancy}
+\begin{equation*}
+\begin{aligned}
+\text{MMD}(\tilde{P}, P_N) &= ||\mu_{\tilde{P}} - \mu_{P_N} ||_{\mathcal{H}}\\
+&= \text{E}_{x,x' \sim \tilde{P}}[k(x,x')] + \text{E}_{y,y' \sim P_N}[k(y,y')] - 2\text{E}_{x\sim \tilde{P}, y \sim P_N}[k(x,y)]
+\end{aligned}
+\end{equation*}
+\end{block}
+
+\begin{block}{(Biased) MMD estimator}
+\begin{equation*}
+\widehat{\text{MMD}} (P, Q) = \frac{1}{N^2} \sum_{i,j = 1}^N k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]}) + k(\tilde{\boldsymbol{\delta}}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]}) - 2 k(\boldsymbol{\delta}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]})
+\end{equation*}
+\end{block}
+
+\end{frame}
+
 
 \begin{frame}{Optimal Control with Constrained Outputs}
 
@@ -488,462 +993,5 @@ Number of scenarios used for optimization: $N = 200$
 		\label{fig:robustness_plot}
 \end{figure}
 \end{frame}	
-
-\begin{frame}{Corridor Test}
-	Number of scenarios used for optimization: $N = 200$
-\vspace{.3cm}
-\begin{columns}[onlytextwidth, T]
-		\begin{column}{.5\textwidth}
-			\;\; Scenario Approach
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-		        }
-				\def\file{data/Scenario_K100_N50.txt}
-				
-				\centering
-				\begin{tikzpicture}
-				\begin{axis}[
-				grid=none,
-				xmin=0, xmax=20,
-				ymin=-12, ymax=4,
-				xtick={0, 5, 10, 15, 20},
-				ytick={-12, -8, -4, 0, 4},
-				ylabel=$y$, xlabel=$t$,
-				set layers=standard,
-				reverse legend,
-				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-				ylabel shift = -6 pt]
-				
-				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-				\foreach \index in {1,...,47}
-					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
-				%\addlegendentry{$y_{0:H}$}
-				\foreach \index in {1,...,3}
-					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
-		
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
-				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
-				\end{axis}
-				\end{tikzpicture}
-			\end{figure}
-			%\includegraphics[width= .9\textwidth]{Scenario_plot}
-		\end{column}
-		\begin{column}{.5\textwidth}
-			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-		        }
-				\def\file{data/Kernel_K100_N50_Alpha01.txt}
-				
-				\centering
-				\begin{tikzpicture}
-				\begin{axis}[
-				grid=none,
-				xmin=0, xmax=20,
-				ymin=-12, ymax=4,
-				xtick={0, 5, 10, 15, 20},
-				ytick={-12, -8, -4, 0, 4},
-				%ylabel=$y$, 
-				xlabel=$t$,
-				set layers=standard,
-				reverse legend,
-				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-				ylabel shift = -6 pt]
-				
-				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-				\foreach \index in {1,...,47}
-					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
-				%\addlegendentry{$y_{0:H}$}
-				\foreach \index in {1,...,3}
-					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
-		
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
-				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
-				\end{axis}
-				\end{tikzpicture}
-			\end{figure}}
-
-			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-		        }
-				\def\file{data/Kernel_K100_N50_Alpha02.txt}
-				
-				\centering
-				\begin{tikzpicture}
-				\begin{axis}[
-				grid=none,
-				xmin=0, xmax=20,
-				ymin=-12, ymax=4,
-				xtick={0, 5, 10, 15, 20},
-				ytick={-12, -8, -4, 0, 4},
-				%ylabel=$y$, 
-				xlabel=$t$,
-				set layers=standard,
-				reverse legend,
-				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-				ylabel shift = -6 pt]
-				
-				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-				\foreach \index in {1,...,48}
-					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
-				%\addlegendentry{$y_{0:H}$}
-				\foreach \index in {1,...,2}
-					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
-		
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
-				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
-				\end{axis}
-				\end{tikzpicture}
-			\end{figure}}
-
-			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.3$)
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-		        }
-				\def\file{data/Kernel_K100_N50_Alpha03.txt}
-				
-				\centering
-				\begin{tikzpicture}
-				\begin{axis}[
-				grid=none,
-				xmin=0, xmax=20,
-				ymin=-12, ymax=4,
-				xtick={0, 5, 10, 15, 20},
-				ytick={-12, -8, -4, 0, 4},
-				%ylabel=$y$, 
-				xlabel=$t$,
-				set layers=standard,
-				reverse legend,
-				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-				ylabel shift = -6 pt]
-				
-				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-				\foreach \index in {1,...,47}
-					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
-				%\addlegendentry{$y_{0:H}$}
-				\foreach \index in {1,...,3}
-					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
-		
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
-				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
-				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
-				\end{axis}
-				\end{tikzpicture}
-			\end{figure}}
-		\end{column}
-	\end{columns}\vspace{.5cm}
-\end{frame}
-
-
-\begin{frame}{Nonlinear System}
-
-\begin{block}{Linear System (used in previous simulations)}
-\begin{equation*}
-\boldsymbol{f}(\boldsymbol{x}, u) = 
-\begin{bmatrix}
-0.8  x_1 - 0.5 x_2 \\
-0.4 x_1 + 0.5 x_2 + u
-\end{bmatrix}
-\end{equation*}
-\end{block}	
-
-\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
-
-\begin{block}{Nonlinear System}
-\begin{equation*}
-\boldsymbol{f}(\boldsymbol{x}, u) = 
-\begin{bmatrix}
-0.8  x_1 - 0.5 x_2 + 0.1 \text{cos}(3 x_1) x_2\\
-0.4 x_1 + 0.5 x_2 + (1 + 0.3 \text{sin} (2 x_2 )) u
-\end{bmatrix}
-\end{equation*}
-\end{block}
-\end{frame}	
-
-
-\begin{frame}{Optimal Control of Nonlinear Systems}
-
-Number of scenarios used for optimization: $N = 200$
-\vspace{.3cm}
-\begin{columns}[onlytextwidth, T]
-		\begin{column}{.5\textwidth}
-			\;\; Scenario Approach
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-	        }
-			\def\file{data/Scenario_K200_nonlinear.txt}
-			
-			\centering
-			\begin{tikzpicture}
-			\begin{axis}[
-			grid=none,
-			xmin=0, xmax=40,
-			ymin=-7, ymax=10,
-			xtick={0, 10, 20, 30, 40},
-			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
-			ylabel=$y$, xlabel=$t$,
-			set layers=standard]
-			
-			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
-			\tikzfillbetween[of=A and B]{opacity=0.2};
-			%\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
-			
-			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
-			%\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
-			
-			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
-			%\addlegendentry{$y_{0:H}$}
-			
-			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
-			\end{axis}
-			\end{tikzpicture}
-			\end{figure}
-			%\includegraphics[width= .9\textwidth]{Scenario_plot}
-		\end{column}
-		\begin{column}{.5\textwidth}
-			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-	        }
-			\def\file{data/Kernel_alpha02_K200_S10_nonlinear.txt}
-			
-			\centering
-			\begin{tikzpicture}
-			\begin{axis}[
-			grid=none,
-			xmin=0, xmax=40,
-			ymin=-7, ymax=10,
-			xtick={0, 10, 20, 30, 40},
-			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
-			%ylabel=$y$, 
-			xlabel=$t$,
-			set layers=standard,
-			reverse legend,
-			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-			ylabel shift = -6 pt]
-			
-			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
-			\tikzfillbetween[of=A and B]{opacity=0.2};
-			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
-			
-			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
-			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
-			
-			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
-			\addlegendentry{$y_{0:H}$}
-			
-			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
-			\end{axis}
-			\end{tikzpicture}
-			\end{figure}}
-
-			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.4$)
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-	        }
-			\def\file{data/Kernel_alpha04_K200_S10_nonlinear.txt}
-			
-			\centering
-			\begin{tikzpicture}
-			\begin{axis}[
-			grid=none,
-			xmin=0, xmax=40,
-			ymin=-7, ymax=10,
-			xtick={0, 10, 20, 30, 40},
-			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},
-			%ylabel=$y$, 
-			xlabel=$t$,
-			set layers=standard,
-			reverse legend,
-			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-			ylabel shift = -6 pt]
-			
-			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
-			\tikzfillbetween[of=A and B]{opacity=0.2};
-			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
-			
-			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
-			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
-			
-			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
-			\addlegendentry{$y_{0:H}$}
-			
-			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
-			\end{axis}
-			\end{tikzpicture}
-			\end{figure}}
-
-			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.6$)
-			\begin{figure}
-			\pgfplotsset{width=\textwidth, compat = 1.18, 
-			height = .8\textwidth, grid= major, 
-			legend cell align = left, ticklabel style = {font=\scriptsize},
-			every axis label/.append style={font=\scriptsize},
-			legend style = {font=\scriptsize},
-	        }
-			\def\file{data/Kernel_alpha06_K200_S10_nonlinear.txt}
-			
-			\centering
-			\begin{tikzpicture}
-			\begin{axis}[
-			grid=none,
-			xmin=0, xmax=40,
-			ymin=-7, ymax=10,
-			xtick={0, 10, 20, 30, 40},
-			ytick={-6, -4, -2, 0, 2, 4, 6,  8, 10},			%ylabel=$y$, 
-			xlabel=$t$,
-			set layers=standard,
-			reverse legend,
-			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
-			ylabel shift = -6 pt]
-			
-			\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
-			\addplot[name path=B, thick, opacity=0.2] table[x=t,y=y_opt_min]{\file};
-			\tikzfillbetween[of=A and B]{opacity=0.2};
-			\addlegendentry{$\left\{y_{0:H}^{[1:N]} \right\}$}
-			
-			\addplot[ultra thick,black!20!green] table[x=t,y=y_pred]{\file};
-			\addlegendentry{$\frac{1}{N}\sum\limits_{n=1}^N y_{0:H}^{[n]}$}
-			
-			\addplot[ultra thick, blue] table[x=t,y=y_true]{\file};
-			\addlegendentry{$y_{0:H}$}
-			
-			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
-			\end{axis}
-			\end{tikzpicture}
-			\end{figure}}
-		\end{column}
-	\end{columns}\vspace{.5cm}
-\end{frame}	
-
-\begin{frame}{Problems}
-	Solver unreliable for kernel approach with non linear systems
-
-	Impossible to solve OCPs with ...
-	\begin{itemize}
-	\item Low number of samples $N$
-	\item Low Risk Factor $\alpha$
-	\item High number of constraints
-	\end{itemize}
-\end{frame}
-
-\section{Conclusion}
-
-\begin{frame}{Conclusion}
-	\textbf{Summary:}
-	Kernel Embeddings allow for ...
-	\begin{itemize}
-		\item solving chance-constrained OCPs
-		\item Choosing risk factor $\alpha$
-	\end{itemize}
-	\vspace{.5cm}
-	
-	\textbf{Future Plans:}
-	\begin{itemize}
-		\item Use kernel embeddings on non-linear systems
-		\item Parameter tuning of $\sigma$
-		\item Alternative approach of reformulating chance constraints
-	\end{itemize}
-\end{frame}
-
-	\appendix
-	% This slide serves 3 purposes:
-	% 	1. a simple example how to create figures in tikz using beamer
-	%	2. testing if you actually checked the content of this template
-	% 	3. subtly preventing you from adding a "Thank you..." slide at the end of your presentation
-	% If this slide is still in your final presentation... well, congratulation!
-
-
-%\nocite{buss11}
-%\nocite{bauer09}
-\begin{frame}{\LSRITRRefTitle}
-	\printbibliography
-\end{frame}
-
-\begin{frame}{Timeline}
-\includegraphics[width= .9\textwidth]{Timeline_pic}
-\end{frame}
-
-\begin{frame}{Scenario Generation}
-\textbf{Goal:} Generate scenarios $\boldsymbol{\delta}^{[1:N]}$ using the observations $\mathbb{D}$\\
-\begin{block}{Algorithm: Scenario Generation}
-For $n = 1,...,N$:
-\begin{enumerate}
-  \item Sample $\{ \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \}^{[n]}$ from $p\left( \boldsymbol{\theta}, \boldsymbol{x}_{\text{-}T:\text{-}1} \mid \mathbb{D} \right)$ using PMCMC \cite{Robert_24}.
-  \item Sample $\boldsymbol{v}_t^{[n]}$ from $\boldsymbol{\mathcal{V}}_{\boldsymbol{\theta}^{[n]}}$ and  $\boldsymbol{w}_t^{[n]}$ from $\boldsymbol{\mathcal{W}}_{\boldsymbol{\theta}^{[n]}}$ for $t = \text{-}1, ..., H$
-  \item Set $\boldsymbol{x}_0^{[n]} = \boldsymbol{f}_{\boldsymbol{\theta}^{[n]}} \left( \boldsymbol{x}_{\text{-} 1}^{[n]}, \boldsymbol{u}_{\text{-} 1} \right) + \boldsymbol{v}_{\text{-} 1}^{[n]}$
-\end{enumerate}
-\textbf{Output:} Scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$
-\end{block}
-\end{frame}
-
-\begin{frame}{Bootstrap Construction}
-\begin{block}{Algorithm: Bootstrap MMD ambiguity set}
-\begin{enumerate}
-\item $\boldsymbol{K} \leftarrow \textit{kernel}(\boldsymbol{\delta}, \boldsymbol{\delta})$
-\item \textbf{For} $m = 1,...,B$
-\item \;\; $I \leftarrow N$ numbers from $\{1, \dots N \}$ with replacement
-\item \;\; $K_x \leftarrow \sum_{i,j = 1}^N K_{ij}, \;K_y \leftarrow \sum_{i,j \in I} K_{ij}, \;K_{xy} \leftarrow \sum_{j \in I} \sum_{i = 1}^N K_{ij}$
-\item \;\; MMD$[m] \leftarrow \frac{1}{N^2} \left( K_x + K_y - 2 K_{xy} \right) $
-\item \textbf{End For} 
-\item MMD $ \leftarrow$ \textit{sort}(MMD)
-\item $\varepsilon \gets$ MMD$\left[ \textit{ceil} (B \beta) \right]$
-\end{enumerate}
-\textbf{Output:} Gram matrix $\boldsymbol{K}$, Radius of MMD ambiguity set $\varepsilon$
-\end{block}
-$B = 1000, \beta = 0.95$
-\end{frame}
-
-\begin{frame}{Maximum Mean Discrepancy (MMD)}
-\begin{block}{Maximum Mean Discrepancy}
-\begin{equation*}
-\begin{aligned}
-\text{MMD}(\tilde{P}, P_N) &= ||\mu_{\tilde{P}} - \mu_{P_N} ||_{\mathcal{H}}\\
-&= \text{E}_{x,x' \sim \tilde{P}}[k(x,x')] + \text{E}_{y,y' \sim P_N}[k(y,y')] - 2\text{E}_{x\sim \tilde{P}, y \sim P_N}[k(x,y)]
-\end{aligned}
-\end{equation*}
-\end{block}
-
-\begin{block}{(Biased) MMD estimator}
-\begin{equation*}
-\widehat{\text{MMD}} (P, Q) = \frac{1}{N^2} \sum_{i,j = 1}^N k(\boldsymbol{\delta}^{[i]}, \boldsymbol{\delta}^{[j]}) + k(\tilde{\boldsymbol{\delta}}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]}) - 2 k(\boldsymbol{\delta}^{[i]}, \tilde{\boldsymbol{\delta}}^{[j]})
-\end{equation*}
-\end{block}
-
-\end{frame}
 
 \end{document}

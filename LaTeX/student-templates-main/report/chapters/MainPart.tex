@@ -2,12 +2,9 @@
 
 In this chapter, an approach is outlined that allows us to effectively reformulate the chance-constraint problem defined in Section \ref{Problem Statement} using the samples generated using the method described in Chapter \ref{Technical Background}. In Section \ref{SubSec:MMD}, a method to construct a maximum mean discrepancy (MMD) ambiguity sets with kernel approximation is proposed, and in Section \ref{Constraint Reformulation}, the ambiguity set is used to reformulate the chance constraints from Section \ref{Problem Statement}. A method for optimizing the hyperparameters for this approximation is explained in Section \ref{Kernel Approximation}. Finally, in Section \ref{Problem Formulation}, the results are used to define a new OCP.
 
-\section{Reproducing Kernel Hilbert Spaces} \label{SubSec:RKHS}
-
-
 \section{MMD ambiguity sets} \label{SubSec:MMD}
 
-As the underlying distribution of the data in the constraints \eqref{constraints} is unknown, we first expand them to their distributionally robust counterpart in order to allow for the use of scenarios as an approximation of the distribution. For this, we consider $\tilde{P}$ as the worst case distribution within a set $\mathcal{P}$ of plausible distributions, the so-called ambiguity set. This gives us the new constraints
+As the underlying distribution of the data in the constraints \eqref{constraints} is unknown, we aim to expand them to their distributionally robust counterpart in order to allow for the use of scenarios as an approximation of the distribution. For this, we consider $\tilde{P}$ as the worst case distribution within a set $\mathcal{P}$ of plausible distributions, the so-called ambiguity set. This gives us the new constraints
 
 \begin{equation} \label{wc constraints}
 \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha.
@@ -79,7 +76,7 @@ with $\tilde{\boldsymbol{\delta}}^{[n]}, n = 1,...,N$, denoting a bootstrap samp
 With a given MMD ambiguity set $\mathcal{P}$, the feasible set of the constraint \eqref{risk constraints} is given as
 
 \begin{equation} \label{feasible set}
-	Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{P \in \mathcal{P}}P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}.
+	Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}.
 \end{equation}
 
 with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) =  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}))$.
@@ -100,7 +97,7 @@ with reproducing kernel hilbert space function $g \in \mathcal{H}$ and $1(\cdot)
 	\text{VaR}_{1-\alpha}^{P} :=  \inf \left\{ t' \in \mathbb{R} : P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq t' \right] \geq 1 - \alpha \right\}.
 \end{equation}
 
-It can be easily shown that
+This allows us to relax the constraint as it can be easily shown that
 
 \begin{equation} \label{VaR t0}
 	\text{VaR}_{1-\alpha}^{P} \leq 0 \iff  P \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha.
@@ -145,13 +142,13 @@ with $g$ being expressed as the product of the kernel Gram matrix $\boldsymbol{K
 
 In Section \ref{Constraint Reformulation}, the chance constraints have been reformulated kernel maximum mean discrepancy where kernels have been used as a universal function approximator based on the available samples. However, for this approximation to be reliable, appropriate kernels must be chosen to give a good estimate. Our samples also consist of multiple elements, i.e., the initial state $\boldsymbol{x}_0$ and the model parameter $\boldsymbol{\theta}$, which are of varying size and magnitude. As such, it is necessary to divide the kernels into multiple factors that are tuned separately and then multiplied.
 
-For these seperate kernels, we use Gaussian kernels $k(z,z') = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||z - z'||_2^2 \right)$ with the bandwidth $\sigma$. As such, the elements of the Gram matrix $\boldsymbol{K} \in \mathbb{R}^{N \times N}$ are defined as
+For these seperate kernels, we use Gaussian kernels $k(\boldsymbol{z},\boldsymbol{z}') = \text{exp}\left(\text{-}\frac{1}{2\sigma^2} ||\boldsymbol{z} - \boldsymbol{z}'||_2^2 \right)$ with the bandwidth $\sigma$. As such, the elements of the Gram matrix $\boldsymbol{K} \in \mathbb{R}^{N \times N}$ are defined as
 
 \begin{equation} \label{Kernel equation}
-K_{ij} = k_{\sigma_\mathcal{X}}(\boldsymbol{x}_0^{[i]}, \boldsymbol{x}_0^{[j]}) k_{\sigma_{\boldsymbol{\Theta}}}(\boldsymbol{\theta}^{[i]}, \boldsymbol{\theta}^{[j]})
+K_{ij} = k_{\boldsymbol{\sigma}_\mathcal{X}}(\boldsymbol{x}_0^{[i]}, \boldsymbol{x}_0^{[j]}) k_{\boldsymbol{\sigma}_{\Theta}}(\boldsymbol{\theta}^{[i]}, \boldsymbol{\theta}^{[j]})
 \end{equation}
 
-with the kernel for the model parameter $\boldsymbol{\theta}$ being potentially subdivided again into an individual kernel for the process and measurement noise and a kernel for the unknown transition and measurement functions. The individual elements of $\boldsymbol{\sigma} = [\sigma_\mathcal{X}, \boldsymbol{\sigma}_{\boldsymbol{\Theta}}]$ are initialized via the median heuristic \cite{Damien_18} and then increased or decreased to maximize the average probability of a set of $N_\text{test}$ test samples, i.e. find the $\boldsymbol{\sigma}$ that maximizes
+with the kernel for the states $\boldsymbol{x}$ and the model parameter $\boldsymbol{\theta}$ being potentially subdivided again into an individual kernel for the process and measurement noise and a kernel for the unknown transition and measurement functions. The individual elements of $\boldsymbol{\sigma} = [\boldsymbol{\sigma}_\mathcal{X}, \boldsymbol{\sigma}_{\Theta}]$ are initialized via the median heuristic \cite{Damien_18} and then increased or decreased to maximize the average probability of a set of $N_\text{test}$ test samples, i.e. find the $\boldsymbol{\sigma}$ that maximizes
 
  \begin{equation} \label{Average Probability}
 \max\limits_{\boldsymbol{\sigma}} \frac{1}{N_\text{test}}  \sum_{n= 1}^{N_\text{test}} \text{P}_{\boldsymbol{\sigma}} ( \boldsymbol{\delta_\text{test}}^{[n]} )
@@ -168,7 +165,7 @@ over a set of $N_\text{train}$ training samples that are independent of the $N_\
 
 \section{Problem Formulation} \label{Problem Formulation}
 
-In the previous sections, the chance constraints have been reformulated into a feasible region $\hat{Z}$. We now want to use this to reformulate the chance-constraint OCP defined in Section \ref{Problem Statement}. 
+In the previous sections, the chance constraints have been reformulated into a feasible region $\hat{Z}$. We now want to use this to reformulate the chance-constrained OCP defined in Section \ref{Problem Statement}. 
 
 For this purpose, we can use the variables $\boldsymbol{\gamma}$, $g_0$ and $t'$ that span the feasible region as optimization parameters while making sure that $\boldsymbol{u}_{0:H}$ is an element of the feasible region.
 
