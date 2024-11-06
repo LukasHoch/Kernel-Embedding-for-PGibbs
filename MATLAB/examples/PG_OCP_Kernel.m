@@ -98,18 +98,15 @@ y_test = y(:, T+1:end);
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
 
-% PG_samples = load("PGibbs_Samples.mat");
-% PG_samples = PG_samples.PG_samples;
-
-PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
-PG_samples = PG_samples.PG_samples;
-
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
+
+PG_samples = load("PG_Samples\PGibbs_Samples_K2300_kd_70.mat");
+PG_samples = PG_samples.PG_samples;
 
 PG_samples = PG_samples(randperm(K));
 
-s = 2;
 
+s = 2;
 
 if s == 1
     H = 11;

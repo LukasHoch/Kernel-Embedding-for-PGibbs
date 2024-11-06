@@ -98,10 +98,10 @@ y_test = y(:, T+1:end);
 % x_t+1 = PG_samples{i}.A*phi(x_t,u_t) + N(0,PG_samples{i}.Q),
 % where phi are the basis functions defined above.
 
-% PG_samples = load("PGibbs_Samples.mat");
+% PG_samples = load("PG_Samples\PGibbs_Samples.mat");
 % PG_samples = PG_samples.PG_samples;
 
-PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
+PG_samples = load("PG_Samples\PGibbs_Samples_K2300_kd_70.mat");
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
@@ -134,7 +134,7 @@ if K_opt > K
     K_opt = K;
 end
 
-N_S = 10;
+N_S = 5;
 
 y_true_scenario = zeros(N_S, H);
 y_true_kernel = zeros(N_S, H, length(alpha));

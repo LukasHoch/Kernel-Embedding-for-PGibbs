@@ -100,7 +100,7 @@ y_test = y(:, T+1:end);
 % PG_samples = load("PGibbs_Samples.mat");
 % PG_samples = PG_samples.PG_samples;
 
-PG_samples = load("PGibbs_Samples_K2300_kd_70.mat");
+PG_samples = load("PG_Samples\PGibbs_Samples_K2300_kd_70.mat");
 PG_samples = PG_samples.PG_samples;
 
 %PG_samples = particle_Gibbs(u_training, y_training, K, K_b, k_d, N, phi, Lambda_Q, ell_Q, Q_init, V, A_init, x_init_mean, x_init_var, g, R);
@@ -209,7 +209,7 @@ R = 0.1;
 %sigma_mult = [0.5273 1.3369 1.4877 0.2340];    %Sigma3 Generated using SigmaTuning2   
 sigma_mult = [0.5637 1.4231 1.5639 0.2653];    %Sigma4 Generated using SigmaTuning3 (Potentially the same as SigmaTuning2, just more converged)
 
-K_opt_max = 200;
+K_opt_max = 300;
 
 K_test = K - K_opt_max;
 
