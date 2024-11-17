@@ -24,7 +24,7 @@
 \presenter{L. Hochschwarzer}
 
 \supervisor{R. Lefringhausen}
-\typeofpres{Report Master‘s Thesis}
+\typeofpres{Final Report Master‘s Thesis}
 
 \usepackage[bigfiles]{media9} %option bigfiles not needed for xelatex, runs without problems on ubuntu14
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,6 +33,8 @@
 
 \usepackage{tikz}
 \usepackage{pgfplots}
+
+\usepackage{xcolor}
 
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{arrows,shapes,backgrounds,patterns,fadings,decorations,
@@ -50,7 +52,7 @@
 \begin{frame}{Motivation}	
 \begin{columns}[onlytextwidth, T]
 		\begin{column}{.5\textwidth}
-			\includegraphics[width= .8\textwidth]{Motivation_pic}
+			\includegraphics[width= .9\textwidth]{Motivation_pic}
 			\cite[4]{Xiloyannis_19}
 		\end{column}
 		\begin{column}{.5\textwidth}
@@ -104,18 +106,18 @@
 		P \left[  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha
 		\end{equation*}
 	\end{block}	
-	\textbf{Problem:} Underlying data distribution $P$ is unknown
+	\textbf{Problem:} Underlying data distribution is unknown
 \end{frame}
 
 \begin{frame}{Related Works}
 
-Particle Gibbs based optimal control via scenario theory \textbf{\cite[4]{Robert_24}}
+Particle Gibbs based optimal control \textbf{\cite[4]{Robert_24}}
 
-$\;\; \Rightarrow \;$ Guarantees determined retroactively
+$\;\; \Rightarrow \;$ Guarantees determined retroactively via scenario theory
 
 \vspace{.4cm}
 
-Alternative Approaches:
+Alternative approaches:
 \begin{itemize}
 \item Wasserstein ambiguity \cite[4]{Hota_19}
 
@@ -129,9 +131,11 @@ $\;\; \Rightarrow \;$ Constraints limited to affine functions
 \section{Particle Gibbs}
 
 \begin{frame}{Particle Gibbs Scenarios}
-Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$\\
+Particle Gibbs provides the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$\\
 
-\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
+$\;\; \Rightarrow \;$ Scenarios \textbf{and} input $\boldsymbol{u}_{0:H}$ define the trajectory
+
+\textbf{Required:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 
 \begin{block}{Chance Constraints}
 	\begin{equation*}
@@ -141,14 +145,13 @@ Particle Gibbs gives us the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsym
 
 \makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
-\begin{block}{Scenario Approach (used in \cite{Robert_24})}
+\begin{block}{Scenario Approach (\cite{Robert_24})}
 	\begin{equation*}
 		 \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]})) \leq 0, \; \forall n = 1, ..., N
 	\end{equation*}
 \end{block}
 
 $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
-
 
 
 
@@ -159,8 +162,8 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 
 \begin{frame}
 	\frametitle{Maximum Mean Discrepancy (MMD) ambiguity sets}
-\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
-\textbf{Idea:} Replace distribution $P$ with the ambiguity set $\mathcal{P}$\\
+\textbf{Required:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
+\textbf{Approach:} Replace distribution $P$ with the ambiguity set $\mathcal{P}$\\
 
 \begin{columns}[onlytextwidth, T]
 \begin{column}{.65\textwidth}
@@ -170,6 +173,8 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 \mathcal{P} =  \left\{ \tilde{P} : \text{MMD} (\tilde{P}, P_N) \leq \varepsilon \right\}.
 \end{equation*}
 \end{block}	
+
+Radius $\varepsilon$ obtained via bootstrap construction 
 
 \makebox[4.2cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
@@ -195,8 +200,7 @@ with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta})  =  \text{max}(\bold
 
 
 \begin{frame}
-	\frametitle{Constraint Reformulation}
-\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
+\frametitle{Constraint Reformulation}
 \begin{block}{Feasible Region of chance constraint}
 \begin{equation*}
 Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
@@ -215,14 +219,111 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 \end{frame}
 
 
-\begin{frame}{Kernel Approximation}
+\begin{frame}{Hyperparameter Tuning}
+\vspace{.3cm}
+	\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\begin{itemize}
+				\item Gaussian kernels 
+				\begin{equation*}
+					k(z,z') = \text{exp}\left(\text{-}\frac{1}{2 {\color{red}{\sigma}}^2} (z - z')^2 \right)
+				\end{equation*}
+				\item Split scenarios into training set $\{z_i\}$ and test set $\{z'_j\}$ 
+				\item Create likelyhood function
+				\begin{equation*}
+					p(z) = \frac{1}{N_\text{train}} \sum_{i = 1}^{N_\text{train}} \frac{1}{\sqrt{2 \pi \sigma^2}}k(z ,z_i)
+				\end{equation*}
+				\item Maximize sum of likelyhoods over test set by selected a good $\sigma$
 
+			\end{itemize}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\only<1>{
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Probability_Plot.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			%ticks = none,
+			xmin=-5, xmax=5,
+			ymin=0, ymax=0.5,
+			xtick={-1, 2},
+			xticklabels={$z_1$, $z_2$},
+			ytick={0, 0.1, 0.2, 0.3, 0.4, 0.5},
+			ylabel={Probability}, 
+			%xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[ultra thick,black!20!blue] table[x=t,y=p1]{\file};
+			\addplot[black!20!red] table[x=t,y=p2]{\file};
+			\addplot[black!20!red] table[x=t,y=p3]{\file};
+
+			\draw[dotted] (-1,0) -- (-1,0.3989422804);
+			\draw[dotted] (2,0) -- (2,0.3989422804);
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+
+			\only<2>{
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Probability_Plot.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			%ticks = none,
+			xmin=-5, xmax=5,
+			ymin=0, ymax=0.5,
+			xtick={-2, 0, 2.2},
+			xticklabels={$z'_1$, $z'_2$, $z'_3$},
+			ytick={0, 0.1, 0.2, 0.3, 0.4, 0.5},
+			ylabel={Probability}, 
+			%xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[ultra thick,black!20!blue] table[x=t,y=p1]{\file};
+
+			\draw[dotted] (-2,0) -- (-2,0.2421045547);
+			\draw[dotted] (0,0) -- (0,0.2959616910);
+			\draw[dotted] (2.2,0) -- (2.2,0.3934267822);
+
+			\draw[dotted] (-5,0.2421045547) -- (-2,0.2421045547);
+			\draw[dotted] (-5,0.2959616910) -- (0,0.2959616910);
+			\draw[dotted] (-5,0.3934267822) -- (2.2,0.3934267822);
+			
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}}
+			%\includegraphics[width= .9\textwidth]{Scenario_plot}
+		\end{column}
+	\end{columns}\vspace{.5cm}
 \end{frame}
 
 
 \begin{frame}
-	\frametitle{Problem Formulation}
-\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
+	\frametitle{Reformulated Optimal Control Problem}
+%\textbf{Goal:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 \begin{align*} 
  &\min\limits_{\boldsymbol{u}_{0:H}, g_0, \boldsymbol{\gamma}, t'} J_H(\boldsymbol{u}_{0:H}) \\
 \text{subject to:}&\; \forall n \in \mathbb{N}_{\leq N}, \;  \forall t \in \mathbb{N}_{\leq H}^0, \\
@@ -244,7 +345,7 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 \begin{frame}{Simulation Setup}
 \begin{itemize}
 \item 
-\makebox[4cm]{Unknown system: \hfill}
+\makebox[4cm]{Unknown linear system: \hfill}
 $\boldsymbol{f}(\boldsymbol{x}, u) = 
 \begin{bmatrix}
 0.8  x_1 - 0.5 x_2 \\
@@ -258,31 +359,32 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \right).$
 
 \item 
-\makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[ x_1,  x_2,  u \right]^\text{T} + \boldsymbol{v}_{t}, \; \boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ 
+\makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[ x_1,  x_2,  u \right]^\text{T}, \; \boldsymbol{v}_{t} \sim \mathcal{N} (\boldsymbol{0}, \boldsymbol{Q})$ 
 \item
 \makebox[4.5cm]{Priors: \hfill} $\boldsymbol{Q} \sim \mathcal{IW} (100 \boldsymbol{I}_2, 10)$ \\
 \makebox[4.5cm]{\hfill} $\boldsymbol{A} \sim \mathcal{MN} (\boldsymbol{0}, \boldsymbol{Q}, 10 \boldsymbol{I}_2)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;$ \cite{Svensson_17}\\
 \makebox[4.5cm]{\hfill} $\boldsymbol{x}_{\text{-}T} \sim \mathcal{N} ([2, 2]^\text{T}, \boldsymbol{I}_2)$
 
 
-\item Known measurement model $g(\boldsymbol{x}, u) = x_1, \; w_t \sim \mathcal{N} (0, 0.1)$
+\item Known measurement model $g(\boldsymbol{x}, u) = x_1, \; w_t \sim \mathcal{N} (0, 0.1)$ (w.l.o.g.)
 
 \item Cost function $J_H = \sum_{t = 0}^H u_t^2$
 
 \item Input constraints $\left| u \right| \leq 10$
 
-\item Gaussian kernels with bandwidth $\sigma$ set via the median heuristic \cite{Damien_18}
+%\item Gaussian kernels with bandwidth $\sigma$ set via the median heuristic \cite{Damien_18}
 
-\item Ambiguity set radius $\varepsilon$ set via bootstrap construction \cite{Yassine_22}.
+%\item Ambiguity set radius $\varepsilon$ set via bootstrap construction \cite{Yassine_22}.
+
+\item Number of scenarios used for optimization: $N = 100$
 \end{itemize}
 \end{frame}	
 
-\begin{frame}{Corridor Test}
-	Number of scenarios used for optimization: $N = 200$
+\begin{frame}{Risk Tuning}
 \vspace{.3cm}
 \begin{columns}[onlytextwidth, T]
 		\begin{column}{.5\textwidth}
-			\;\; Scenario Approach
+			$\;\;\;\;\;\;\;\;\;$ Scenario Approach
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -319,10 +421,12 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 				\end{axis}
 				\end{tikzpicture}
 			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$Average Cost $J_H = 338.4$
+
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.1$)
+			\only<1>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.1$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -359,9 +463,11 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
 				\end{axis}
 				\end{tikzpicture}
-			\end{figure}}
+			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Average Cost $J_H = 255.9$
+			}
 
-			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
+			\only<2>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.2$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -398,9 +504,11 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
 				\end{axis}
 				\end{tikzpicture}
-			\end{figure}}
+			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Average Cost $J_H = 129.5$
+			}
 
-			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.3$)
+			\only<3>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.3$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -437,71 +545,60 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
 				\end{axis}
 				\end{tikzpicture}
-			\end{figure}}
+			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Average Cost $J_H = 69.9$
+			}
 		\end{column}
 	\end{columns}\vspace{.5cm}
-\end{frame}
-
-\begin{frame}{Corridor Test}
-\begin{table}
-\centering
-\begin{tabular}{|c| c| c| c| c|}
-\hline
-Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 10$\% & $\alpha = 20$\% & $\alpha = 30$\% \\
-\hline
-$J_H$ (mean) & $338.4$ & $255.9$ & $129.5$ & $69.9$\\
-\hline
-Risky Runs & $8$\% & $40$\% & $78$\% & $98$\% \\
-\hline
-Failed Runs & $6$\% & $6$\% & $4$\% & $6$\% \\
-\hline
-\end{tabular}
-%\caption{Results of the 50 exemplary runs with known basis functions for the scenario approach and kernel approach for risk values of $0.1$, $0.2$, and $0.3$. The table shows the average cost of the 50 runs and the percentage of failed Monte Carlo runs, i.e. runs where the true output violated at least one constraint.}
-\label{tab:results_corridor}
-\end{table} 
 \end{frame}
 
 
 
 \begin{frame}{Nonlinear System}
 
-\begin{block}{Linear System (used in previous simulations)}
-\begin{equation*}
-\boldsymbol{f}(\boldsymbol{x}, u) = 
-\begin{bmatrix}
-0.8  x_1 - 0.5 x_2 \\
-0.4 x_1 + 0.5 x_2 + u
-\end{bmatrix}
-\end{equation*}
-\end{block}	
-
-\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
-
 \begin{block}{Nonlinear System}
-\begin{equation*}
-\boldsymbol{f}(\boldsymbol{x}, u) = 
-\begin{bmatrix}
-0.8  x_1 - 0.5 x_2 + 0.1 \text{cos}(3 x_1) x_2\\
-0.4 x_1 + 0.5 x_2 + (1 + 0.3 \text{sin} (2 x_2 )) u
-\end{bmatrix}
-\end{equation*}
-\end{block}
+	\begin{equation*}
+	\boldsymbol{f}(\boldsymbol{x}, u) = 
+	\begin{bmatrix}
+	0.8  x_1 - 0.5 x_2 + 0.1 \text{cos}(3 x_1) x_2\\
+	0.4 x_1 + 0.5 x_2 + (1 + 0.3 \text{sin} (2 x_2 )) u
+	\end{bmatrix}
+	\end{equation*}
+	\end{block}
+	
+	\begin{itemize}
+	\item \makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[x_1, x_2, u, \text{cos} ( 3 x_1) x_2, \text{sin} (2 x_2) u 				\right]^\text{T}$
+	\item Input constraints $\left| u \right| \leq 5$
+	\item Number of scenarios used for optimization: $N = 200$
+	\end{itemize}
 
-\begin{itemize}
-\item \makebox[4.5cm]{Known system structure: \hfill} $\boldsymbol{f}(\boldsymbol{x}, u) = \boldsymbol{A} \left[x_1, x_2, u, \text{cos} ( 3 x_1) x_2, \text{sin} (2 x_2) u \right]^\text{T} + \boldsymbol{v}_{t}$
-\item Input constraints $\left| u \right| \leq 5$
-\end{itemize}
 
-\end{frame}	
+\vspace{.5cm}
+
+	Challenge: Numerical issues complicates solving OCPs with
+
+	\begin{itemize}
+	\item Low number of samples $N$
+	\item Low Risk Factor $\alpha$
+	\item High number of constraints
+	\end{itemize}
+
+	%\vspace{.5cm}
+
+	%Solution:
+	%\begin{itemize}
+	%\item Approximate max operator $[z]_+ \approx \frac{z + \sqrt{z^2 + 0.01}}{2}$
+	%\item New Gram matrix $\boldsymbol{K}' = \boldsymbol{K} + 0.01 \boldsymbol{I}_N$
+	%\end{itemize}
+\end{frame}
 
 
 \begin{frame}{Optimal Control of Nonlinear Systems}
 
-Number of scenarios used for optimization: $N = 200$
 \vspace{.3cm}
 \begin{columns}[onlytextwidth, T]
 		\begin{column}{.5\textwidth}
-			\;\; Scenario Approach
+			$\;\;\;\;\;\;\;\;\;$ Scenario Approach
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -536,10 +633,11 @@ Number of scenarios used for optimization: $N = 200$
 			\end{axis}
 			\end{tikzpicture}
 			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 32.8$s
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
-			\only<1>{$\;\;$ Kernel Approach  ($\alpha = 0.2$)
+			\only<1>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.2$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -578,9 +676,11 @@ Number of scenarios used for optimization: $N = 200$
 			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
 			\end{axis}
 			\end{tikzpicture}
-			\end{figure}}
+			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 176.1$s
+}
 
-			\only<2>{$\;\;$ Kernel Approach  ($\alpha = 0.4$)
+			\only<2>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.4$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -619,9 +719,11 @@ Number of scenarios used for optimization: $N = 200$
 			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
 			\end{axis}
 			\end{tikzpicture}
-			\end{figure}}
+			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 50.9$s
+}
 
-			\only<3>{$\;\;$ Kernel Approach  ($\alpha = 0.6$)
+			\only<3>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.6$)
 			\begin{figure}
 			\pgfplotsset{width=\textwidth, compat = 1.18, 
 			height = .8\textwidth, grid= major, 
@@ -659,52 +761,35 @@ Number of scenarios used for optimization: $N = 200$
 			\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (20,2) rectangle (25,-15); 
 			\end{axis}
 			\end{tikzpicture}
-			\end{figure}}
+			\end{figure}
+			$\;\;\;\;\;\;\;\;\;$ Computation Time $= 41.0$s
+}
 		\end{column}
 	\end{columns}\vspace{.5cm}
 \end{frame}	
 
-\begin{frame}{Limitations}
-	Solver unreliable for kernel approach with nonlinear systems
-
-	Impossible to solve OCPs with ...
-	\begin{itemize}
-	\item Low number of samples $N$
-	\item Low Risk Factor $\alpha$
-	\item High number of constraints
-	\end{itemize}
-
-\begin{table}
-\centering
-\begin{tabular}{|c| c| c| c| c|}
-\hline
-Approach & Scenario &  \multicolumn{3}{|c|}{Kernel}\\  \cline{3-5} & &  $\alpha = 20$\% & $\alpha = 40$\% & $\alpha = 60$\% \\
-\hline
-Computation time & $32.8$s & $176.1$s & $50.9$s & $41.0$s\\
-\hline
-\end{tabular}
-%\caption{Computation time for scenario and kernel approach for an exemplary run with a system with nonlinear basis functions.}
-\label{tab:computation times}
-\end{table} 
-\end{frame}
 
 \section{Conclusion}
 
 \begin{frame}{Conclusion}
-	\textbf{Summary:}
-	Kernel Embeddings allow for ...
-	\begin{itemize}
-		\item solving chance-constrained OCPs
-		\item Choosing risk factor $\alpha$
-	\end{itemize}
-	\vspace{.5cm}
-	
-	\textbf{Future Plans:}
-	\begin{itemize}
-		\item Use kernel embeddings on non-linear systems
-		\item Parameter tuning of $\sigma$
-		\item Alternative approach of reformulating chance constraints
-	\end{itemize}
+	\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\textbf{Summary:}
+		
+			The approach presented combines Particle Gibbs sampling with MMD-ambiguity sets using Kernel Embeddings
+		
+			\vspace{.5cm}
+		
+			Kernel Embeddings allow for ...
+			\begin{itemize}
+				\item solving chance-constrained OCPs
+				\item Choosing risk factor $\alpha$
+			\end{itemize}
+		\end{column}
+		\begin{column}{.5\textwidth}
+			
+		\end{column}
+	\end{columns}
 \end{frame}
 
 	\appendix
@@ -993,5 +1078,65 @@ Number of scenarios used for optimization: $N = 200$
 		\label{fig:robustness_plot}
 \end{figure}
 \end{frame}	
+
+\begin{frame}{Empirical Distribution}
+\vspace{.3cm}
+	\begin{columns}[onlytextwidth, T]
+		\begin{column}{.5\textwidth}
+			\textbf{Given:} Samples $z_i, i = 1,...,N$
+
+			\begin{block}{Empirical Distribution}
+			\begin{equation*}
+				P_N(z) = \frac{1}{N} \sum_{i = 1}^{N} \text{dirac}(z - z_i)
+			\end{equation*}
+			\end{block}	
+
+		\end{column}
+		\begin{column}{.5\textwidth}
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+	        }
+			\def\file{data/Probability_Plot.txt}
+			
+			\centering
+			\begin{tikzpicture}
+			\begin{axis}[
+			grid=none,
+			%ticks = none,
+			xmin=-5, xmax=5,
+			ymin=0, ymax=0.5,
+			xtick={-1.3, -0.4, 1.1, 1.9, 2.4},
+			xticklabels={$z_1$, $z_2$, $z_3$, $z_4$, $z_5$},
+			ytick={0, 0.1, 0.2, 0.3, 0.4, 0.5},
+			ylabel={Probability}, 
+			%xlabel=$t$,
+			set layers=standard,
+			reverse legend,
+			legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+			ylabel shift = -6 pt]
+			
+			\addplot[ultra thick,black!20!blue] table[x=t,y=p1]{\file};
+			
+			\draw[<-,thick,red] (-1.3,.2)--(-1.3,0);
+			\draw[<-,thick,red] (-0.4,.2)--(-0.4,0);
+			\draw[<-,thick,red] (1.1,.2)--(1.1,0);
+			\draw[<-,thick,red] (1.9,.2)--(1.9,0);
+			\draw[<-,thick,red] (2.4,.2)--(2.4,0);
+
+
+			%\draw[<-,thick,red] (-1.3,0)--(-1.3,0.2) 
+
+			\end{axis}
+			\end{tikzpicture}
+			\end{figure}
+
+			%\includegraphics[width= .9\textwidth]{Scenario_plot}
+		\end{column}
+	\end{columns}\vspace{.5cm}
+\end{frame}
 
 \end{document}
