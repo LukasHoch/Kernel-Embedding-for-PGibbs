@@ -103,7 +103,7 @@
 		\end{equation*}
 		subject to: 
 		\begin{equation*}
-		P \left[  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H})) \leq 0 \right] \geq 1 - \alpha
+		P \left[  h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha
 		\end{equation*}
 	\end{block}	
 	\textbf{Problem:} Underlying data distribution is unknown
@@ -111,7 +111,7 @@
 
 \begin{frame}{Related Works}
 
-Particle Gibbs based optimal control \textbf{\cite[4]{Robert_24}}
+Particle Gibbs based optimal control \textbf{\cite{Robert_24}}
 
 $\;\; \Rightarrow \;$ Guarantees determined retroactively via scenario theory
 
@@ -119,11 +119,11 @@ $\;\; \Rightarrow \;$ Guarantees determined retroactively via scenario theory
 
 Alternative approaches:
 \begin{itemize}
-\item Wasserstein ambiguity \cite[4]{Hota_19}
+\item Wasserstein ambiguity \cite{Hota_19}
 
 $\;\; \Rightarrow \;$ Constraints limited to affine functions
-\item \makebox[3cm]{ Kernel embeddings \hfill} \textbf{\cite[4]{Yassine_22}}\\
-\makebox[3cm]{\hfill}   \cite[4]{Adam_22} 
+\item \makebox[3cm]{ Kernel embeddings \hfill} \textbf{\cite{Yassine_22}}\\
+\makebox[3cm]{\hfill}   \cite{Adam_22} 
 \end{itemize}
 \end{frame}
 
@@ -139,7 +139,7 @@ $\;\; \Rightarrow \;$ Scenarios \textbf{and} input $\boldsymbol{u}_{0:H}$ define
 
 \begin{block}{Chance Constraints}
 	\begin{equation*}
-		P \left[  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha
+		P \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha
 	\end{equation*}
 \end{block}	
 
@@ -147,7 +147,7 @@ $\;\; \Rightarrow \;$ Scenarios \textbf{and} input $\boldsymbol{u}_{0:H}$ define
 
 \begin{block}{Scenario Approach (\cite{Robert_24})}
 	\begin{equation*}
-		 \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]})) \leq 0, \; \forall n = 1, ..., N
+		 h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N
 	\end{equation*}
 \end{block}
 
@@ -180,11 +180,10 @@ Radius $\varepsilon$ obtained via bootstrap construction
 
 \begin{block}{Expanded Chance-Constraints}
 \begin{equation*}
-\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha.
+\inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
 \end{equation*}
 \end{block}
 
-with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta})  =  \text{max}(\boldsymbol{h}(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}))$.
 
 \end{column}
 \begin{column}{.3\textwidth}
@@ -203,7 +202,7 @@ with $\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta})  =  \text{max}(\bold
 \frametitle{Constraint Reformulation}
 \begin{block}{Feasible Region of chance constraint}
 \begin{equation*}
-Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ \tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) \leq 0 \right] \geq 1 - \alpha \right\}
+Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha \right\}
 \end{equation*}
 \end{block}	
 
@@ -212,7 +211,7 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 \begin{block}{Reformulated Feasible Region \cite{Yassine_22}}
 \begin{empheq}[right = \empheqrbrace, left= \hat{Z} \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
     & g_0 + \frac{1}{N}\sum_{n = 1}^N (\boldsymbol{K}\boldsymbol{\gamma})_n + \varepsilon \sqrt{\boldsymbol{\gamma}^\text{T}\boldsymbol{K}\boldsymbol{\gamma}} \leq t' \alpha \\
-    & [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}^{[n]}) + t']_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
+    & [h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) + t']_+ \leq g_0 + (\boldsymbol{K}\boldsymbol{\gamma})_n, \; n = 1,...,N \\
     & g_0 \in \mathbb{R}, \boldsymbol{\gamma} \in \mathbb{R}^N, t' \in \mathbb{R}
   \end{empheq}
 \end{block}
@@ -633,7 +632,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{axis}
 			\end{tikzpicture}
 			\end{figure}
-			$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 32.8$s
+			%$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 32.8$s
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
@@ -677,7 +676,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{axis}
 			\end{tikzpicture}
 			\end{figure}
-			$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 176.1$s
+			%$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 176.1$s
 }
 
 			\only<2>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.4$)
@@ -720,7 +719,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{axis}
 			\end{tikzpicture}
 			\end{figure}
-			$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 50.9$s
+			%$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 50.9$s
 }
 
 			\only<3>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.6$)
@@ -762,7 +761,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{axis}
 			\end{tikzpicture}
 			\end{figure}
-			$\;\;\;\;\;\;\;\;\;$ Computation Time $= 41.0$s
+			%$\;\;\;\;\;\;\;\;\;$ Computation Time $= 41.0$s
 }
 		\end{column}
 	\end{columns}\vspace{.5cm}
@@ -773,21 +772,110 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 
 \begin{frame}{Conclusion}
 	\begin{columns}[onlytextwidth, T]
-		\begin{column}{.5\textwidth}
+		\begin{column}{.6\textwidth}
 			\textbf{Summary:}
 		
-			The approach presented combines Particle Gibbs sampling with MMD-ambiguity sets using Kernel Embeddings
+			\begin{itemize}
+				\item Sampling from unknown system with particle Gibbs
+				\item Ambiguity set around empirical distribution
+				\item Optimization over ambuiguity set for robust solution
+			\end{itemize}
 		
 			\vspace{.5cm}
-		
+			\begin{columns}
+			\begin{column}{.6\textwidth}
 			Kernel Embeddings allow for ...
 			\begin{itemize}
 				\item solving chance-constrained OCPs
 				\item Choosing risk factor $\alpha$
 			\end{itemize}
+			\end{column}
+\begin{column}{.4\textwidth}
+			\includegraphics[width= \textwidth]{AmbiguitySetDrawing}
+			\end{column}
+			\end{columns}
 		\end{column}
-		\begin{column}{.5\textwidth}
-			
+		\begin{column}{.4\textwidth}
+			%\includegraphics[width= .5\textwidth]{AmbiguitySetDrawing}
+			%\vspace{.5cm}
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			%every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha01.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				%xtick={0, 5, 10, 15, 20},
+				%ytick={-12, -8, -4, 0, 4},
+				ticks = none,
+				%ylabel=$y$, 
+				%xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				\draw (10,2) node {$\alpha = 0.1$};
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}
+			\begin{figure}
+			\pgfplotsset{width=\textwidth, compat = 1.18, 
+			height = .8\textwidth, grid= major, 
+			legend cell align = left, ticklabel style = {font=\scriptsize},
+			%every axis label/.append style={font=\scriptsize},
+			legend style = {font=\scriptsize},
+		        }
+				\def\file{data/Kernel_K100_N50_Alpha03.txt}
+				
+				\centering
+				\begin{tikzpicture}
+				\begin{axis}[
+				grid=none,
+				xmin=0, xmax=20,
+				ymin=-12, ymax=4,
+				%xtick={0, 5, 10, 15, 20},
+				%ytick={-12, -8, -4, 0, 4},
+				ticks = none,
+				%ylabel=$y$, 
+				%xlabel=$t$,
+				set layers=standard,
+				reverse legend,
+				legend style={font=\scriptsize, at={(0,1)},anchor=north west, row sep=2pt},
+				ylabel shift = -6 pt]
+				
+				%\addplot[name path=A, forget plot, thick, opacity=0.2] table[x=t,y=y_opt_max]{\file};
+				\foreach \index in {1,...,47}
+					\addplot[thin, blue] table[x=t,y=Successful\index]{\file};
+				%\addlegendentry{$y_{0:H}$}
+				\foreach \index in {1,...,3}
+					\addplot[thin, red] table[x=t,y=Failed\index]{\file};
+		
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,-5) -- (15,-5) arc(0:-180:5) --cycle;
+				\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (5,15) rectangle (15,-2.5); 
+				\draw (10,2) node {$\alpha = 0.3$};
+				%\draw [fill=red, fill opacity=0.2,red, opacity=0.2] (30,10) rectangle (40,-15); 
+				\end{axis}
+				\end{tikzpicture}
+			\end{figure}
 		\end{column}
 	\end{columns}
 \end{frame}
