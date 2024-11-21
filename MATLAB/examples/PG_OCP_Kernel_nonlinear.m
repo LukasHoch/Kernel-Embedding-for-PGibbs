@@ -9,7 +9,8 @@ rng(5);
 addpath('..\src')
 
 % Import CasADi - insert your path here.
-addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
+%addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
+addpath('C:\Users\lukas\OneDrive\Desktop\casadi-3.6.7-windows64-matlab2018b')
 import casadi.*
 
 K = 2200; % number of PG samples
@@ -112,11 +113,11 @@ PG_samples = PG_samples.PG_samples;
 %PG_samples = PG_samples(randperm(K));
 
 
-solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory','print_level', 0);
+%solver_opts = struct('linear_solver', 'ma57', 'max_iter', 40000, 'hessian_approximation', 'limited-memory');
 
-%solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
-    %'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
-    %'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
+solver_opts = struct('nlp_scaling_method', 'gradient-based', 'tol', 1e-5, 'acceptable_tol', 1e-4, 'constr_viol_tol', 1e-5,...
+    'max_iter', 1000, 'max_soc', 100, 'alpha_red_factor', 0.5, 'warm_start_init_point', 'yes', 'warm_start_bound_push', 1e-6,...
+    'hessian_approximation', 'limited-memory', 'acceptable_iter', 10, 'watchdog_shortened_iter_trigger', 1, 'mu_strategy', 'adaptive', 'print_level', 5, 'output_file', 'ipopt_log.txt'); 
 
 casadi_opts = struct('expand', 1);
 

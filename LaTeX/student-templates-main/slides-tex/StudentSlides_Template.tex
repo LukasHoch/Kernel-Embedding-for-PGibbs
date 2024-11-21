@@ -53,7 +53,7 @@
 \begin{columns}[onlytextwidth, T]
 		\begin{column}{.5\textwidth}
 			\includegraphics[width= .9\textwidth]{Motivation_pic}
-			\cite[4]{Xiloyannis_19}
+			\makebox[1.7cm]{\hfill} \cite{Xiloyannis_19}
 		\end{column}
 		\begin{column}{.5\textwidth}
 		\vspace{1cm}
@@ -117,7 +117,7 @@ $\;\; \Rightarrow \;$ Guarantees determined retroactively via scenario theory
 
 \vspace{.4cm}
 
-Alternative approaches:
+Alternative approaches for sampling-based optimization:
 \begin{itemize}
 \item Wasserstein ambiguity \cite{Hota_19}
 
@@ -128,12 +128,12 @@ $\;\; \Rightarrow \;$ Constraints limited to affine functions
 \end{frame}
 
 
-\section{Particle Gibbs}
+\section{Scenario Optimization}
 
-\begin{frame}{Particle Gibbs Scenarios}
+\begin{frame}{Scenario Optimization}
 Particle Gibbs provides the scenarios $\boldsymbol{\delta}^{[1:N]} = \{ \boldsymbol{\theta}, \boldsymbol{x}_0, \boldsymbol{v}_{0:H}, \boldsymbol{w}_{0:H}\}^{[1:N]}$\\
 
-$\;\; \Rightarrow \;$ Scenarios \textbf{and} input $\boldsymbol{u}_{0:H}$ define the trajectory
+$\;\; \Rightarrow \;$ Scenario \textbf{and} input $\boldsymbol{u}_{0:H}$ define the trajectory
 
 \textbf{Required:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$
 
@@ -145,7 +145,7 @@ $\;\; \Rightarrow \;$ Scenarios \textbf{and} input $\boldsymbol{u}_{0:H}$ define
 
 \makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
-\begin{block}{Scenario Approach (\cite{Robert_24})}
+\begin{block}{Scenario Approach \cite{Robert_24}}
 	\begin{equation*}
 		 h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]}) \leq 0, \; \forall n = 1, ..., N
 	\end{equation*}
@@ -163,14 +163,14 @@ $\;\; \Rightarrow \;$ Risk factor $\alpha$ not considered in optimization
 \begin{frame}
 	\frametitle{Maximum Mean Discrepancy (MMD) ambiguity sets}
 \textbf{Required:} Reformulate chance-constraint problem with scenarios $\boldsymbol{\delta}^{[1:N]}$\\
-\textbf{Approach:} Replace distribution $P$ with the ambiguity set $\mathcal{P}$\\
+\textbf{Our Approach:} Replace distribution $P$ with the ambiguity set $\mathcal{P}$\\
 
 \begin{columns}[onlytextwidth, T]
 \begin{column}{.65\textwidth}
 
 \begin{block}{MMD ambiguity set}
 \begin{equation*}
-\mathcal{P} =  \left\{ \tilde{P} : \text{MMD} (\tilde{P}, P_N) \leq \varepsilon \right\}.
+\mathcal{P} =  \left\{ \tilde{P} : \text{MMD} (\tilde{P}, P_N(\boldsymbol{\delta}^{[1:N]})) \leq \varepsilon \right\}.
 \end{equation*}
 \end{block}	
 
@@ -206,7 +206,7 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 \end{equation*}
 \end{block}	
 
-\makebox[6.7cm]{\hfill} $\boldsymbol{\Downarrow}$ 
+\makebox[6.5cm]{\hfill} $\boldsymbol{\Downarrow}$ 
 
 \begin{block}{Reformulated Feasible Region \cite{Yassine_22}}
 \begin{empheq}[right = \empheqrbrace, left= \hat{Z} \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
@@ -225,14 +225,14 @@ Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P
 			\begin{itemize}
 				\item Gaussian kernels 
 				\begin{equation*}
-					k(z,z') = \text{exp}\left(\text{-}\frac{1}{2 {\color{red}{\sigma}}^2} (z - z')^2 \right)
+					k(z,z') = \text{exp}\left(\text{-}\frac{1}{2 \sigma^2} (z - z')^2 \right)
 				\end{equation*}
 				\item Split scenarios into training set $\{z_i\}$ and test set $\{z'_j\}$ 
 				\item Create likelyhood function
 				\begin{equation*}
 					p(z) = \frac{1}{N_\text{train}} \sum_{i = 1}^{N_\text{train}} \frac{1}{\sqrt{2 \pi \sigma^2}}k(z ,z_i)
 				\end{equation*}
-				\item Maximize sum of likelyhoods over test set by selected a good $\sigma$
+				\item Grid search to maximize sum of likelyhoods over test set
 
 			\end{itemize}
 		\end{column}
@@ -592,7 +592,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 \end{frame}
 
 
-\begin{frame}{Optimal Control of Nonlinear Systems}
+\begin{frame}{Nonlinear Optimal Control}
 
 \vspace{.3cm}
 \begin{columns}[onlytextwidth, T]
@@ -632,7 +632,7 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{axis}
 			\end{tikzpicture}
 			\end{figure}
-			%$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 32.8$s
+			$\;\;\;\;\;\;\;\;\;$ Cost $J_H = 29.56$
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 		\begin{column}{.5\textwidth}
@@ -677,7 +677,8 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{tikzpicture}
 			\end{figure}
 			%$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 176.1$s
-}
+			$\;\;\;\;\;\;\;\;\;$ Cost $J_H = 19.45$
+			}
 
 			\only<2>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.4$)
 			\begin{figure}
@@ -720,7 +721,8 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{tikzpicture}
 			\end{figure}
 			%$\;\;\;\;\;\;\;\;\;$ Computation Time $ = 50.9$s
-}
+			$\;\;\;\;\;\;\;\;\;$ Cost $J_H = 18.77$
+}			
 
 			\only<3>{$\;\;\;\;\;\;\;\;\;$ Kernel Approach  ($\alpha = 0.6$)
 			\begin{figure}
@@ -762,7 +764,8 @@ $\boldsymbol{f}(\boldsymbol{x}, u) =
 			\end{tikzpicture}
 			\end{figure}
 			%$\;\;\;\;\;\;\;\;\;$ Computation Time $= 41.0$s
-}
+			$\;\;\;\;\;\;\;\;\;$ Cost $J_H = 16.2$
+			}
 		\end{column}
 	\end{columns}\vspace{.5cm}
 \end{frame}	
@@ -1225,6 +1228,58 @@ Number of scenarios used for optimization: $N = 200$
 			%\includegraphics[width= .9\textwidth]{Scenario_plot}
 		\end{column}
 	\end{columns}\vspace{.5cm}
+\end{frame}
+
+\begin{frame}
+\frametitle{Constraint Reformulation}
+\begin{block}{Feasible Region of chance constraint}
+\begin{equation*}
+Z :=  \left\{ \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} : \inf\limits_{\tilde{P} \in \mathcal{P}}\tilde{P} \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha \right\}
+\end{equation*}
+\end{block}	
+
+\makebox[6.5cm]{\hfill} $\boldsymbol{\Downarrow}$ 
+
+\begin{block}{Reformulated Feasible Region \cite{Yassine_22}}
+  \begin{empheq}[right = \empheqrbrace, left= Z \coloneqq \empheqlbrace \boldsymbol{u}_{0:H} \in \mathcal{U}^{H+1} :]{align*}
+    & g_0 + \frac{1}{N}\sum_{n = 1}^N g(\boldsymbol{\delta}^{[n]}) + \varepsilon ||g||_\mathcal{H} \leq \alpha \\
+    & 1 (h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H}^{[n]},  \boldsymbol{y}_{0:H}^{[n]})  > 0) \leq g_0 + g(\boldsymbol{\delta}^{[n]}), \; n = 1,...,N \\
+    & g_0 \in \mathbb{R}, g \in \mathcal{H}
+  \end{empheq}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Value at Risk (VaR)}
+\begin{block}{VaR}
+\begin{equation*}
+\text{VaR}_{1-\alpha}^{P} :=  \inf \left\{ t' \in \mathbb{R} : P \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq t' \right] \geq 1 - \alpha \right\}.
+\end{equation*}
+\end{block}	
+
+
+\begin{block}{Reformulated Constraint}
+\begin{equation*}
+	\text{VaR}_{1-\alpha}^{P} \leq 0 \iff  P \left[ h(\boldsymbol{u}_{0:H},  \boldsymbol{x}_{0:H},  \boldsymbol{y}_{0:H}) \leq 0 \right] \geq 1 - \alpha.
+\end{equation*}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conditional Value at Risk (CVaR)}
+\begin{block}{CVaR}
+\begin{equation*}
+\text{CVaR}_{1-\alpha}^{P} :=  \inf\limits_{t \in \mathbb{R}} \text{E}_P \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right]
+\end{equation*}
+\end{block}	
+
+
+\begin{block}{Reformulated Constraint}
+  \begin{empheq}{align*}
+	\sup\limits_{\tilde{P} \in \mathcal{P}} \text{CVaR}_{1-\alpha}^{\tilde{P}} &= \sup\limits_{\tilde{P} \in \mathcal{P}}  \inf\limits_{t \in \mathbb{R}} \text{E}_{\tilde{P}} \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right] \\
+    &= \inf\limits_{t \in \mathbb{R}} \sup\limits_{\tilde{P} \in \mathcal{P}} \text{E}_{\tilde{P}} \left[  [\tilde{h}(\boldsymbol{u}_{0:H},  \boldsymbol{\delta}) + t']_+ - t'  \alpha \right] \leq 0.
+  \end{empheq}
+\end{block}
 \end{frame}
 
 \end{document}
