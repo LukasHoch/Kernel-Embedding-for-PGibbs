@@ -1,7 +1,7 @@
 # MATLAB
-This folder contains the MATLAB implementation of `PGopt` which uses [CasADi](https://web.casadi.org/), [IPOPT](https://coin-or.github.io/Ipopt/), and the proprietary [HSL Linear Solvers](https://licences.stfc.ac.uk/product/coin-hsl) to solve the scenario optimal control problem.
+This folder contains the MATLAB implementation of `Kernel-Embedding-for-PGibbs` which uses [CasADi](https://web.casadi.org/), [IPOPT](https://coin-or.github.io/Ipopt/), and the proprietary [HSL Linear Solvers](https://licences.stfc.ac.uk/product/coin-hsl) to solve the scenario optimal control problem.
 
-**Note that the results presented in the paper were obtained using the Julia version. Although the MATLAB version provides similar results, it does not reproduce these results exactly due to different random numbers in Matlab and Julia.**
+**Note that the results presented in the paper were obtained using the Julia version. Although the MATLAB version provides similar results, it does not reproduce these results exactly due to different random numbers in Matlab**
 
 To execute the MATLAB code, first install [MATLAB](https://mathworks.com/products/matlab.html). 
 
