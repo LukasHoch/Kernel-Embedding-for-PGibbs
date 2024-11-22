@@ -10,7 +10,7 @@ addpath('..\src')
 
 % Import CasADi - insert your path here.
 %addpath('C:\Users\Lukas Hochschwarzer\Desktop\Casadi-3.6.5')
-addpath('C:\Users\lukas\OneDrive\Desktop\casadi-3.6.7-windows64-matlab2018b')
+addpath('<yourpath>/casadi-3.6.5-windows64-matlab2018b')
 import casadi.*
 
 K = 2200; % number of PG samples
